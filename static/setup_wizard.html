@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Setup Wizard</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #475569;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .logo span {
+            color: var(--text-primary);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--bg-card);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 3px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-input);
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .progress-step.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .progress-step.completed .step-circle::after {
+            content: '✓';
+        }
+
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 80px;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .progress-step.completed .step-label {
+            color: var(--success);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        label.required::after {
+            content: ' *';
+            color: var(--danger);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border: none;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .option-card {
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .option-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .option-card .title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .option-card .desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--bg-input);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone .text {
+            color: var(--text-secondary);
+        }
+
+        .upload-zone .supported {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Document List */
+        .document-list {
+            margin-top: 1.5rem;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-input);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .document-item .info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .document-item .icon {
+            font-size: 1.5rem;
+        }
+
+        .document-item .name {
+            font-weight: 500;
+        }
+
+        .document-item .type {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .document-item .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--success);
+        }
+
+        .document-item .status.processing {
+            color: var(--warning);
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: var(--bg-input);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-section h3 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item .label {
+            color: var(--text-muted);
+        }
+
+        .summary-item .value {
+            font-weight: 500;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary-light);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert .icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Welcome Animation */
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list .check {
+            color: var(--success);
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .progress-steps {
+                overflow-x: auto;
+                padding-bottom: 1rem;
+            }
+
+            .step-label {
+                display: none;
+            }
+
+            .main-content {
+                margin: 1rem auto;
+            }
+
+            .step-content {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">⚖️ <span>Semptify</span></div>
+        <div style="color: var(--text-muted);">Court Defense System</div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Welcome</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Your Info</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Case Info</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-label">Storage</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-circle">5</div>
+                <div class="step-label">Documents</div>
+            </div>
+            <div class="progress-step" data-step="6">
+                <div class="step-circle">6</div>
+                <div class="step-label">Processing</div>
+            </div>
+            <div class="progress-step" data-step="7">
+                <div class="step-circle">7</div>
+                <div class="step-label">Complete</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Step 1: Welcome -->
+        <div class="step-content active" data-step="1">
+            <div style="text-align: center;">
+                <div class="welcome-icon">🏠</div>
+                <h1 class="step-title" style="justify-content: center;">Welcome to Semptify</h1>
+                <p class="step-description" style="max-width: 500px; margin: 0 auto 2rem;">
+                    Your comprehensive court defense system. Let's set up your case properly so all your forms and documents are ready.
+                </p>
+            </div>
+
+            <ul class="feature-list">
+                <li>
+                    <span class="check">✓</span>
+                    <span><strong>Secure Document Vault</strong> - Store all your case documents with integrity verification</span>
+                </li>
+                <li>
+                    <span class="check">✓</span>
+                    <span><strong>Auto-Fill Court Forms</strong> - Your information populates all required forms</span>
+                </li>
+                <li>
+                    <span class="check">✓</span>
+                    <span><strong>Timeline Generator</strong> - Automatically extract key dates from documents</span>
+                </li>
+                <li>
+                    <span class="check">✓</span>
+                    <span><strong>Defense Wizard</strong> - Step-by-step guidance for filing your answer</span>
+                </li>
+                <li>
+                    <span class="check">✓</span>
+                    <span><strong>Zoom Court Prep</strong> - Everything you need for virtual hearings</span>
+                </li>
+            </ul>
+
+            <div class="alert alert-info">
+                <span class="icon">ℹ️</span>
+                <div>
+                    <strong>Before you begin:</strong> Have your summons, complaint, lease, and any eviction notices ready. 
+                    You'll upload these documents in step 5.
+                </div>
+            </div>
+
+            <div class="button-row" style="justify-content: center;">
+                <button class="btn-primary" onclick="goToStep(2)">
+                    Get Started <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Your Information -->
+        <div class="step-content" data-step="2">
+            <h2 class="step-title">📋 Your Information</h2>
+            <p class="step-description">
+                This is your personal information as the tenant/defendant. It will appear on all court forms.
+            </p>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label class="required" for="fullName">Full Legal Name</label>
+                    <input type="text" id="fullName" name="full_name" required 
+                           placeholder="As it appears on your ID">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" 
+                               placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" 
+                               placeholder="(555) 123-4567">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="required" for="address">Street Address</label>
+                    <input type="text" id="address" name="address" required
+                           placeholder="123 Main Street">
+                    <div class="form-hint">Your current mailing address</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required" for="city">City</label>
+                        <input type="text" id="city" name="city" required
+                               placeholder="City name">
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="state">State</label>
+                        <select id="state" name="state" required>
+                            <option value="MN" selected>Minnesota</option>
+                            <option value="WI">Wisconsin</option>
+                            <option value="ND">North Dakota</option>
+                            <option value="SD">South Dakota</option>
+                            <option value="IA">Iowa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="zipCode">ZIP Code</label>
+                        <input type="text" id="zipCode" name="zip_code" required
+                               placeholder="55123" pattern="[0-9]{5}(-[0-9]{4})?">
+                    </div>
+                </div>
+            </form>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(1)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-primary" onclick="saveProfile()">
+                    Continue <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Case Information -->
+        <div class="step-content" data-step="3">
+            <h2 class="step-title">📁 Case Information</h2>
+            <p class="step-description">
+                Enter information from your summons and complaint. This is critical for filing your answer correctly.
+            </p>
+
+            <form id="caseForm">
+                <div class="alert alert-info">
+                    <span class="icon">📄</span>
+                    <div>Look at your summons document for the case number and dates.</div>
+                </div>
+
+                <!-- Case Details -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required" for="caseNumber">Case Number</label>
+                        <input type="text" id="caseNumber" name="case_number" required
+                               placeholder="19AV-CV-25-3477">
+                        <div class="form-hint">Found on your summons (e.g., 19AV-CV-25-1234)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="courtCounty">County</label>
+                        <select id="courtCounty" name="court_county">
+                            <option value="Dakota" selected>Dakota County</option>
+                            <option value="Hennepin">Hennepin County</option>
+                            <option value="Ramsey">Ramsey County</option>
+                            <option value="Anoka">Anoka County</option>
+                            <option value="Washington">Washington County</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Property Address -->
+                <h3 style="margin: 2rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                    🏠 Rental Property Address
+                </h3>
+                
+                <div class="form-group">
+                    <label class="required" for="propertyAddress">Street Address</label>
+                    <input type="text" id="propertyAddress" name="property_address" required
+                           placeholder="Address of the rental property">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required" for="propertyCity">City</label>
+                        <input type="text" id="propertyCity" name="property_city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="propertyState">State</label>
+                        <input type="text" id="propertyState" name="property_state" value="MN">
+                    </div>
+                    <div class="form-group">
+                        <label class="required" for="propertyZip">ZIP</label>
+                        <input type="text" id="propertyZip" name="property_zip" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unitNumber">Unit #</label>
+                        <input type="text" id="unitNumber" name="unit_number" placeholder="Apt/Unit">
+                    </div>
+                </div>
+
+                <!-- Landlord/Plaintiff -->
+                <h3 style="margin: 2rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                    👤 Landlord/Plaintiff Information
+                </h3>
+
+                <div class="form-group">
+                    <label class="required" for="landlordName">Landlord/Property Manager Name</label>
+                    <input type="text" id="landlordName" name="landlord_name" required
+                           placeholder="Name as shown on complaint">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="landlordAddress">Address</label>
+                        <input type="text" id="landlordAddress" name="landlord_address">
+                    </div>
+                    <div class="form-group">
+                        <label for="landlordPhone">Phone</label>
+                        <input type="tel" id="landlordPhone" name="landlord_phone">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="landlordAttorney">Attorney Name (if any)</label>
+                        <input type="text" id="landlordAttorney" name="landlord_attorney">
+                    </div>
+                    <div class="form-group">
+                        <label for="landlordBarNumber">Attorney Bar #</label>
+                        <input type="text" id="landlordBarNumber" name="landlord_bar_number">
+                    </div>
+                </div>
+
+                <!-- Key Dates -->
+                <h3 style="margin: 2rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                    📅 Important Dates
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="noticeDate">Notice Date</label>
+                        <input type="date" id="noticeDate" name="notice_date">
+                        <div class="form-hint">Date on eviction notice</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="noticeType">Notice Type</label>
+                        <select id="noticeType" name="notice_type">
+                            <option value="">Select type...</option>
+                            <option value="14-day">14-Day Notice (Non-Payment)</option>
+                            <option value="30-day">30-Day Notice</option>
+                            <option value="immediate">Immediate (Lease Violation)</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="summonsDate">Summons Date</label>
+                        <input type="date" id="summonsDate" name="summons_date">
+                        <div class="form-hint">Date you were served</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hearingDate">Hearing Date</label>
+                        <input type="date" id="hearingDate" name="hearing_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="hearingTime">Hearing Time</label>
+                        <input type="time" id="hearingTime" name="hearing_time">
+                    </div>
+                </div>
+
+                <!-- Amounts -->
+                <h3 style="margin: 2rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                    💰 Amounts Claimed (from complaint)
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rentClaimed">Rent Claimed</label>
+                        <input type="number" id="rentClaimed" name="rent_claimed" 
+                               step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="lateFeesClaimed">Late Fees Claimed</label>
+                        <input type="number" id="lateFeesClaimed" name="late_fees_claimed"
+                               step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="otherFeesClaimed">Other Fees</label>
+                        <input type="number" id="otherFeesClaimed" name="other_fees_claimed"
+                               step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Lease Info -->
+                <h3 style="margin: 2rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                    📝 Lease Information
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="monthlyRent">Monthly Rent</label>
+                        <input type="number" id="monthlyRent" name="monthly_rent"
+                               step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="securityDeposit">Security Deposit</label>
+                        <input type="number" id="securityDeposit" name="security_deposit"
+                               step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="leaseType">Lease Type</label>
+                        <select id="leaseType" name="lease_type">
+                            <option value="month-to-month">Month-to-Month</option>
+                            <option value="fixed-term">Fixed Term Lease</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leaseStartDate">Lease Start Date</label>
+                        <input type="date" id="leaseStartDate" name="lease_start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="leaseEndDate">Lease End Date</label>
+                        <input type="date" id="leaseEndDate" name="lease_end_date">
+                    </div>
+                </div>
+            </form>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(2)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-primary" onclick="saveCaseInfo()">
+                    Continue <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Storage Configuration -->
+        <div class="step-content" data-step="4">
+            <h2 class="step-title">☁️ Document Storage</h2>
+            <p class="step-description">
+                Choose where to store your case documents. You can always change this later.
+            </p>
+
+            <div class="card-grid">
+                <div class="option-card selected" data-storage="local" onclick="selectStorage('local')">
+                    <div class="icon">💾</div>
+                    <div class="title">Local Storage</div>
+                    <div class="desc">Store on this server (Recommended for quick setup)</div>
+                </div>
+                <div class="option-card" data-storage="google_drive" onclick="selectStorage('google_drive')">
+                    <div class="icon">📁</div>
+                    <div class="title">Google Drive</div>
+                    <div class="desc">Sync with your Google account</div>
+                </div>
+                <div class="option-card" data-storage="onedrive" onclick="selectStorage('onedrive')">
+                    <div class="icon">☁️</div>
+                    <div class="title">OneDrive</div>
+                    <div class="desc">Sync with Microsoft account</div>
+                </div>
+                <div class="option-card" data-storage="dropbox" onclick="selectStorage('dropbox')">
+                    <div class="icon">📦</div>
+                    <div class="title">Dropbox</div>
+                    <div class="desc">Sync with Dropbox account</div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <span class="icon">💡</span>
+                <div>
+                    <strong>Tip:</strong> Local storage is fastest for getting started. You can connect cloud storage later from the settings.
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(3)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-primary" onclick="saveStorage()">
+                    Continue <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 5: Document Upload -->
+        <div class="step-content" data-step="5">
+            <h2 class="step-title">📤 Upload Documents</h2>
+            <p class="step-description">
+                Upload your case documents. We'll automatically extract dates, amounts, and other important information.
+            </p>
+
+            <div class="alert alert-warning">
+                <span class="icon">⚠️</span>
+                <div>
+                    <strong>Important:</strong> Upload your summons first, then the complaint, then any notices and your lease.
+                </div>
+            </div>
+
+            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt" style="display: none;">
+            
+            <div class="upload-zone" id="uploadZone">
+                <div class="icon">📁</div>
+                <div class="text">Drag & drop files here or click to browse</div>
+                <div class="supported">Supported: PDF, Images, Word, Text</div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="docTypeSelect">Document Type (for next upload)</label>
+                <select id="docTypeSelect">
+                    <option value="summons">Summons</option>
+                    <option value="complaint">Complaint</option>
+                    <option value="notice">Eviction Notice</option>
+                    <option value="lease">Lease/Rental Agreement</option>
+                    <option value="payment">Payment Records</option>
+                    <option value="communication">Emails/Letters/Texts</option>
+                    <option value="photo">Photos</option>
+                    <option value="other">Other Evidence</option>
+                </select>
+            </div>
+
+            <div class="document-list" id="documentList">
+                <!-- Documents will be listed here -->
+            </div>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(4)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-primary" onclick="goToStep(6)">
+                    Continue <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 6: Processing -->
+        <div class="step-content" data-step="6">
+            <h2 class="step-title">⚙️ Processing Documents</h2>
+            <p class="step-description">
+                We're extracting information from your documents to auto-fill your court forms.
+            </p>
+
+            <div id="processingStatus" style="text-align: center; padding: 3rem;">
+                <div class="loading" style="width: 60px; height: 60px; border-width: 4px;"></div>
+                <p style="margin-top: 1.5rem; color: var(--text-secondary);">Analyzing documents...</p>
+            </div>
+
+            <div id="processingResults" style="display: none;">
+                <div class="alert alert-success">
+                    <span class="icon">✅</span>
+                    <div>
+                        <strong>Processing Complete!</strong>
+                        <div id="extractedSummary"></div>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <h3>📅 Dates Found</h3>
+                    <div id="extractedDates">No dates extracted</div>
+                </div>
+
+                <div class="summary-section">
+                    <h3>💰 Amounts Found</h3>
+                    <div id="extractedAmounts">No amounts extracted</div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(5)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-primary" id="processNextBtn" onclick="processDocuments()" disabled>
+                    <span class="loading" style="width: 16px; height: 16px;"></span>
+                    Processing...
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 7: Review & Complete -->
+        <div class="step-content" data-step="7">
+            <h2 class="step-title">✅ Review & Complete</h2>
+            <p class="step-description">
+                Review your information before completing setup. You can edit any section later.
+            </p>
+
+            <div id="reviewContent">
+                <!-- Summary will be populated here -->
+            </div>
+
+            <div class="alert alert-success">
+                <span class="icon">🎉</span>
+                <div>
+                    <strong>You're all set!</strong> Your case is configured and ready. Click "Complete Setup" to go to your dashboard.
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="goToStep(6)">
+                    <span>←</span> Back
+                </button>
+                <button class="btn-success" onclick="completeSetup()">
+                    ✅ Complete Setup
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        let currentStep = 1;
+        let selectedStorage = 'local';
+        let uploadedDocuments = [];
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // First check if user is authenticated via storage
+            try {
+                const sessionRes = await fetch('/storage/session');
+                const session = await sessionRes.json();
+                
+                if (!session.authenticated && !session.user_id) {
+                    // No auth at all - redirect to storage providers for OAuth
+                    console.log('No auth - redirecting to storage providers');
+                    window.location.href = '/storage/providers';
+                    return;
+                }
+                
+                currentUser = session;
+                console.log('Authenticated user:', session.user_id, 'Provider:', session.provider);
+            } catch (error) {
+                console.log('Auth check failed, continuing anyway:', error);
+            }
+
+            // Check existing setup status
+            try {
+                const response = await fetch('/api/setup/status');
+                const data = await response.json();
+
+                if (data.is_complete) {
+                    // Already completed, redirect to dashboard
+                    window.location.href = '/static/command_center.html';
+                    return;
+                }
+
+                // Resume from last step
+                if (data.progress.steps_completed.length > 0) {
+                    const lastCompleted = Math.max(...data.progress.steps_completed);
+                    goToStep(Math.min(lastCompleted + 1, 7));
+                }
+
+                // Pre-fill forms if data exists
+                if (data.profile) {
+                    document.getElementById('fullName').value = data.profile.full_name || '';
+                    document.getElementById('email').value = data.profile.email || '';
+                    document.getElementById('phone').value = data.profile.phone || '';
+                    document.getElementById('address').value = data.profile.address || '';
+                    document.getElementById('city').value = data.profile.city || '';
+                    document.getElementById('state').value = data.profile.state || 'MN';
+                    document.getElementById('zipCode').value = data.profile.zip_code || '';
+                }
+
+                if (data.case_info) {
+                    populateCaseForm(data.case_info);
+                }
+
+            } catch (error) {
+                console.log('Starting fresh setup');
+            }
+
+            // Setup file upload
+            setupFileUpload();
+        });        // Navigation
+        function goToStep(step) {
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach(el => {
+                const s = parseInt(el.dataset.step);
+                el.classList.remove('active');
+                if (s < step) {
+                    el.classList.add('completed');
+                } else if (s === step) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('completed');
+                }
+            });
+
+            // Update content
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step) {
+                    el.classList.add('active');
+                }
+            });
+
+            currentStep = step;
+
+            // Special handling for certain steps
+            if (step === 6) {
+                processDocuments();
+            } else if (step === 7) {
+                loadReviewContent();
+            }
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Step 2: Save Profile
+        async function saveProfile() {
+            const form = document.getElementById('profileForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const data = {
+                full_name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value || null,
+                phone: document.getElementById('phone').value || null,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zip_code: document.getElementById('zipCode').value,
+            };
+
+            try {
+                const response = await fetch('/api/setup/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    goToStep(3);
+                } else {
+                    const error = await response.json();
+                    alert('Error saving profile: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Step 3: Save Case Info
+        async function saveCaseInfo() {
+            const form = document.getElementById('caseForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const data = {
+                case_number: document.getElementById('caseNumber').value,
+                court_county: document.getElementById('courtCounty').value,
+                property_address: document.getElementById('propertyAddress').value,
+                property_city: document.getElementById('propertyCity').value,
+                property_state: document.getElementById('propertyState').value || 'MN',
+                property_zip: document.getElementById('propertyZip').value,
+                unit_number: document.getElementById('unitNumber').value || null,
+                landlord: {
+                    name: document.getElementById('landlordName').value,
+                    address: document.getElementById('landlordAddress').value || null,
+                    phone: document.getElementById('landlordPhone').value || null,
+                    attorney_name: document.getElementById('landlordAttorney').value || null,
+                    attorney_bar_number: document.getElementById('landlordBarNumber').value || null,
+                },
+                notice_date: document.getElementById('noticeDate').value || null,
+                notice_type: document.getElementById('noticeType').value || null,
+                summons_date: document.getElementById('summonsDate').value || null,
+                hearing_date: document.getElementById('hearingDate').value || null,
+                hearing_time: document.getElementById('hearingTime').value || null,
+                rent_claimed: parseFloat(document.getElementById('rentClaimed').value) || null,
+                late_fees_claimed: parseFloat(document.getElementById('lateFeesClaimed').value) || null,
+                other_fees_claimed: parseFloat(document.getElementById('otherFeesClaimed').value) || null,
+                monthly_rent: parseFloat(document.getElementById('monthlyRent').value) || null,
+                security_deposit: parseFloat(document.getElementById('securityDeposit').value) || null,
+                lease_type: document.getElementById('leaseType').value,
+                lease_start_date: document.getElementById('leaseStartDate').value || null,
+                lease_end_date: document.getElementById('leaseEndDate').value || null,
+            };
+
+            try {
+                const response = await fetch('/api/setup/case', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.answer_deadline) {
+                        alert(`Important: Your answer deadline is ${result.answer_deadline}`);
+                    }
+                    goToStep(4);
+                } else {
+                    const error = await response.json();
+                    alert('Error saving case info: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Step 4: Storage Selection
+        function selectStorage(provider) {
+            selectedStorage = provider;
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.storage === provider) {
+                    card.classList.add('selected');
+                }
+            });
+        }
+
+        async function saveStorage() {
+            try {
+                const response = await fetch('/api/setup/storage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: selectedStorage,
+                        connected: selectedStorage === 'local',
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.oauth_url && selectedStorage !== 'local') {
+                        // Redirect to OAuth
+                        window.location.href = result.oauth_url;
+                    } else {
+                        goToStep(5);
+                    }
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Step 5: File Upload
+        function setupFileUpload() {
+            const zone = document.getElementById('uploadZone');
+            const input = document.getElementById('fileInput');
+
+            zone.addEventListener('click', () => input.click());
+
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                await uploadFiles(files);
+            });
+
+            input.addEventListener('change', async (e) => {
+                await uploadFiles(e.target.files);
+            });
+
+            // Load existing documents
+            loadDocuments();
+        }
+
+        async function uploadFiles(files) {
+            const docType = document.getElementById('docTypeSelect').value;
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('document_type', docType);
+                formData.append('description', '');
+
+                try {
+                    const response = await fetch('/api/setup/documents/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        uploadedDocuments.push(result);
+                        updateDocumentList();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error uploading ${file.name}: ${error.detail}`);
+                    }
+                } catch (error) {
+                    alert(`Error uploading ${file.name}: ${error.message}`);
+                }
+            }
+        }
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/setup/documents');
+                const data = await response.json();
+                uploadedDocuments = data.documents;
+                updateDocumentList();
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        function updateDocumentList() {
+            const list = document.getElementById('documentList');
+            
+            if (uploadedDocuments.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No documents uploaded yet</p>';
+                return;
+            }
+
+            list.innerHTML = uploadedDocuments.map(doc => `
+                <div class="document-item">
+                    <div class="info">
+                        <span class="icon">📄</span>
+                        <div>
+                            <div class="name">${doc.filename}</div>
+                            <div class="type">${doc.type || 'Document'}</div>
+                        </div>
+                    </div>
+                    <div class="status">
+                        ✓ Uploaded
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Step 6: Process Documents
+        async function processDocuments() {
+            const statusDiv = document.getElementById('processingStatus');
+            const resultsDiv = document.getElementById('processingResults');
+            const nextBtn = document.getElementById('processNextBtn');
+
+            statusDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            nextBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/setup/documents/process', {
+                    method: 'POST',
+                });
+
+                const data = await response.json();
+
+                // Show results
+                statusDiv.style.display = 'none';
+                resultsDiv.style.display = 'block';
+
+                document.getElementById('extractedSummary').textContent = 
+                    `Processed ${data.documents_processed} documents`;
+
+                // Show extracted dates
+                let datesHtml = '';
+                data.results.forEach(doc => {
+                    if (doc.extracted && doc.extracted.dates && doc.extracted.dates.length > 0) {
+                        datesHtml += `<div class="summary-item">
+                            <span class="label">${doc.filename}</span>
+                            <span class="value">${doc.extracted.dates.join(', ')}</span>
+                        </div>`;
+                    }
+                });
+                document.getElementById('extractedDates').innerHTML = datesHtml || 'No dates found';
+
+                // Show extracted amounts
+                let amountsHtml = '';
+                data.results.forEach(doc => {
+                    if (doc.extracted && doc.extracted.amounts && doc.extracted.amounts.length > 0) {
+                        amountsHtml += `<div class="summary-item">
+                            <span class="label">${doc.filename}</span>
+                            <span class="value">${doc.extracted.amounts.join(', ')}</span>
+                        </div>`;
+                    }
+                });
+                document.getElementById('extractedAmounts').innerHTML = amountsHtml || 'No amounts found';
+
+                // Enable next button
+                nextBtn.innerHTML = 'Continue <span>→</span>';
+                nextBtn.disabled = false;
+                nextBtn.onclick = () => goToStep(7);
+
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-warning">
+                    <span class="icon">⚠️</span>
+                    <div>Processing error: ${error.message}. You can continue and process later.</div>
+                </div>`;
+                nextBtn.innerHTML = 'Continue Anyway <span>→</span>';
+                nextBtn.disabled = false;
+                nextBtn.onclick = () => goToStep(7);
+            }
+        }
+
+        // Step 7: Load Review Content
+        async function loadReviewContent() {
+            const container = document.getElementById('reviewContent');
+            
+            try {
+                const response = await fetch('/api/setup/summary');
+                const data = await response.json();
+
+                let html = '';
+
+                // Profile Summary
+                if (data.profile) {
+                    html += `
+                        <div class="summary-section">
+                            <h3>👤 Your Information</h3>
+                            <div class="summary-item">
+                                <span class="label">Name</span>
+                                <span class="value">${data.profile.full_name}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Address</span>
+                                <span class="value">${data.profile.address}, ${data.profile.city}, ${data.profile.state} ${data.profile.zip_code}</span>
+                            </div>
+                            ${data.profile.email ? `<div class="summary-item">
+                                <span class="label">Email</span>
+                                <span class="value">${data.profile.email}</span>
+                            </div>` : ''}
+                            ${data.profile.phone ? `<div class="summary-item">
+                                <span class="label">Phone</span>
+                                <span class="value">${data.profile.phone}</span>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Case Summary
+                if (data.case_info) {
+                    html += `
+                        <div class="summary-section">
+                            <h3>📁 Case Information</h3>
+                            <div class="summary-item">
+                                <span class="label">Case Number</span>
+                                <span class="value">${data.case_info.case_number}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Property</span>
+                                <span class="value">${data.case_info.property_address}, ${data.case_info.property_city}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Landlord</span>
+                                <span class="value">${data.case_info.landlord?.name || 'Not specified'}</span>
+                            </div>
+                            ${data.case_info.hearing_date ? `<div class="summary-item">
+                                <span class="label">Hearing Date</span>
+                                <span class="value" style="color: var(--warning);">${data.case_info.hearing_date} ${data.case_info.hearing_time || ''}</span>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Documents Summary
+                if (data.documents && data.documents.length > 0) {
+                    html += `
+                        <div class="summary-section">
+                            <h3>📄 Documents (${data.documents.length})</h3>
+                            ${data.documents.map(doc => `
+                                <div class="summary-item">
+                                    <span class="label">${doc.type}</span>
+                                    <span class="value">${doc.filename}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html || '<p>No data to review</p>';
+
+            } catch (error) {
+                container.innerHTML = `<div class="alert alert-warning">
+                    <span class="icon">⚠️</span>
+                    <div>Error loading summary: ${error.message}</div>
+                </div>`;
+            }
+        }
+
+        // Complete Setup
+        async function completeSetup() {
+            try {
+                const response = await fetch('/api/setup/complete', {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    window.location.href = result.redirect || '/static/command_center.html';
+                } else {
+                    const error = await response.json();
+                    alert('Error completing setup: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Helper: Populate case form
+        function populateCaseForm(data) {
+            if (data.case_number) document.getElementById('caseNumber').value = data.case_number;
+            if (data.court_county) document.getElementById('courtCounty').value = data.court_county;
+            if (data.property_address) document.getElementById('propertyAddress').value = data.property_address;
+            if (data.property_city) document.getElementById('propertyCity').value = data.property_city;
+            if (data.property_state) document.getElementById('propertyState').value = data.property_state;
+            if (data.property_zip) document.getElementById('propertyZip').value = data.property_zip;
+            if (data.unit_number) document.getElementById('unitNumber').value = data.unit_number;
+            if (data.landlord) {
+                if (data.landlord.name) document.getElementById('landlordName').value = data.landlord.name;
+                if (data.landlord.address) document.getElementById('landlordAddress').value = data.landlord.address;
+                if (data.landlord.phone) document.getElementById('landlordPhone').value = data.landlord.phone;
+                if (data.landlord.attorney_name) document.getElementById('landlordAttorney').value = data.landlord.attorney_name;
+                if (data.landlord.attorney_bar_number) document.getElementById('landlordBarNumber').value = data.landlord.attorney_bar_number;
+            }
+            if (data.notice_date) document.getElementById('noticeDate').value = data.notice_date;
+            if (data.notice_type) document.getElementById('noticeType').value = data.notice_type;
+            if (data.summons_date) document.getElementById('summonsDate').value = data.summons_date;
+            if (data.hearing_date) document.getElementById('hearingDate').value = data.hearing_date;
+            if (data.hearing_time) document.getElementById('hearingTime').value = data.hearing_time;
+            if (data.rent_claimed) document.getElementById('rentClaimed').value = data.rent_claimed;
+            if (data.late_fees_claimed) document.getElementById('lateFeesClaimed').value = data.late_fees_claimed;
+            if (data.other_fees_claimed) document.getElementById('otherFeesClaimed').value = data.other_fees_claimed;
+            if (data.monthly_rent) document.getElementById('monthlyRent').value = data.monthly_rent;
+            if (data.security_deposit) document.getElementById('securityDeposit').value = data.security_deposit;
+            if (data.lease_type) document.getElementById('leaseType').value = data.lease_type;
+            if (data.lease_start_date) document.getElementById('leaseStartDate').value = data.lease_start_date;
+            if (data.lease_end_date) document.getElementById('leaseEndDate').value = data.lease_end_date;
+        }
+    </script>
+</body>
+</html>

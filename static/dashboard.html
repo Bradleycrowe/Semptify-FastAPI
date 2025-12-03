@@ -1,0 +1,2304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1e1e2e;
+            --darker: #181825;
+            --light: #cdd6f4;
+            --muted: #6c7086;
+            --surface: #313244;
+            --overlay: #45475a;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Onboarding Modal */
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .onboarding-overlay.hidden {
+            display: none;
+        }
+
+        .onboarding-card {
+            background: var(--dark);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid var(--surface);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .onboarding-card h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .onboarding-card p {
+            color: var(--muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .onboarding-steps {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .onboarding-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 12px;
+        }
+
+        .onboarding-step .number {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .onboarding-step span {
+            font-size: 0.95rem;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Upload Modal */
+        .upload-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-modal.hidden {
+            display: none;
+        }
+
+        .upload-modal-content {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--surface);
+        }
+
+        .upload-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-modal-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--surface);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone p {
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone small {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .upload-progress {
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--surface);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .upload-status {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: var(--surface);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Storage Provider Buttons */
+        .storage-options {
+            margin-top: 1.5rem;
+        }
+
+        .provider-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: 2px solid var(--surface);
+            background: var(--surface);
+            color: var(--light);
+            transition: all 0.2s;
+        }
+
+        .provider-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .provider-btn.google:hover { border-color: #4285f4; }
+        .provider-btn.onedrive:hover { border-color: #0078d4; }
+        .provider-btn.dropbox:hover { border-color: #0061fe; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--muted);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--surface);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            font-size: 0.85rem;
+        }
+
+        .start-btn.secondary {
+            background: var(--surface);
+            color: var(--light);
+        }
+
+        .start-btn.secondary:hover {
+            background: var(--overlay);
+        }
+
+        .storage-prompt {
+            color: var(--muted);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .storage-note {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 1.5rem;
+            opacity: 0.8;
+        }
+
+        /* Storage Status in Sidebar */
+        .storage-status {
+            padding: 1rem;
+            border-top: 1px solid var(--surface);
+        }
+
+        .storage-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .storage-card.connected {
+            border-left: 3px solid var(--success);
+        }
+
+        .storage-card.disconnected {
+            border-left: 3px solid var(--warning);
+        }
+
+        .storage-card h4 {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .storage-card .status-text {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .storage-card .connect-btn {
+            margin-top: 0.75rem;
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .storage-card .connect-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            border-right: 1px solid var(--surface);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--surface);
+            text-align: center;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .nav-section {
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            color: var(--light);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--surface);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item .icon {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        /* Case Status Card */
+        .case-status {
+            padding: 1rem;
+            border-top: 1px solid var(--surface);
+        }
+
+        .case-card {
+            background: linear-gradient(135deg, var(--surface), var(--overlay));
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .case-card h4 {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .case-card .case-number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--warning);
+        }
+
+        .case-card .next-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--surface);
+            font-size: 0.85rem;
+        }
+
+        .case-card .next-date .icon {
+            color: var(--danger);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: var(--dark);
+            border-bottom: 1px solid var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            width: 400px;
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--light);
+            flex: 1;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--muted);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--surface);
+            color: var(--light);
+        }
+
+        .btn-outline:hover {
+            background: var(--surface);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Panel Container */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Panel */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.documents::before { background: var(--primary); }
+        .stat-card.deadlines::before { background: var(--danger); }
+        .stat-card.motions::before { background: var(--success); }
+        .stat-card.hearings::before { background: var(--warning); }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card .change {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-card .change.positive { color: var(--success); }
+        .stat-card .change.negative { color: var(--danger); }
+
+        /* Widgets Grid */
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .widget {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .widget-header h3 {
+            font-size: 1rem;
+        }
+
+        .widget-header .view-all {
+            font-size: 0.85rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Timeline Widget */
+        .timeline-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--overlay);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-date {
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .timeline-date .day {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .timeline-date .month {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .timeline-content h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .timeline-content .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag.deadline { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .tag.hearing { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .tag.filing { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+        .tag.document { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+
+        /* Quick Actions Widget */
+        .quick-actions {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--overlay);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            background: var(--primary);
+        }
+
+        .quick-action .icon {
+            font-size: 1.5rem;
+        }
+
+        .quick-action span {
+            font-size: 0.9rem;
+        }
+
+        /* Documents Panel */
+        .documents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            background: var(--surface);
+            color: var(--light);
+            border: none;
+        }
+
+        .filter-tab.active {
+            background: var(--primary);
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .doc-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .doc-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .doc-card .doc-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .doc-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-card .meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .doc-card .doc-type {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        /* Defense Panel */
+        .defense-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .defense-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--success);
+        }
+
+        .defense-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .defense-card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .defense-card .requirements {
+            background: var(--overlay);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .defense-card .requirements h5 {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .defense-card .requirements ul {
+            margin-left: 1rem;
+        }
+
+        .defense-card .requirements li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Motions Panel */
+        .motions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .motion-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .motion-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .motion-card h4 {
+            font-size: 1rem;
+        }
+
+        .motion-card .deadline-tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .motion-card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .motion-card .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Library Panel */
+        .library-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            background: var(--overlay);
+        }
+
+        .category-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-card .count {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        /* Zoom Panel */
+        .zoom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .zoom-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .zoom-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .zoom-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .zoom-card ul {
+            margin-left: 1.25rem;
+        }
+
+        .zoom-card li {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .ai-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+        }
+
+        .ai-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .ai-panel {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 400px;
+            background: var(--dark);
+            border-radius: 16px;
+            border: 1px solid var(--surface);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .ai-panel.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-header h3 {
+            font-size: 1rem;
+        }
+
+        .ai-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .ai-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .ai-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            max-width: 85%;
+        }
+
+        .ai-message.assistant {
+            background: var(--surface);
+            margin-right: auto;
+        }
+
+        .ai-message.user {
+            background: var(--primary);
+            margin-left: auto;
+        }
+
+        .ai-input {
+            padding: 1rem;
+            border-top: 1px solid var(--surface);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .ai-input input {
+            flex: 1;
+            background: var(--surface);
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--light);
+            outline: none;
+        }
+
+        .ai-input button {
+            padding: 0.75rem 1rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--muted);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        /* Statistics Widget */
+        .stats-widget {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .mini-stat {
+            background: var(--overlay);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .mini-stat .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .mini-stat .label {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .widgets-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .logo h1,
+            .sidebar .nav-label,
+            .sidebar .nav-item span,
+            .sidebar .case-status {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>⚖️ Semptify</h1>
+            <span>Legal Defense Command Center</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a class="nav-item active" data-panel="dashboard">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="nav-item" data-panel="documents">
+                <span class="icon">📄</span>
+                <span>Documents</span>
+                <span class="badge" id="doc-count">0</span>
+            </a>
+            <a class="nav-item" data-panel="timeline">
+                <span class="icon">📅</span>
+                <span>Timeline</span>
+            </a>
+            
+            <div class="nav-label" style="margin-top: 1rem;">Defense Tools</div>
+            <a class="nav-item" data-panel="defense">
+                <span class="icon">🛡️</span>
+                <span>Defenses</span>
+            </a>
+            <a class="nav-item" data-panel="motions">
+                <span class="icon">📋</span>
+                <span>Motions</span>
+            </a>
+            <a class="nav-item" data-panel="counterclaims">
+                <span class="icon">⚔️</span>
+                <span>Counterclaims</span>
+            </a>
+            
+            <div class="nav-label" style="margin-top: 1rem;">Resources</div>
+            <a class="nav-item" data-panel="library">
+                <span class="icon">📚</span>
+                <span>Law Library</span>
+            </a>
+            <a class="nav-item" data-panel="zoom">
+                <span class="icon">💻</span>
+                <span>Zoom Court</span>
+            </a>
+            <a class="nav-item" data-panel="procedures">
+                <span class="icon">📖</span>
+                <span>Procedures</span>
+            </a>
+        </div>
+        
+        <div class="case-status">
+            <div class="case-card">
+                <h4>Active Case</h4>
+                <div class="case-number" id="case-number">No Active Case</div>
+                <div class="next-date">
+                    <span class="icon">⏰</span>
+                    <span id="next-deadline">No upcoming deadlines</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="storage-status">
+            <div class="storage-card disconnected" id="storage-card">
+                <h4>Cloud Storage</h4>
+                <div class="status-text">⚠️ Not connected</div>
+                <button class="connect-btn" onclick="showStorageOptions()">Connect Storage</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" placeholder="Search documents, laws, motions..." id="global-search">
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="openUploadModal()">
+                    <span>📤</span> Upload
+                </button>
+                <button class="btn btn-primary" onclick="showPanel('motions')">
+                    <span>➕</span> New Motion
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Dashboard Panel -->
+            <div class="panel active" id="panel-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card documents">
+                        <h3>Total Documents</h3>
+                        <div class="value" id="stat-documents">-</div>
+                        <div class="change positive" id="stat-docs-change">Loading...</div>
+                    </div>
+                    <div class="stat-card deadlines">
+                        <h3>Upcoming Deadlines</h3>
+                        <div class="value" id="stat-deadlines">-</div>
+                        <div class="change negative" id="stat-deadline-change">Loading...</div>
+                    </div>
+                    <div class="stat-card motions">
+                        <h3>Available Motions</h3>
+                        <div class="value" id="stat-motions">-</div>
+                        <div class="change positive">Ready to file</div>
+                    </div>
+                    <div class="stat-card hearings">
+                        <h3>Defense Strategies</h3>
+                        <div class="value" id="stat-defenses">-</div>
+                        <div class="change positive">Applicable defenses</div>
+                    </div>
+                </div>
+
+                <div class="widgets-grid">
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3>📅 Upcoming Events</h3>
+                            <span class="view-all" onclick="showPanel('timeline')">View All →</span>
+                        </div>
+                        <div class="timeline-list" id="timeline-widget">
+                            <div class="loading"><div class="spinner"></div> Loading timeline...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3>⚡ Quick Actions</h3>
+                        </div>
+                        <div class="quick-actions">
+                            <div class="quick-action" onclick="showPanel('motions')">
+                                <span class="icon">📋</span>
+                                <span>File a Motion</span>
+                            </div>
+                            <div class="quick-action" onclick="showPanel('defense')">
+                                <span class="icon">🛡️</span>
+                                <span>Review Defenses</span>
+                            </div>
+                            <div class="quick-action" onclick="showPanel('library')">
+                                <span class="icon">📚</span>
+                                <span>Research Law</span>
+                            </div>
+                            <div class="quick-action" onclick="showPanel('zoom')">
+                                <span class="icon">💻</span>
+                                <span>Zoom Court Prep</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget" style="margin-top: 1.5rem;">
+                    <div class="widget-header">
+                        <h3>📄 Recent Documents</h3>
+                        <span class="view-all" onclick="showPanel('documents')">View All →</span>
+                    </div>
+                    <div class="documents-grid" id="recent-docs">
+                        <div class="loading"><div class="spinner"></div> Loading documents...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Panel -->
+            <div class="panel" id="panel-documents">
+                <div class="documents-header">
+                    <h2>📄 Documents</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="lease">Lease</button>
+                        <button class="filter-tab" data-filter="notice">Notices</button>
+                        <button class="filter-tab" data-filter="court">Court Filings</button>
+                        <button class="filter-tab" data-filter="evidence">Evidence</button>
+                    </div>
+                </div>
+                <div class="documents-grid" id="documents-list">
+                    <div class="loading"><div class="spinner"></div> Loading documents...</div>
+                </div>
+            </div>
+
+            <!-- Timeline Panel -->
+            <div class="panel" id="panel-timeline">
+                <h2>📅 Case Timeline</h2>
+                <div class="timeline-list" id="timeline-full" style="margin-top: 1.5rem;">
+                    <div class="loading"><div class="spinner"></div> Loading timeline...</div>
+                </div>
+            </div>
+
+            <!-- Defense Panel -->
+            <div class="panel" id="panel-defense">
+                <h2>🛡️ Defense Strategies</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Minnesota eviction defense strategies applicable to your case</p>
+                <div class="defense-grid" id="defense-list">
+                    <div class="loading"><div class="spinner"></div> Loading defenses...</div>
+                </div>
+            </div>
+
+            <!-- Motions Panel -->
+            <div class="panel" id="panel-motions">
+                <h2>📋 Motion Templates</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Pre-drafted motions ready for your case</p>
+                <div class="motions-grid" id="motions-list">
+                    <div class="loading"><div class="spinner"></div> Loading motions...</div>
+                </div>
+            </div>
+
+            <!-- Counterclaims Panel -->
+            <div class="panel" id="panel-counterclaims">
+                <h2>⚔️ Counterclaims</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Potential counterclaims against the landlord</p>
+                <div class="defense-grid" id="counterclaims-list">
+                    <div class="loading"><div class="spinner"></div> Loading counterclaims...</div>
+                </div>
+            </div>
+
+            <!-- Library Panel -->
+            <div class="panel" id="panel-library">
+                <h2>📚 Law Library</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Minnesota tenant law resources and references</p>
+                <div class="library-categories" id="library-categories">
+                    <div class="loading"><div class="spinner"></div> Loading library...</div>
+                </div>
+                
+                <div class="widget" style="margin-top: 1.5rem;">
+                    <div class="widget-header">
+                        <h3>🔍 Quick Reference</h3>
+                    </div>
+                    <div id="quick-reference">
+                        <div class="loading"><div class="spinner"></div> Loading references...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zoom Panel -->
+            <div class="panel" id="panel-zoom">
+                <h2>💻 Zoom Court Preparation</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Everything you need for virtual court appearances</p>
+                <div class="zoom-grid" id="zoom-content">
+                    <div class="loading"><div class="spinner"></div> Loading Zoom tips...</div>
+                </div>
+            </div>
+
+            <!-- Procedures Panel -->
+            <div class="panel" id="panel-procedures">
+                <h2>📖 Court Procedures</h2>
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">Step-by-step guides for eviction proceedings</p>
+                <div class="defense-grid" id="procedures-list">
+                    <div class="loading"><div class="spinner"></div> Loading procedures...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Onboarding Overlay - Storage Required -->
+    <div class="onboarding-overlay" id="onboarding-overlay">
+        <div class="onboarding-card">
+            <h1>⚖️ Welcome to Semptify</h1>
+            <p>Your complete eviction defense command center. Connect your cloud storage to securely store your documents and get started.</p>
+            
+            <div class="onboarding-steps">
+                <div class="onboarding-step">
+                    <span class="number">1</span>
+                    <span>Connect your secure cloud storage</span>
+                </div>
+                <div class="onboarding-step">
+                    <span class="number">2</span>
+                    <span>Upload your eviction documents</span>
+                </div>
+                <div class="onboarding-step">
+                    <span class="number">3</span>
+                    <span>We build your timeline and suggest defenses</span>
+                </div>
+            </div>
+            
+            <div class="storage-options">
+                <p class="storage-prompt">Choose your secure cloud storage:</p>
+                <div class="provider-buttons">
+                    <button class="provider-btn google" onclick="connectStorage('google_drive')">
+                        <span>🔵</span> Google Drive
+                    </button>
+                    <button class="provider-btn onedrive" onclick="connectStorage('onedrive')">
+                        <span>🔷</span> OneDrive
+                    </button>
+                    <button class="provider-btn dropbox" onclick="connectStorage('dropbox')">
+                        <span>📦</span> Dropbox
+                    </button>
+                </div>
+                <p class="storage-note">Your documents are stored in YOUR cloud account - we never store your files on our servers.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="upload-modal hidden" id="upload-modal">
+        <div class="upload-modal-content">
+            <div class="upload-modal-header">
+                <h2>📤 Upload Document</h2>
+                <button class="close-modal" onclick="closeUploadModal()">✕</button>
+            </div>
+            
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                <div class="icon">📁</div>
+                <p>Drag & drop your document here</p>
+                <p>or click to browse</p>
+                <small>PDF, DOC, DOCX, JPG, PNG (max 20MB)</small>
+            </div>
+            
+            <input type="file" id="file-input" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            
+            <div class="upload-progress hidden" id="upload-progress">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="upload-status" id="upload-status">Uploading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <div class="ai-panel" id="ai-panel">
+            <div class="ai-header">
+                <h3>🤖 Legal AI Assistant</h3>
+                <button class="ai-close" onclick="toggleAI()">✕</button>
+            </div>
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message assistant">
+                    Hello! I'm your legal AI assistant. I can help you understand your eviction case, explain legal terms, suggest defenses, and guide you through court procedures. What would you like to know?
+                </div>
+            </div>
+            <div class="ai-input">
+                <input type="text" id="ai-input" placeholder="Ask about your case..." onkeypress="if(event.key==='Enter')sendAIMessage()">
+                <button onclick="sendAIMessage()">➤</button>
+            </div>
+        </div>
+        <button class="ai-toggle" onclick="toggleAI()">🤖</button>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = '';
+
+        // State
+        let documents = [];
+        let timeline = [];
+        let defenses = [];
+        let motions = [];
+        let counterclaims = [];
+        let libraryCategories = [];
+        let zoomTips = [];
+        let procedures = [];
+        let isNewUser = true;
+        let storageConnected = false;
+        let storageProvider = null;
+
+        // Toast Notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Storage Connection - REQUIRED for all users
+        async function checkStorageStatus() {
+            try {
+                const response = await fetch('/storage/status', { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    storageConnected = data.authenticated;
+                    storageProvider = data.provider;
+                    updateStorageUI();
+                    return data;
+                }
+            } catch (e) {
+                console.error('Storage status check failed:', e);
+            }
+            return { authenticated: false };
+        }
+
+        function updateStorageUI() {
+            const storageCard = document.getElementById('storage-card');
+            if (storageCard) {
+                if (storageConnected) {
+                    storageCard.className = 'storage-card connected';
+                    storageCard.innerHTML = `
+                        <h4>Cloud Storage</h4>
+                        <div class="status-text">✅ ${storageProvider || 'Connected'}</div>
+                    `;
+                } else {
+                    storageCard.className = 'storage-card disconnected';
+                    storageCard.innerHTML = `
+                        <h4>Cloud Storage</h4>
+                        <div class="status-text">⚠️ Not connected</div>
+                        <button class="connect-btn" onclick="showStorageOptions()">Connect Storage</button>
+                    `;
+                }
+            }
+        }
+
+        function connectStorage(provider) {
+            // Redirect to OAuth flow - this is the main entry point
+            window.location.href = `/storage/auth/${provider}`;
+        }
+
+        function showStorageOptions() {
+            document.getElementById('onboarding-overlay').classList.remove('hidden');
+        }
+
+        // Onboarding - Storage is REQUIRED
+        async function checkOnboarding() {
+            const storageStatus = await checkStorageStatus();
+            
+            // Storage is required - show onboarding if not connected
+            if (!storageStatus.authenticated) {
+                document.getElementById('onboarding-overlay').classList.remove('hidden');
+                isNewUser = true;
+            } else {
+                document.getElementById('onboarding-overlay').classList.add('hidden');
+                isNewUser = false;
+                showToast(`Connected to ${storageProvider}`, 'success');
+            }
+        }
+
+        function startOnboarding() {
+            document.getElementById('onboarding-overlay').classList.add('hidden');
+            openUploadModal();
+        }
+
+        // Upload Modal
+        function openUploadModal() {
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+            document.getElementById('upload-progress').classList.add('hidden');
+            document.getElementById('progress-fill').style.width = '0%';
+        }
+
+        // File Upload Handling
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFileUpload(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
+        });
+
+        async function handleFileUpload(file) {
+            const progressDiv = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('progress-fill');
+            const statusText = document.getElementById('upload-status');
+            
+            progressDiv.classList.remove('hidden');
+            progressFill.style.width = '10%';
+            statusText.textContent = `Uploading ${file.name}...`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                progressFill.style.width = '30%';
+                statusText.textContent = 'Processing with AI...';
+                
+                const response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+                
+                const result = await response.json();
+                progressFill.style.width = '60%';
+                statusText.textContent = 'Extracting timeline events...';
+
+                // Auto-extract timeline events
+                await fetch(`/api/documents/${result.id}/auto-timeline`, { method: 'POST' });
+                
+                progressFill.style.width = '100%';
+                statusText.textContent = 'Complete!';
+                
+                showToast(`${file.name} uploaded and processed!`, 'success');
+                
+                setTimeout(() => {
+                    closeUploadModal();
+                    loadDocuments();
+                    loadTimeline();
+                }, 1000);
+
+            } catch (error) {
+                statusText.textContent = 'Upload failed. Please try again.';
+                progressFill.style.width = '0%';
+                showToast('Upload failed: ' + error.message, 'error');
+            }
+        }
+
+        // Panel Navigation
+        function showPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('panel-' + panelId).classList.add('active');
+            document.querySelector(`[data-panel="${panelId}"]`)?.classList.add('active');
+            
+            // Load panel data if not loaded
+            loadPanelData(panelId);
+        }
+
+        // Initialize navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const panel = item.dataset.panel;
+                if (panel) showPanel(panel);
+            });
+        });
+
+        // Load panel data
+        async function loadPanelData(panelId) {
+            switch(panelId) {
+                case 'documents':
+                    if (documents.length === 0) await loadDocuments();
+                    break;
+                case 'timeline':
+                    if (timeline.length === 0) await loadTimeline();
+                    break;
+                case 'defense':
+                    if (defenses.length === 0) await loadDefenses();
+                    break;
+                case 'motions':
+                    if (motions.length === 0) await loadMotions();
+                    break;
+                case 'counterclaims':
+                    if (counterclaims.length === 0) await loadCounterclaims();
+                    break;
+                case 'library':
+                    if (libraryCategories.length === 0) await loadLibrary();
+                    break;
+                case 'zoom':
+                    if (zoomTips.length === 0) await loadZoomTips();
+                    break;
+                case 'procedures':
+                    if (procedures.length === 0) await loadProcedures();
+                    break;
+            }
+        }
+
+        // Load Documents
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents/');
+                if (response.ok) {
+                    const data = await response.json();
+                    documents = data.documents || data || [];
+                    renderDocuments();
+                    document.getElementById('doc-count').textContent = documents.length;
+                    document.getElementById('stat-documents').textContent = documents.length;
+                    document.getElementById('stat-docs-change').textContent = `${documents.length} in vault`;
+                }
+            } catch (e) {
+                console.error('Error loading documents:', e);
+                documents = [];
+                renderDocuments();
+            }
+        }
+
+        function renderDocuments() {
+            const container = document.getElementById('documents-list');
+            const recentContainer = document.getElementById('recent-docs');
+            
+            if (documents.length === 0) {
+                const empty = `<div class="empty-state">
+                    <div class="icon">📄</div>
+                    <p>No documents yet</p>
+                    <button class="btn btn-primary" onclick="openUploadModal()">Upload Documents</button>
+                </div>`;
+                container.innerHTML = empty;
+                recentContainer.innerHTML = empty;
+                return;
+            }
+            
+            const docHTML = documents.map(doc => `
+                <div class="doc-card" onclick="viewDocument('${doc.id || doc.filename}')">
+                    <div class="doc-icon">${getDocIcon(doc.filename || doc.name)}</div>
+                    <h4>${doc.filename || doc.name || 'Unnamed'}</h4>
+                    <div class="meta">${formatDate(doc.upload_date || doc.created_at)}</div>
+                    <span class="doc-type">${doc.document_type || doc.type || 'Document'}</span>
+                </div>
+            `).join('');
+            
+            container.innerHTML = docHTML;
+            recentContainer.innerHTML = documents.slice(0, 4).map(doc => `
+                <div class="doc-card" onclick="viewDocument('${doc.id || doc.filename}')">
+                    <div class="doc-icon">${getDocIcon(doc.filename || doc.name)}</div>
+                    <h4>${doc.filename || doc.name || 'Unnamed'}</h4>
+                    <div class="meta">${formatDate(doc.upload_date || doc.created_at)}</div>
+                </div>
+            `).join('') || '<div class="empty-state"><p>No recent documents</p></div>';
+        }
+
+        function getDocIcon(filename) {
+            if (!filename) return '📄';
+            const ext = filename.split('.').pop()?.toLowerCase();
+            switch(ext) {
+                case 'pdf': return '📕';
+                case 'doc': case 'docx': return '📘';
+                case 'jpg': case 'jpeg': case 'png': return '🖼️';
+                default: return '📄';
+            }
+        }
+
+        // Load Timeline
+        async function loadTimeline() {
+            try {
+                const response = await fetch('/api/timeline/');
+                if (response.ok) {
+                    const data = await response.json();
+                    timeline = data.events || data || [];
+                    renderTimeline();
+                    
+                    // Count upcoming deadlines
+                    const now = new Date();
+                    const upcoming = timeline.filter(e => new Date(e.date) > now).length;
+                    document.getElementById('stat-deadlines').textContent = upcoming;
+                    document.getElementById('stat-deadline-change').textContent = upcoming > 0 ? `Next in ${getDaysUntil(timeline[0]?.date)} days` : 'None scheduled';
+                }
+            } catch (e) {
+                console.error('Error loading timeline:', e);
+                timeline = [];
+                renderTimeline();
+            }
+        }
+
+        function renderTimeline() {
+            const widget = document.getElementById('timeline-widget');
+            const full = document.getElementById('timeline-full');
+            
+            if (timeline.length === 0) {
+                const empty = '<div class="empty-state"><div class="icon">📅</div><p>No timeline events</p></div>';
+                widget.innerHTML = empty;
+                full.innerHTML = empty;
+                return;
+            }
+            
+            const render = (events) => events.map(event => {
+                const date = new Date(event.date);
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <div class="day">${date.getDate()}</div>
+                            <div class="month">${date.toLocaleString('default', { month: 'short' })}</div>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>${event.title || event.event_type}</h4>
+                            <p>${event.description || ''}</p>
+                            <span class="tag ${event.event_type?.toLowerCase() || 'document'}">${event.event_type || 'Event'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            widget.innerHTML = render(timeline.slice(0, 5));
+            full.innerHTML = render(timeline);
+        }
+
+        // Load Defenses
+        async function loadDefenses() {
+            try {
+                const response = await fetch('/api/eviction-defense/defenses');
+                if (response.ok) {
+                    const data = await response.json();
+                    defenses = data.defenses || data || [];
+                    renderDefenses();
+                    document.getElementById('stat-defenses').textContent = defenses.length;
+                }
+            } catch (e) {
+                console.error('Error loading defenses:', e);
+                defenses = [];
+                renderDefenses();
+            }
+        }
+
+        function renderDefenses() {
+            const container = document.getElementById('defense-list');
+            
+            if (defenses.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">🛡️</div><p>No defenses loaded</p></div>';
+                return;
+            }
+            
+            container.innerHTML = defenses.map(def => `
+                <div class="defense-card">
+                    <h4>${def.name || def.title}</h4>
+                    <p>${def.description}</p>
+                    <div class="requirements">
+                        <h5>Requirements</h5>
+                        <ul>
+                            ${(def.requirements || def.elements || []).map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Motions
+        async function loadMotions() {
+            try {
+                const response = await fetch('/api/eviction-defense/motions');
+                if (response.ok) {
+                    const data = await response.json();
+                    motions = data.motions || data || [];
+                    renderMotions();
+                    document.getElementById('stat-motions').textContent = motions.length;
+                }
+            } catch (e) {
+                console.error('Error loading motions:', e);
+                motions = [];
+                renderMotions();
+            }
+        }
+
+        function renderMotions() {
+            const container = document.getElementById('motions-list');
+            
+            if (motions.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No motions available</p></div>';
+                return;
+            }
+            
+            container.innerHTML = motions.map(motion => `
+                <div class="motion-card">
+                    <div class="header">
+                        <h4>${motion.name || motion.title}</h4>
+                        ${motion.deadline ? `<span class="deadline-tag">⏰ ${motion.deadline}</span>` : ''}
+                    </div>
+                    <p>${motion.description || motion.purpose}</p>
+                    <div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="generateMotion('${motion.id || motion.name}')">Generate</button>
+                        <button class="btn btn-outline btn-sm" onclick="viewMotionDetails('${motion.id || motion.name}')">Details</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Counterclaims
+        async function loadCounterclaims() {
+            try {
+                const response = await fetch('/api/eviction-defense/counterclaims');
+                if (response.ok) {
+                    const data = await response.json();
+                    counterclaims = data.counterclaims || data || [];
+                    renderCounterclaims();
+                }
+            } catch (e) {
+                console.error('Error loading counterclaims:', e);
+                counterclaims = [];
+                renderCounterclaims();
+            }
+        }
+
+        function renderCounterclaims() {
+            const container = document.getElementById('counterclaims-list');
+            
+            if (counterclaims.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">⚔️</div><p>No counterclaims loaded</p></div>';
+                return;
+            }
+            
+            container.innerHTML = counterclaims.map(cc => `
+                <div class="defense-card">
+                    <h4>${cc.name || cc.title}</h4>
+                    <p>${cc.description}</p>
+                    <div class="requirements">
+                        <h5>Elements to Prove</h5>
+                        <ul>
+                            ${(cc.elements || cc.requirements || []).map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Library
+        async function loadLibrary() {
+            try {
+                const response = await fetch('/api/law-library/categories');
+                if (response.ok) {
+                    const data = await response.json();
+                    libraryCategories = data.categories || data || [];
+                    renderLibrary();
+                }
+                
+                // Also load quick reference
+                const refResponse = await fetch('/api/law-library/quick-reference/eviction_process');
+                if (refResponse.ok) {
+                    const refData = await refResponse.json();
+                    renderQuickReference(refData);
+                }
+            } catch (e) {
+                console.error('Error loading library:', e);
+                libraryCategories = [];
+                renderLibrary();
+            }
+        }
+
+        function renderLibrary() {
+            const container = document.getElementById('library-categories');
+            
+            if (libraryCategories.length === 0) {
+                // Default categories
+                libraryCategories = [
+                    { id: 'statutes', name: 'Minnesota Statutes', icon: '📜', count: 'Ch. 504B' },
+                    { id: 'case_law', name: 'Case Law', icon: '⚖️', count: 'Precedents' },
+                    { id: 'court_rules', name: 'Court Rules', icon: '📋', count: 'Procedures' },
+                    { id: 'forms', name: 'Legal Forms', icon: '📝', count: 'Templates' },
+                    { id: 'deadlines', name: 'Deadlines', icon: '⏰', count: 'Calculator' },
+                    { id: 'definitions', name: 'Legal Terms', icon: '📖', count: 'Glossary' }
+                ];
+            }
+            
+            container.innerHTML = libraryCategories.map(cat => `
+                <div class="category-card" onclick="browseCategory('${cat.id}')">
+                    <div class="icon">${cat.icon || '📚'}</div>
+                    <h4>${cat.name}</h4>
+                    <div class="count">${cat.count || cat.items?.length || ''}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderQuickReference(data) {
+            const container = document.getElementById('quick-reference');
+            if (!data || !data.content) {
+                container.innerHTML = '<p style="color: var(--muted);">Select a topic for quick reference</p>';
+                return;
+            }
+            container.innerHTML = `
+                <div style="background: var(--overlay); padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin-bottom: 0.5rem;">${data.topic}</h4>
+                    <div style="font-size: 0.9rem; color: var(--muted); white-space: pre-wrap;">${data.content}</div>
+                </div>
+            `;
+        }
+
+        // Load Zoom Tips
+        async function loadZoomTips() {
+            try {
+                const response = await fetch('/api/zoom-court/quick-tips');
+                if (response.ok) {
+                    const data = await response.json();
+                    zoomTips = data.tips || data || [];
+                    renderZoomTips();
+                }
+            } catch (e) {
+                console.error('Error loading zoom tips:', e);
+                zoomTips = [];
+                renderZoomTips();
+            }
+        }
+
+        function renderZoomTips() {
+            const container = document.getElementById('zoom-content');
+            
+            // Default tips if API doesn't return any
+            if (zoomTips.length === 0) {
+                zoomTips = [
+                    { category: 'Before the Hearing', icon: '✅', tips: ['Test your audio and video', 'Find a quiet location', 'Charge your device', 'Have documents ready'] },
+                    { category: 'During the Hearing', icon: '🎤', tips: ['Mute when not speaking', 'Look at the camera', 'Speak clearly', 'Wait to be recognized'] },
+                    { category: 'Presentation', icon: '👔', tips: ['Dress professionally', 'Good lighting', 'Clean background', 'Minimize distractions'] },
+                    { category: 'Technical Issues', icon: '🔧', tips: ['Have phone as backup', 'Know court phone number', 'Test screen share', 'Close other apps'] }
+                ];
+            }
+            
+            container.innerHTML = zoomTips.map(section => `
+                <div class="zoom-card">
+                    <div class="icon">${section.icon || '💻'}</div>
+                    <h4>${section.category || section.title}</h4>
+                    <ul>
+                        ${(section.tips || section.items || []).map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        // Load Procedures
+        async function loadProcedures() {
+            try {
+                const response = await fetch('/api/eviction-defense/procedures');
+                if (response.ok) {
+                    const data = await response.json();
+                    procedures = data.procedures || data || [];
+                    renderProcedures();
+                }
+            } catch (e) {
+                console.error('Error loading procedures:', e);
+                procedures = [];
+                renderProcedures();
+            }
+        }
+
+        function renderProcedures() {
+            const container = document.getElementById('procedures-list');
+            
+            if (procedures.length === 0) {
+                // Default procedures
+                procedures = [
+                    { name: 'Initial Answer', description: 'How to file your answer to the eviction complaint within 5 days', steps: ['Get complaint copy', 'Complete answer form', 'File with court', 'Serve landlord'] },
+                    { name: 'Request for Hearing', description: 'How to request a hearing date', steps: ['File hearing request', 'Pay any fees', 'Note the date', 'Prepare evidence'] },
+                    { name: 'Discovery Process', description: 'How to request documents from the landlord', steps: ['Draft discovery requests', 'Serve on landlord', 'Wait 30 days', 'File motion if ignored'] },
+                    { name: 'Trial Preparation', description: 'Steps to prepare for your eviction trial', steps: ['Organize evidence', 'Prepare witnesses', 'Draft opening statement', 'Anticipate questions'] }
+                ];
+            }
+            
+            container.innerHTML = procedures.map(proc => `
+                <div class="defense-card">
+                    <h4>${proc.name || proc.title}</h4>
+                    <p>${proc.description}</p>
+                    <div class="requirements">
+                        <h5>Steps</h5>
+                        <ol style="margin-left: 1rem;">
+                            ${(proc.steps || []).map(s => `<li>${s}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility Functions
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown date';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getDaysUntil(dateStr) {
+            if (!dateStr) return 0;
+            const date = new Date(dateStr);
+            const now = new Date();
+            return Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+        }
+
+        function viewDocument(id) {
+            window.location.href = `/documents?view=${id}`;
+        }
+
+        function generateMotion(motionId) {
+            window.location.href = `/eviction-defense?motion=${motionId}`;
+        }
+
+        function viewMotionDetails(motionId) {
+            alert(`Motion details for: ${motionId}\n\nFull motion generation coming soon!`);
+        }
+
+        function browseCategory(categoryId) {
+            window.location.href = `/law-library?category=${categoryId}`;
+        }
+
+        // AI Assistant
+        function toggleAI() {
+            document.getElementById('ai-panel').classList.toggle('active');
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const messagesContainer = document.getElementById('ai-messages');
+            
+            // Add user message
+            messagesContainer.innerHTML += `<div class="ai-message user">${message}</div>`;
+            input.value = '';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            try {
+                const response = await fetch('/api/law-library/librarian/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: message })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    messagesContainer.innerHTML += `<div class="ai-message assistant">${data.answer || data.response || 'I apologize, I could not process that question.'}</div>`;
+                } else {
+                    messagesContainer.innerHTML += `<div class="ai-message assistant">I'm having trouble connecting to the legal database. Please try again.</div>`;
+                }
+            } catch (e) {
+                messagesContainer.innerHTML += `<div class="ai-message assistant">I apologize, I'm currently offline. Please try again later.</div>`;
+            }
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Global Search
+        document.getElementById('global-search').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (!query) return;
+                
+                // Search across all content
+                alert(`Searching for: ${query}\n\nGlobal search feature coming soon!`);
+            }
+        });
+
+        // Filter tabs for documents
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const filter = tab.dataset.filter;
+                // Filter documents (implement filtering logic)
+                console.log('Filter:', filter);
+            });
+        });
+
+        // Initialize Dashboard
+        async function initDashboard() {
+            // Load all data in parallel
+            await Promise.all([
+                loadDocuments(),
+                loadTimeline(),
+                loadDefenses(),
+                loadMotions()
+            ]);
+            
+            // Check if new user needs onboarding
+            checkOnboarding();
+        }
+
+        // Start
+        initDashboard();
+    </script>
+</body>
+</html>

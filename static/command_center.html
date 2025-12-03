@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify Command Center - Dakota County Court Defense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo { display: flex; align-items: center; gap: 1rem; }
+        .logo h1 { font-size: 1.5rem; }
+        .logo .case-number { 
+            background: var(--warning);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 0.5rem;
+        }
+        
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            height: calc(100vh - 70px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section h3 {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .nav-item:hover { background: var(--bg-hover); }
+        .nav-item.active { background: var(--primary); }
+        .nav-item .icon { font-size: 1.25rem; }
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Content Area */
+        .content {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+        }
+        
+        .stat-card .label { color: var(--text-muted); font-size: 0.875rem; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; margin: 0.25rem 0; }
+        .stat-card .change { font-size: 0.75rem; }
+        .stat-card .change.positive { color: var(--success); }
+        .stat-card .change.warning { color: var(--warning); }
+        .stat-card .change.danger { color: var(--danger); }
+        
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-header h2 { font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-body { padding: 1.25rem; }
+
+        /* Defense Analysis Widget */
+        .defense-analysis-card {
+            border: 2px solid var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+        }
+        .defense-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .defense-panel {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+        .defense-panel h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .defense-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .defense-list .empty-state {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 1rem;
+        }
+        .violation-item, .strategy-item {
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .violation-item {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--danger);
+        }
+        .violation-item.high { border-left-color: #dc2626; background: rgba(220, 38, 38, 0.15); }
+        .violation-item.medium { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+        .violation-item.low { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
+        .violation-title { font-weight: 600; color: var(--text-primary); }
+        .violation-desc { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.25rem; }
+        .violation-law { color: var(--accent); font-size: 0.75rem; margin-top: 0.25rem; }
+        .strategy-item {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--success);
+        }
+        .strategy-item.strong { border-left-color: #059669; background: rgba(5, 150, 105, 0.15); }
+        .strategy-item.moderate { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+        .strategy-title { font-weight: 600; color: var(--text-primary); }
+        .strategy-desc { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.25rem; }
+        .strategy-strength { 
+            font-size: 0.7rem; 
+            padding: 0.15rem 0.4rem; 
+            border-radius: 4px; 
+            background: var(--success); 
+            color: white; 
+            display: inline-block; 
+            margin-top: 0.25rem;
+        }
+        .readiness-meter {
+            height: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+        .readiness-label {
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .readiness-label.critical { color: var(--danger); }
+        .readiness-label.warning { color: var(--warning); }
+        .readiness-label.ready { color: var(--success); }
+        .next-steps {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+        }
+        .next-step {
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .next-step::before {
+            content: "→";
+            color: var(--accent);
+        }
+        .recommended-forms {
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+        }
+        .recommended-forms h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        .forms-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .form-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .form-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 1200px) {
+            .defense-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .defense-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.25rem;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .action-btn .icon { font-size: 2rem; }
+        .action-btn .label { font-weight: 500; }
+        .action-btn .sublabel { font-size: 0.75rem; color: var(--text-muted); }
+        
+        /* Timeline Preview */
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .timeline-item:last-child { border-bottom: none; }
+        
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+        
+        .timeline-dot.notice { background: var(--warning); }
+        .timeline-dot.court { background: var(--danger); }
+        .timeline-dot.document { background: var(--primary); }
+        .timeline-dot.payment { background: var(--success); }
+        
+        .timeline-content { flex: 1; }
+        .timeline-content .title { font-weight: 500; }
+        .timeline-content .date { font-size: 0.75rem; color: var(--text-muted); }
+        
+        /* Right Panel - AI Assistant */
+        .ai-panel {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ai-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ai-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .ai-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+        }
+        
+        .ai-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .ai-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+        }
+        
+        .ai-message.assistant {
+            background: var(--bg-hover);
+            margin-right: auto;
+        }
+        
+        .ai-message.user {
+            background: var(--primary);
+            margin-left: auto;
+        }
+        
+        .ai-message .sender {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        
+        .ai-input-area {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .ai-input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .ai-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg-dark);
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+        
+        .ai-input:focus { outline: none; border-color: var(--primary); }
+        
+        .ai-send {
+            padding: 0.75rem 1rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .ai-send:hover { background: var(--primary-dark); }
+        
+        /* Sticky Notes */
+        .sticky-notes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .sticky-note {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .sticky-note.yellow { background: #fef08a; color: #000; }
+        .sticky-note.pink { background: #fda4af; color: #000; }
+        .sticky-note.blue { background: #93c5fd; color: #000; }
+        .sticky-note.green { background: #86efac; color: #000; }
+        
+        /* Calendar Widget */
+        .calendar-mini {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        
+        .calendar-mini .day-header { color: var(--text-muted); padding: 0.25rem; }
+        .calendar-mini .day {
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        
+        .calendar-mini .day:hover { background: var(--bg-hover); }
+        .calendar-mini .day.today { background: var(--primary); }
+        .calendar-mini .day.has-event { position: relative; }
+        .calendar-mini .day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--danger);
+            border-radius: 50%;
+        }
+        
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .upload-zone.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .upload-zone .icon { font-size: 3rem; margin-bottom: 1rem; }
+        
+        /* Processing Status */
+        .processing-list { max-height: 200px; overflow-y: auto; }
+        
+        .processing-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-hover);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .processing-item .status-icon { font-size: 1.25rem; }
+        .processing-item .filename { flex: 1; font-size: 0.875rem; }
+        .processing-item .progress {
+            width: 60px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .processing-item .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { background: var(--bg-hover); }
+        
+        /* Deadline Alert */
+        .deadline-alert {
+            background: linear-gradient(135deg, var(--danger), #b91c1c);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .deadline-alert .icon { font-size: 2rem; }
+        .deadline-alert .content { flex: 1; }
+        .deadline-alert .title { font-weight: bold; font-size: 1.125rem; }
+        .deadline-alert .countdown { font-size: 0.875rem; opacity: 0.9; }
+        
+        /* Document Grid */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-hover);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .doc-item:hover { background: var(--primary); }
+        .doc-item .icon { font-size: 1.5rem; }
+        .doc-item .info { flex: 1; }
+        .doc-item .name { font-size: 0.875rem; font-weight: 500; }
+        .doc-item .meta { font-size: 0.75rem; color: var(--text-muted); }
+        .doc-item .status { font-size: 0.75rem; }
+        .doc-item .status.processed { color: var(--success); }
+        .doc-item .status.pending { color: var(--warning); }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body { padding: 1.25rem; }
+        .modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container { grid-template-columns: 250px 1fr; }
+            .ai-panel { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Toast animations */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <h1>⚖️ Semptify Command Center</h1>
+            <span class="case-number" id="caseNumber">Case #19AV-CV-25-3477</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-warning" onclick="openZoomSetup()">📹 Zoom Court Setup</button>
+            <button class="btn btn-danger" onclick="openEmergency()">🚨 Emergency Help</button>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <button class="btn btn-outline" onclick="connectStorage()">Connect Storage</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="nav-section">
+                <h3>📋 Case Management</h3>
+                <a href="/static/document_intake.html" class="nav-item">
+                    <span class="icon">📤</span>
+                    <span>Upload Documents</span>
+                </a>
+                <a href="/static/timeline.html" class="nav-item">
+                    <span class="icon">📅</span>
+                    <span>Timeline</span>
+                    <span class="badge" id="timelineCount">0</span>
+                </a>
+                <a href="/static/calendar.html" class="nav-item">
+                    <span class="icon">🗓️</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/static/documents.html" class="nav-item">
+                    <span class="icon">📁</span>
+                    <span>Document Vault</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>⚖️ Eviction Defense</h3>
+                <a href="/eviction/" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Defense Portal</span>
+                </a>
+                <a href="/eviction/answer" class="nav-item">
+                    <span class="icon">📝</span>
+                    <span>Answer Summons</span>
+                </a>
+                <a href="/eviction/counterclaim" class="nav-item">
+                    <span class="icon">⚔️</span>
+                    <span>Counterclaim</span>
+                </a>
+                <a href="/eviction/motions" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>File Motions</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>📚 Legal Resources</h3>
+                <a href="/law-library" class="nav-item">
+                    <span class="icon">📖</span>
+                    <span>Law Library</span>
+                </a>
+                <a href="/eviction/forms/library" class="nav-item">
+                    <span class="icon">📄</span>
+                    <span>Court Forms</span>
+                </a>
+                <a href="/dakota/procedures/rules" class="nav-item">
+                    <span class="icon">⚙️</span>
+                    <span>Dakota Rules</span>
+                </a>
+                <a href="/dakota/procedures/defenses" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Defenses</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>💻 Zoom Court</h3>
+                <a href="/eviction/zoom" class="nav-item">
+                    <span class="icon">📹</span>
+                    <span>Zoom Helper</span>
+                </a>
+                <a href="/zoom-court" class="nav-item">
+                    <span class="icon">🎯</span>
+                    <span>Hearing Prep</span>
+                </a>
+                <a href="/api/zoom-court/etiquette" class="nav-item" target="_blank">
+                    <span class="icon">👔</span>
+                    <span>Court Etiquette</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <h3>🔧 Tools</h3>
+                <a href="#" class="nav-item" onclick="openNotes()">
+                    <span class="icon">📝</span>
+                    <span>Sticky Notes</span>
+                </a>
+                <a href="#" class="nav-item" onclick="openChecklist()">
+                    <span class="icon">✅</span>
+                    <span>Checklist</span>
+                </a>
+                <a href="/api/docs" class="nav-item" target="_blank">
+                    <span class="icon">🔌</span>
+                    <span>API Docs</span>
+                </a>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Deadline Alert -->
+            <div class="deadline-alert" id="deadlineAlert" style="display: none;">
+                <span class="icon">⏰</span>
+                <div class="content">
+                    <div class="title" id="deadlineTitle">Hearing in X Days</div>
+                    <div class="countdown" id="deadlineCountdown">December 15, 2025 at 9:00 AM</div>
+                </div>
+                <button class="btn btn-outline" onclick="openCalendar()">View Calendar</button>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Documents</div>
+                    <div class="value" id="docCount">0</div>
+                    <div class="change positive" id="docStatus">Loading...</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Timeline Events</div>
+                    <div class="value" id="eventCount">0</div>
+                    <div class="change" id="eventStatus">From vault documents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Defenses Ready</div>
+                    <div class="value" id="defenseCount">0</div>
+                    <div class="change positive">Available strategies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Days to Hearing</div>
+                    <div class="value" id="daysToHearing">--</div>
+                    <div class="change danger" id="hearingDate">Set hearing date</div>
+                </div>
+            </div>
+
+            <!-- Defense Analysis Widget -->
+            <div class="card defense-analysis-card">
+                <div class="card-header">
+                    <h2>🛡️ Defense Analysis</h2>
+                    <button class="btn btn-primary btn-sm" onclick="analyzeDefenses()">
+                        <span id="analyzeSpinner" style="display:none;">⏳</span>
+                        <span id="analyzeText">Analyze Case</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="defense-grid">
+                        <!-- Violations Panel -->
+                        <div class="defense-panel violations-panel">
+                            <h3>⚠️ Violations Found</h3>
+                            <div id="violationsList" class="defense-list">
+                                <div class="empty-state">Click "Analyze Case" to check for landlord violations</div>
+                            </div>
+                        </div>
+                        <!-- Strategies Panel -->
+                        <div class="defense-panel strategies-panel">
+                            <h3>⚔️ Defense Strategies</h3>
+                            <div id="strategiesList" class="defense-list">
+                                <div class="empty-state">Strategies will appear after analysis</div>
+                            </div>
+                        </div>
+                        <!-- Court Readiness -->
+                        <div class="defense-panel readiness-panel">
+                            <h3>✅ Court Readiness</h3>
+                            <div id="readinessStatus" class="readiness-status">
+                                <div class="readiness-meter">
+                                    <div class="meter-fill" id="readinessMeter" style="width: 0%"></div>
+                                </div>
+                                <div class="readiness-label" id="readinessLabel">Not Analyzed</div>
+                                <div class="next-steps" id="nextSteps"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Recommended Forms -->
+                    <div class="recommended-forms" id="recommendedForms" style="display: none;">
+                        <h4>📋 Recommended Forms to File</h4>
+                        <div class="forms-list" id="formsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>⚡ Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="/static/document_intake.html" class="action-btn">
+                            <span class="icon">📤</span>
+                            <span class="label">Upload Documents</span>
+                            <span class="sublabel">Add evidence files</span>
+                        </a>
+                        <a href="/eviction/answer" class="action-btn">
+                            <span class="icon">📝</span>
+                            <span class="label">Answer Summons</span>
+                            <span class="sublabel">Respond to complaint</span>
+                        </a>
+                        <a href="/eviction/counterclaim" class="action-btn">
+                            <span class="icon">⚔️</span>
+                            <span class="label">File Counterclaim</span>
+                            <span class="sublabel">Counter-sue landlord</span>
+                        </a>
+                        <a href="/eviction/motions" class="action-btn">
+                            <span class="icon">📋</span>
+                            <span class="label">File Motion</span>
+                            <span class="sublabel">Dismiss, stay, continue</span>
+                        </a>
+                        <a href="/eviction/zoom" class="action-btn">
+                            <span class="icon">💻</span>
+                            <span class="label">Zoom Court Prep</span>
+                            <span class="sublabel">Virtual hearing setup</span>
+                        </a>
+                        <a href="/eviction/forms/library" class="action-btn">
+                            <span class="icon">📁</span>
+                            <span class="label">Court Forms</span>
+                            <span class="sublabel">Official MN forms</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Two Column Layout -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- Recent Documents -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📄 Recent Documents</h2>
+                        <a href="/static/documents.html" class="btn btn-outline">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="doc-grid" id="recentDocs">
+                            <div class="doc-item">
+                                <span class="icon">📄</span>
+                                <div class="info">
+                                    <div class="name">Loading...</div>
+                                    <div class="meta">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Timeline Preview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📅 Timeline</h2>
+                        <a href="/static/timeline.html" class="btn btn-outline">View Full</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="timelinePreview">
+                            <div class="timeline-item">
+                                <div class="timeline-dot document"></div>
+                                <div class="timeline-content">
+                                    <div class="title">Loading...</div>
+                                    <div class="date">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Document Upload Zone -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📤 Quick Upload</h2>
+                    <span class="text-muted">Drag & drop or click to upload</span>
+                </div>
+                <div class="card-body">
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                        <div class="icon">📁</div>
+                        <div>Drop files here or click to browse</div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">
+                            Supports: PDF, Images, Word, Text files
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" multiple hidden accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt">
+                    
+                    <div class="processing-list" id="processingList" style="margin-top: 1rem; display: none;">
+                        <!-- Processing items will appear here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- AI Assistant Panel -->
+        <aside class="ai-panel">
+            <div class="ai-header">
+                <h3>🤖 AI Assistant</h3>
+                <div class="ai-tabs">
+                    <button class="ai-tab active" data-ai="copilot">Copilot</button>
+                    <button class="ai-tab" data-ai="claude">Claude</button>
+                </div>
+            </div>
+            
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message assistant">
+                    <div class="sender">🤖 Legal Assistant</div>
+                    <div>Welcome to Semptify! I'm here to help with your eviction defense case. 
+                    
+I can help you:
+• Analyze your documents
+• Explain legal procedures
+• Draft responses and motions
+• Prepare for your hearing
+
+What would you like help with?</div>
+                </div>
+            </div>
+            
+            <div class="ai-input-area">
+                <div style="margin-bottom: 0.75rem;">
+                    <div class="sticky-notes">
+                        <div class="sticky-note yellow" contenteditable="true">Remember: Hearing 12/15 @ 9AM</div>
+                        <div class="sticky-note pink" contenteditable="true">Call HOME Line: 612-728-5767</div>
+                        <div class="sticky-note blue" contenteditable="true">Bring: ID, all documents</div>
+                        <div class="sticky-note green" contenteditable="true">Test Zoom before hearing</div>
+                    </div>
+                </div>
+                <div class="ai-input-wrapper">
+                    <input type="text" class="ai-input" id="aiInput" placeholder="Ask about your case..." onkeypress="if(event.key==='Enter')sendAiMessage()">
+                    <button class="ai-send" onclick="sendAiMessage()">Send</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal-overlay" id="notesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📝 Sticky Notes</h2>
+                <button class="close-btn" onclick="closeModal('notesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="sticky-notes" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="sticky-note yellow" contenteditable="true" style="min-height: 100px;">Court hearing notes...</div>
+                    <div class="sticky-note pink" contenteditable="true" style="min-height: 100px;">Evidence to gather...</div>
+                    <div class="sticky-note blue" contenteditable="true" style="min-height: 100px;">Questions for lawyer...</div>
+                    <div class="sticky-note green" contenteditable="true" style="min-height: 100px;">Important dates...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="zoomModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>📹 Zoom Court Setup Checklist</h2>
+                <button class="close-btn" onclick="closeModal('zoomModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="zoomChecklist">
+                Loading...
+            </div>
+            <div class="modal-footer">
+                <a href="/eviction/zoom" class="btn btn-primary">Full Zoom Guide</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base
+        const API = '';
+        
+        // State
+        let currentAI = 'copilot';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSession();
+            await loadStats();
+            await loadTimeline();
+            await loadDocuments();
+            setupUpload();
+            setupDeadlineAlert();
+            connectWebSocket();
+        });
+
+        // WebSocket connection for real-time updates
+        let ws = null;
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/events`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('🔌 WebSocket connected');
+                showToast('Connected to live updates', 'success');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleEvent(data);
+            };
+            
+            ws.onclose = () => {
+                console.log('🔌 WebSocket disconnected, reconnecting...');
+                setTimeout(connectWebSocket, 3000);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+        
+        // Handle incoming events
+        function handleEvent(event) {
+            console.log('📢 Event:', event.type, event.data);
+            
+            switch(event.type) {
+                case 'document_added':
+                    showToast(`Document added: ${event.data.filename || 'New document'}`, 'success');
+                    loadDocuments();
+                    loadStats();
+                    break;
+                case 'document_processed':
+                    showToast('Document processed', 'info');
+                    loadTimeline();
+                    break;
+                case 'timeline_updated':
+                    loadTimeline();
+                    loadStats();
+                    break;
+                case 'deadline_approaching':
+                    showToast(`⚠️ Deadline: ${event.data.deadline} in ${event.data.days_remaining} days`, 'warning');
+                    break;
+                case 'violation_found':
+                    showToast(`🎯 Violation found: ${event.data.violation}`, 'success');
+                    break;
+                case 'notification':
+                    showToast(event.data.message, event.data.level || 'info');
+                    break;
+                case 'connected':
+                    console.log('WebSocket:', event.message);
+                    break;
+            }
+        }
+        
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = message;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        // Load session info
+        async function loadSession() {
+            try {
+                const res = await fetch('/storage/session');
+                const data = await res.json();
+                document.getElementById('userName').textContent = 
+                    data.authenticated ? `${data.provider_name} Connected` : 'Not Connected';
+            } catch (e) {
+                console.error('Session error:', e);
+            }
+        }
+        
+        // Load statistics
+        async function loadStats() {
+            try {
+                // Timeline events
+                const timelineRes = await fetch('/api/timeline/');
+                const timeline = await timelineRes.json();
+                document.getElementById('eventCount').textContent = timeline.total || 0;
+                document.getElementById('timelineCount').textContent = timeline.total || 0;
+                
+                // Documents
+                const docsRes = await fetch('/api/documents/');
+                const docs = await docsRes.json();
+                const docCount = docs.documents?.length || 0;
+                document.getElementById('docCount').textContent = docCount;
+                document.getElementById('docStatus').textContent = `${docCount} processed`;
+                
+                // Defenses
+                const defensesRes = await fetch('/dakota/procedures/defenses');
+                const defenses = await defensesRes.json();
+                let defenseCount = 0;
+                Object.values(defenses).forEach(cat => {
+                    if (cat.defenses) defenseCount += cat.defenses.length;
+                });
+                document.getElementById('defenseCount').textContent = defenseCount;
+                
+            } catch (e) {
+                console.error('Stats error:', e);
+            }
+        }
+        
+        // Load timeline preview
+        async function loadTimeline() {
+            try {
+                const res = await fetch('/api/timeline/?limit=5');
+                const data = await res.json();
+                
+                const container = document.getElementById('timelinePreview');
+                if (data.events && data.events.length > 0) {
+                    container.innerHTML = data.events.map(event => `
+                        <div class="timeline-item">
+                            <div class="timeline-dot ${event.event_type}"></div>
+                            <div class="timeline-content">
+                                <div class="title">${event.title}</div>
+                                <div class="date">${new Date(event.event_date).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="color: var(--text-muted);">No timeline events yet. Upload documents to generate timeline.</div>';
+                }
+            } catch (e) {
+                console.error('Timeline error:', e);
+            }
+        }
+        
+        // Load recent documents
+        async function loadDocuments() {
+            try {
+                const res = await fetch('/api/documents/?limit=4');
+                const data = await res.json();
+                
+                const container = document.getElementById('recentDocs');
+                if (data.documents && data.documents.length > 0) {
+                    container.innerHTML = data.documents.map(doc => `
+                        <div class="doc-item" onclick="window.location='/api/documents/${doc.id}'">
+                            <span class="icon">${getDocIcon(doc.document_type)}</span>
+                            <div class="info">
+                                <div class="name">${doc.original_filename || doc.filename}</div>
+                                <div class="meta">${doc.document_type || 'Unknown'}</div>
+                            </div>
+                            <span class="status processed">✓</span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="color: var(--text-muted);">No documents yet. Upload your first document above.</div>';
+                }
+            } catch (e) {
+                console.error('Documents error:', e);
+            }
+        }
+        
+        function getDocIcon(type) {
+            const icons = {
+                'notice': '📋',
+                'lease': '📜',
+                'legal': '⚖️',
+                'correspondence': '✉️',
+                'photo': '📷',
+                'receipt': '🧾',
+                'payment': '💵'
+            };
+            return icons[type] || '📄';
+        }
+        
+        // Setup deadline alert
+        function setupDeadlineAlert() {
+            // Hardcoded for now - would come from calendar/case data
+            const hearingDate = new Date('2025-12-15T09:00:00');
+            const now = new Date();
+            const daysUntil = Math.ceil((hearingDate - now) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntil > 0 && daysUntil <= 30) {
+                document.getElementById('deadlineAlert').style.display = 'flex';
+                document.getElementById('deadlineTitle').textContent = `⚠️ Hearing in ${daysUntil} Days!`;
+                document.getElementById('deadlineCountdown').textContent = hearingDate.toLocaleString();
+                document.getElementById('daysToHearing').textContent = daysUntil;
+                document.getElementById('hearingDate').textContent = hearingDate.toLocaleDateString();
+            }
+        }
+        
+        // File Upload
+        function setupUpload() {
+            const zone = document.getElementById('uploadZone');
+            const input = document.getElementById('fileInput');
+            
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+            
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+            
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            input.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+        
+        async function handleFiles(files) {
+            const list = document.getElementById('processingList');
+            list.style.display = 'block';
+            
+            for (const file of files) {
+                const item = document.createElement('div');
+                item.className = 'processing-item';
+                item.innerHTML = `
+                    <span class="status-icon">⏳</span>
+                    <span class="filename">${file.name}</span>
+                    <div class="progress"><div class="progress-bar" style="width: 0%"></div></div>
+                `;
+                list.appendChild(item);
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const res = await fetch('/api/documents/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (res.ok) {
+                        item.querySelector('.status-icon').textContent = '✅';
+                        item.querySelector('.progress-bar').style.width = '100%';
+                        item.querySelector('.progress-bar').style.background = 'var(--success)';
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                } catch (e) {
+                    item.querySelector('.status-icon').textContent = '❌';
+                    item.querySelector('.progress-bar').style.background = 'var(--danger)';
+                }
+            }
+            
+            // Refresh data
+            setTimeout(() => {
+                loadStats();
+                loadTimeline();
+                loadDocuments();
+            }, 1000);
+        }
+
+        // Defense Analysis
+        async function analyzeDefenses() {
+            const spinner = document.getElementById('analyzeSpinner');
+            const text = document.getElementById('analyzeText');
+            const violationsList = document.getElementById('violationsList');
+            const strategiesList = document.getElementById('strategiesList');
+            const readinessMeter = document.getElementById('readinessMeter');
+            const readinessLabel = document.getElementById('readinessLabel');
+            const nextSteps = document.getElementById('nextSteps');
+            const recommendedForms = document.getElementById('recommendedForms');
+            const formsList = document.getElementById('formsList');
+
+            // Show loading state
+            spinner.style.display = 'inline';
+            text.textContent = 'Analyzing...';
+            violationsList.innerHTML = '<div class="empty-state">Scanning for violations...</div>';
+            strategiesList.innerHTML = '<div class="empty-state">Matching defense strategies...</div>';
+
+            try {
+                const res = await fetch('/api/eviction-defense/analyze', { method: 'POST' });
+                const data = await res.json();
+
+                // Render violations
+                if (data.violations && data.violations.length > 0) {
+                    violationsList.innerHTML = data.violations.map(v => `
+                        <div class="violation-item ${v.severity || 'medium'}">
+                            <div class="violation-title">${v.title}</div>
+                            <div class="violation-desc">${v.description}</div>
+                            <div class="violation-law">📖 ${v.law_ref}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    violationsList.innerHTML = '<div class="empty-state">✅ No violations detected</div>';
+                }
+
+                // Render strategies
+                if (data.strategies && data.strategies.length > 0) {
+                    strategiesList.innerHTML = data.strategies.map(s => `
+                        <div class="strategy-item ${s.strength || 'moderate'}">
+                            <div class="strategy-title">${s.title}</div>
+                            <div class="strategy-desc">${s.description}</div>
+                            <span class="strategy-strength">${s.strength?.toUpperCase() || 'MODERATE'}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    strategiesList.innerHTML = '<div class="empty-state">No strategies matched yet</div>';
+                }
+
+                // Calculate court readiness
+                let readiness = 0;
+                let readinessClass = 'critical';
+                let readinessText = 'Not Ready';
+
+                // Base on various factors
+                const docCount = parseInt(document.getElementById('docCount')?.textContent || '0');
+                const hasViolations = data.violations?.length > 0;
+                const hasStrategies = data.strategies?.length > 0;
+                const hasCaseNumber = data.case_number && data.case_number !== 'Not entered';
+
+                if (hasCaseNumber) readiness += 20;
+                if (docCount > 0) readiness += 20;
+                if (docCount >= 3) readiness += 10;
+                if (hasViolations) readiness += 20;  // Found violations = good for defense
+                if (hasStrategies) readiness += 20;
+                if (data.recommended_forms?.length > 0) readiness += 10;
+
+                if (readiness >= 70) {
+                    readinessClass = 'ready';
+                    readinessText = 'Court Ready!';
+                } else if (readiness >= 40) {
+                    readinessClass = 'warning';
+                    readinessText = 'Partially Ready';
+                } else {
+                    readinessClass = 'critical';
+                    readinessText = 'Not Ready';
+                }
+
+                readinessMeter.style.width = readiness + '%';
+                readinessLabel.textContent = readinessText + ' (' + readiness + '%)';
+                readinessLabel.className = 'readiness-label ' + readinessClass;
+
+                // Next steps
+                if (data.next_steps && data.next_steps.length > 0) {
+                    nextSteps.innerHTML = data.next_steps.slice(0, 4).map(step => `
+                        <div class="next-step">${step}</div>
+                    `).join('');
+                }
+
+                // Recommended forms
+                if (data.recommended_forms && data.recommended_forms.length > 0) {
+                    recommendedForms.style.display = 'block';
+                    formsList.innerHTML = data.recommended_forms.map(form => `
+                        <span class="form-badge" onclick="window.location.href='/eviction/forms/library'">${form}</span>
+                    `).join('');
+                } else {
+                    recommendedForms.style.display = 'none';
+                }
+
+                showToast('Defense analysis complete!', 'success');
+            } catch (e) {
+                console.error('Analysis failed:', e);
+                violationsList.innerHTML = '<div class="empty-state">❌ Analysis failed</div>';
+                strategiesList.innerHTML = '<div class="empty-state">❌ Could not load strategies</div>';
+                showToast('Analysis failed: ' + e.message, 'error');
+            } finally {
+                spinner.style.display = 'none';
+                text.textContent = 'Analyze Case';
+            }
+        }
+
+        // AI Chat
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const container = document.getElementById('aiMessages');
+            
+            // Add user message
+            container.innerHTML += `
+                <div class="ai-message user">
+                    <div>${message}</div>
+                </div>
+            `;
+            
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+            
+            // Get AI response
+            try {
+                const res = await fetch('/api/copilot/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, context: 'eviction_defense' })
+                });
+                
+                const data = await res.json();
+                
+                container.innerHTML += `
+                    <div class="ai-message assistant">
+                        <div class="sender">🤖 ${currentAI === 'copilot' ? 'Copilot' : 'Claude'}</div>
+                        <div>${data.response || data.message || 'I understand. Let me help you with that.'}</div>
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML += `
+                    <div class="ai-message assistant">
+                        <div class="sender">🤖 Assistant</div>
+                        <div>I'm processing your request. For immediate help with eviction defense, visit the <a href="/eviction/">Defense Portal</a> or call HOME Line at 612-728-5767.</div>
+                    </div>
+                `;
+            }
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // AI Tab switching
+        document.querySelectorAll('.ai-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.ai-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentAI = tab.dataset.ai;
+            });
+        });
+        
+        // Modal functions
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        function openNotes() { openModal('notesModal'); }
+        
+        async function openZoomSetup() {
+            openModal('zoomModal');
+            try {
+                const res = await fetch('/api/zoom-court/tech-checklist');
+                const data = await res.json();
+                
+                let html = '<div style="display: grid; gap: 1rem;">';
+                
+                if (data.before_hearing) {
+                    html += '<h3>Before Hearing</h3>';
+                    html += data.before_hearing.map(item => `
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox"> ${item}
+                        </label>
+                    `).join('');
+                }
+                
+                if (data.day_of_hearing) {
+                    html += '<h3 style="margin-top: 1rem;">Day of Hearing</h3>';
+                    html += data.day_of_hearing.map(item => `
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox"> ${item}
+                        </label>
+                    `).join('');
+                }
+                
+                html += '</div>';
+                document.getElementById('zoomChecklist').innerHTML = html;
+            } catch (e) {
+                document.getElementById('zoomChecklist').innerHTML = '<p>Could not load checklist. <a href="/eviction/zoom">Go to Zoom Guide</a></p>';
+            }
+        }
+        
+        function openEmergency() {
+            alert('EMERGENCY CONTACTS:\n\n' +
+                '📞 HOME Line (Free Tenant Hotline): 612-728-5767\n' +
+                '📞 Southern MN Regional Legal Services: 1-888-575-2954\n' +
+                '📞 Dakota County Court: 651-438-4300\n\n' +
+                'If you\'re being illegally locked out, call 911.');
+        }
+        
+        function openCalendar() {
+            window.location = '/static/calendar.html';
+        }
+        
+        function openChecklist() {
+            window.location = '/eviction/hearing';
+        }
+        
+        function connectStorage() {
+            window.location = '/storage/providers';
+        }
+        
+        function saveNotes() {
+            const notes = [];
+            document.querySelectorAll('.sticky-note').forEach(note => {
+                notes.push(note.textContent);
+            });
+            localStorage.setItem('semptify_notes', JSON.stringify(notes));
+            alert('Notes saved!');
+            closeModal('notesModal');
+        }
+        
+        // Load saved notes
+        const savedNotes = localStorage.getItem('semptify_notes');
+        if (savedNotes) {
+            const notes = JSON.parse(savedNotes);
+            document.querySelectorAll('.sticky-note').forEach((note, i) => {
+                if (notes[i]) note.textContent = notes[i];
+            });
+        }
+    </script>
+</body>
+</html>

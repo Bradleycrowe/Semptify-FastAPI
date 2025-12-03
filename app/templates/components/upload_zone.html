@@ -1,0 +1,94 @@
+{# Upload Zone Component #}
+{# Usage: {% include "components/upload_zone.html" with context %} #}
+
+{% set zone_id = zone_id or 'upload-zone' %}
+{% set input_id = input_id or 'file-input' %}
+{% set accept = accept or '.pdf,.doc,.docx,.jpg,.jpeg,.png,.txt' %}
+{% set multiple = multiple if multiple is defined else true %}
+
+<div class="upload-zone" id="{{ zone_id }}">
+    <div class="upload-zone__icon">📤</div>
+    <p class="upload-zone__title">
+        {{ title or 'Drag & drop files here or click to browse' }}
+    </p>
+    <p class="upload-zone__subtitle">
+        {{ subtitle or 'Supported: PDF, DOC, DOCX, images, text files' }}
+    </p>
+    <input 
+        type="file" 
+        id="{{ input_id }}" 
+        name="file"
+        accept="{{ accept }}"
+        {% if multiple %}multiple{% endif %}
+        style="display: none;"
+    >
+</div>
+
+<style>
+.upload-zone {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.upload-zone:hover,
+.upload-zone--active {
+    border-color: var(--color-accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.upload-zone__icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+}
+
+.upload-zone__title {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.upload-zone__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.upload-zone--uploading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+</style>
+
+<script>
+(function() {
+    const zone = document.getElementById('{{ zone_id }}');
+    const input = document.getElementById('{{ input_id }}');
+    
+    if (!zone || !input) return;
+    
+    // Click to browse
+    zone.addEventListener('click', () => input.click());
+    
+    // Drag and drop
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('upload-zone--active');
+    });
+    
+    zone.addEventListener('dragleave', () => {
+        zone.classList.remove('upload-zone--active');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('upload-zone--active');
+        
+        if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            input.dispatchEvent(new Event('change'));
+        }
+    });
+})();
+</script>

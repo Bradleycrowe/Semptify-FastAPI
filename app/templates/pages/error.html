@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title or 'Error' }} - Semptify{% endblock %}
+
+{% block content %}
+<div class="container container--narrow">
+    <div class="card text-center" style="margin-top: 4rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">
+            {% if status_code == 404 %}
+            🔍
+            {% elif status_code == 403 %}
+            🔒
+            {% elif status_code == 401 %}
+            🔑
+            {% elif status_code == 429 %}
+            ⏳
+            {% else %}
+            ⚠️
+            {% endif %}
+        </div>
+        
+        <h1 class="mb-md">{{ title or 'Something went wrong' }}</h1>
+        
+        <p class="text-secondary mb-lg">
+            {{ message or 'An unexpected error occurred. Please try again.' }}
+        </p>
+        
+        {% if details %}
+        <details style="text-align: left; margin-bottom: 1.5rem;">
+            <summary class="text-muted" style="cursor: pointer;">Technical Details</summary>
+            <pre style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem; overflow-x: auto;">{{ details }}</pre>
+        </details>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/" class="btn btn--primary">Go Home</a>
+            <button onclick="history.back()" class="btn btn--secondary">Go Back</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

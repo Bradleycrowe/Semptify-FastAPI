@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Document Intake</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        /* Auth Banner */
+        .auth-banner {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .auth-banner.not-authenticated {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        }
+        
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .auth-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .auth-details h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .auth-details p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        
+        .auth-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .role-badge {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .provider-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .btn-auth {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .btn-auth:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .storage-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        .storage-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .storage-indicator .dot.disconnected {
+            background: #ef4444;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: var(--gray-50);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .card-header .icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .card-body {
+            padding: 24px;
+        }
+        
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--gray-50);
+        }
+        
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        
+        .upload-zone .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .upload-zone h3 {
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+        
+        .upload-zone p {
+            color: var(--gray-500);
+            font-size: 14px;
+        }
+        
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+        
+        .file-types {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .file-type-badge {
+            padding: 4px 10px;
+            background: var(--gray-200);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-primary:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        /* Progress */
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-container.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #7c3aed);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        /* Status */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        .status-original { background: #d1fae5; color: #065f46; }
+        .status-copy { background: #fef3c7; color: #92400e; }
+        .status-flagged { background: #fee2e2; color: #991b1b; }
+        
+        /* Results Section */
+        .results-section {
+            margin-top: 20px;
+        }
+        
+        .result-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .result-card h4 {
+            font-size: 15px;
+            color: var(--gray-700);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .result-item .label {
+            font-size: 12px;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .result-item .value {
+            font-size: 14px;
+            color: var(--gray-800);
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .result-item .value.mono {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+        }
+        
+        /* Extracted Data */
+        .extracted-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .extracted-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .extracted-item .main {
+            flex: 1;
+        }
+        
+        .extracted-item .title {
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+        
+        .extracted-item .subtitle {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        .confidence-bar {
+            width: 60px;
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 3px;
+        }
+        
+        /* Issues */
+        .issue-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+        
+        .issue-high {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+        
+        .issue-medium {
+            background: #fffbeb;
+            border-color: #f59e0b;
+        }
+        
+        .issue-low {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+        
+        .issue-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .issue-desc {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        /* Chain of Custody */
+        .custody-timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .custody-timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-300);
+        }
+        
+        .custody-event {
+            position: relative;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .custody-event::before {
+            content: '';
+            position: absolute;
+            left: -22px;
+            top: 16px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--gray-300);
+        }
+        
+        .custody-event .time {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        .custody-event .action {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .custody-event .actor {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        /* Forgery Alerts */
+        .forgery-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: #fef2f2;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #fecaca;
+        }
+        
+        .forgery-alert .icon {
+            font-size: 20px;
+        }
+        
+        .forgery-alert .content {
+            flex: 1;
+        }
+        
+        .forgery-alert .indicator {
+            font-weight: 600;
+            color: #991b1b;
+        }
+        
+        .forgery-alert .description {
+            font-size: 14px;
+            color: #7f1d1d;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-500);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--gray-700);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Document Queue */
+        .document-queue {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .queue-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .queue-item.selected {
+            background: #eff6ff;
+            border: 1px solid var(--primary);
+        }
+        
+        .queue-item .file-icon {
+            font-size: 24px;
+        }
+        
+        .queue-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .queue-item .filename {
+            font-weight: 500;
+            color: var(--gray-800);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .queue-item .meta {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+        }
+        
+        .toast-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .toast-error {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .toast-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-500);
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        /* Hash Display */
+        .hash-display {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 11px;
+            background: var(--gray-100);
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+            margin-top: 4px;
+        }
+        
+        /* Integrity Indicator */
+        .integrity-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .integrity-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .integrity-tampered {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .integrity-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Score Display */
+        .score-meter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .score-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .score-fill.low { background: var(--success); }
+        .score-fill.medium { background: var(--warning); }
+        .score-fill.high { background: var(--danger); }
+        
+        .score-value {
+            font-weight: 600;
+            min-width: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Auth Banner -->
+        <div class="auth-banner" id="authBanner">
+            <div class="auth-info">
+                <div class="auth-avatar" id="authAvatar">👤</div>
+                <div class="auth-details">
+                    <h3 id="authUserName">Loading...</h3>
+                    <p id="authUserInfo">Checking authentication...</p>
+                </div>
+            </div>
+            <div class="auth-actions">
+                <div class="storage-indicator" id="storageIndicator">
+                    <span class="dot" id="storageDot"></span>
+                    <span id="storageStatus">Checking storage...</span>
+                </div>
+                <span class="role-badge" id="roleBadge">-</span>
+                <button class="btn-auth" id="authButton" onclick="handleAuthAction()">Sign In</button>
+            </div>
+        </div>
+        
+        <header class="header">
+            <h1>📄 Document Intake System</h1>
+            <p>Upload, process, and securely register legal documents with tamper-proof verification</p>
+        </header>
+        
+        <div class="main-grid">
+            <!-- Left Column - Upload & Queue -->
+            <div>
+                <!-- Upload Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">📤</div>
+                        <h2>Upload Documents</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- User info is now from session -->
+                        <input type="hidden" id="userId" value="">
+                        
+                        <div class="form-group">
+                            <label for="caseNumber">Case Number (Optional)</label>
+                            <input type="text" id="caseNumber" placeholder="e.g., CASE-2024-001">
+                        </div>
+                        
+                        <div class="upload-zone" id="uploadZone">
+                            <div class="icon">📁</div>
+                            <h3>Drop files here or click to upload</h3>
+                            <p>Supports PDF, DOCX, JPEG, PNG, TIFF up to 25MB</p>
+                            <div class="file-types">
+                                <span class="file-type-badge">PDF</span>
+                                <span class="file-type-badge">DOCX</span>
+                                <span class="file-type-badge">JPEG</span>
+                                <span class="file-type-badge">PNG</span>
+                                <span class="file-type-badge">TIFF</span>
+                            </div>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,.tiff,.tif">
+                        </div>
+                        
+                        <div class="progress-container" id="uploadProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="progressStatus">Uploading...</span>
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Document Queue -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <div class="icon">📋</div>
+                        <h2>Document Queue</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="document-queue" id="documentQueue">
+                            <div class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>No documents uploaded yet</p>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="btn btn-primary" id="processAllBtn" disabled>
+                                ⚙️ Process All
+                            </button>
+                            <button class="btn btn-success" id="registerAllBtn" disabled>
+                                ✓ Register All
+                            </button>
+                            <button class="btn btn-outline" id="clearQueueBtn" disabled>
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Results -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">📊</div>
+                        <h2>Analysis Results</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="tabs">
+                            <button class="tab active" data-tab="overview">Overview</button>
+                            <button class="tab" data-tab="extraction">Extracted Data</button>
+                            <button class="tab" data-tab="issues">Issues</button>
+                            <button class="tab" data-tab="registry">Registry</button>
+                            <button class="tab" data-tab="custody">Chain of Custody</button>
+                        </div>
+                        
+                        <!-- Overview Tab -->
+                        <div class="tab-content active" id="tab-overview">
+                            <div id="overviewContent">
+                                <div class="empty-state">
+                                    <div class="icon">📄</div>
+                                    <p>Select a document to view details</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Extraction Tab -->
+                        <div class="tab-content" id="tab-extraction">
+                            <div id="extractionContent">
+                                <div class="empty-state">
+                                    <div class="icon">🔍</div>
+                                    <p>Process a document to see extracted data</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Issues Tab -->
+                        <div class="tab-content" id="tab-issues">
+                            <div id="issuesContent">
+                                <div class="empty-state">
+                                    <div class="icon">⚠️</div>
+                                    <p>No issues detected yet</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Registry Tab -->
+                        <div class="tab-content" id="tab-registry">
+                            <div id="registryContent">
+                                <div class="empty-state">
+                                    <div class="icon">🔐</div>
+                                    <p>Register a document to view security details</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Custody Tab -->
+                        <div class="tab-content" id="tab-custody">
+                            <div id="custodyContent">
+                                <div class="empty-state">
+                                    <div class="icon">🔗</div>
+                                    <p>Chain of custody will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script>
+        // =====================================================================
+        // Configuration
+        // =====================================================================
+        const API_BASE = window.location.origin;
+        
+        // =====================================================================
+        // State
+        // =====================================================================
+        let documents = [];
+        let selectedDocId = null;
+        let currentUser = null;
+        let accessToken = null;
+        let isAuthenticated = false;
+        
+        // =====================================================================
+        // DOM Elements
+        // =====================================================================
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const documentQueue = document.getElementById('documentQueue');
+        const progressContainer = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressPercent = document.getElementById('progressPercent');
+        const processAllBtn = document.getElementById('processAllBtn');
+        const registerAllBtn = document.getElementById('registerAllBtn');
+        const clearQueueBtn = document.getElementById('clearQueueBtn');
+        const toastContainer = document.getElementById('toastContainer');
+        
+        // Auth Elements
+        const authBanner = document.getElementById('authBanner');
+        const authAvatar = document.getElementById('authAvatar');
+        const authUserName = document.getElementById('authUserName');
+        const authUserInfo = document.getElementById('authUserInfo');
+        const authButton = document.getElementById('authButton');
+        const roleBadge = document.getElementById('roleBadge');
+        const storageDot = document.getElementById('storageDot');
+        const storageStatus = document.getElementById('storageStatus');
+        
+        // =====================================================================
+        // Authentication & Session Management
+        // =====================================================================
+        
+        // User ID Format: <provider><role><8-char-random>
+        // Provider: G=Google Drive, D=Dropbox, O=OneDrive
+        // Role: U=User, M=Manager, V=Advocate, L=Legal, A=Admin
+        // Example: GU7x9kM2pQ = Google Drive + User + 7x9kM2pQ
+        
+        const PROVIDER_CODES = {
+            'G': { id: 'google_drive', name: 'Google Drive', icon: '🔵' },
+            'D': { id: 'dropbox', name: 'Dropbox', icon: '💧' },
+            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' }
+        };
+        
+        const ROLE_CODES = {
+            'U': { id: 'user', name: 'User' },
+            'M': { id: 'manager', name: 'Manager' },
+            'V': { id: 'advocate', name: 'Advocate' },
+            'L': { id: 'legal', name: 'Legal' },
+            'A': { id: 'admin', name: 'Admin' }
+        };
+        
+        function parseUserId(userId) {
+            if (!userId || userId.length < 3) return null;
+            
+            const providerChar = userId[0].toUpperCase();
+            const roleChar = userId[1].toUpperCase();
+            const uniquePart = userId.substring(2);
+            
+            const provider = PROVIDER_CODES[providerChar];
+            const role = ROLE_CODES[roleChar];
+            
+            if (!provider || !role) return null;
+            
+            return {
+                userId: userId,
+                provider: provider.id,
+                providerName: provider.name,
+                providerIcon: provider.icon,
+                role: role.id,
+                roleName: role.name,
+                uniquePart: uniquePart
+            };
+        }
+        
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        async function checkAuthStatus() {
+            try {
+                // First check cookie directly for user ID
+                const semptifyUid = getCookie('semptify_uid');
+
+                if (!semptifyUid) {
+                    // No cookie - redirect to welcome page to sign up/sign in
+                    console.log('No session found, redirecting to welcome...');
+                    window.location.href = '/static/welcome.html';
+                    return;
+                }
+
+                // Parse user ID to get provider and role
+                const parsed = parseUserId(semptifyUid);
+
+                if (!parsed) {
+                    // Invalid user ID format - clear cookie and redirect
+                    document.cookie = 'semptify_uid=; path=/; max-age=0';
+                    window.location.href = '/static/welcome.html';
+                    return;
+                }
+
+                // Valid cookie - set up user context
+                currentUser = {
+                    id: semptifyUid,
+                    provider: parsed.provider,
+                    providerName: parsed.providerName,
+                    providerIcon: parsed.providerIcon,
+                    role: parsed.role,
+                    roleName: parsed.roleName,
+                    uniquePart: parsed.uniquePart
+                };
+
+                // Update hidden user ID field
+                document.getElementById('userId').value = currentUser.id;
+
+                // Check server session status
+                const statusResponse = await fetch(`${API_BASE}/storage/status`, {
+                    credentials: 'include'
+                });
+                const statusData = await statusResponse.json();
+
+                if (statusData.authenticated && statusData.access_token) {
+                    // Full session with access token
+                    accessToken = statusData.access_token;
+                    isAuthenticated = true;
+                    updateAuthUI(true);
+                    showToast(`Welcome back! Connected as ${currentUser.roleName}`, 'success');
+                } else {
+                    // Have cookie - user is "signed in" but may need OAuth for cloud storage
+                    isAuthenticated = true;  // User is signed in with cookie
+                    accessToken = null;      // Just no cloud storage token yet
+                    updateAuthUI(true, false);
+                    showToast(`Signed in as ${currentUser.roleName} (${currentUser.providerName})`, 'success');
+                }
+
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                // On error, check if we at least have a valid cookie
+                const semptifyUid = getCookie('semptify_uid');
+                if (semptifyUid) {
+                    const parsed = parseUserId(semptifyUid);
+                    if (parsed) {
+                        currentUser = {
+                            id: semptifyUid,
+                            provider: parsed.provider,
+                            providerName: parsed.providerName,
+                            providerIcon: parsed.providerIcon,
+                            role: parsed.role,
+                            roleName: parsed.roleName,
+                            uniquePart: parsed.uniquePart
+                        };
+                        document.getElementById('userId').value = currentUser.id;
+                        isAuthenticated = true;
+                        updateAuthUI(true, false);
+                        return;
+                    }
+                }
+                // No valid session at all
+                window.location.href = '/static/welcome.html';
+            }
+        }        function updateAuthUI(authenticated, needsReauth = false) {
+            if (authenticated && currentUser) {
+                authBanner.classList.remove('not-authenticated');
+                authAvatar.textContent = currentUser.providerIcon || getProviderIcon(currentUser.provider);
+                authUserName.textContent = `${currentUser.roleName} • ${currentUser.id}`;
+                authUserInfo.textContent = `Storage: ${currentUser.providerName}`;
+                authButton.textContent = 'Sign Out';
+                authButton.onclick = handleLogout;
+                roleBadge.textContent = currentUser.roleName;
+                storageDot.classList.remove('disconnected');
+                storageStatus.textContent = `${currentUser.providerName} connected`;
+                
+                // Enable upload
+                uploadZone.style.opacity = '1';
+                uploadZone.style.pointerEvents = 'auto';
+                
+            } else if (needsReauth && currentUser) {
+                // Have user ID but need to re-authenticate
+                authBanner.classList.add('not-authenticated');
+                authAvatar.textContent = currentUser.providerIcon || '🔒';
+                authUserName.textContent = `${currentUser.roleName} • Session Expired`;
+                authUserInfo.textContent = `Re-authenticate with ${currentUser.providerName}`;
+                authButton.textContent = 'Sign In';
+                authButton.onclick = () => {
+                    // Redirect to specific provider auth
+                    window.location.href = `${API_BASE}/storage/auth/${currentUser.provider}?existing_uid=${currentUser.id}`;
+                };
+                roleBadge.textContent = currentUser.roleName;
+                storageDot.classList.add('disconnected');
+                storageStatus.textContent = 'Reconnect needed';
+                
+                // Disable upload
+                uploadZone.style.opacity = '0.5';
+                uploadZone.style.pointerEvents = 'none';
+                
+            } else {
+                authBanner.classList.add('not-authenticated');
+                authAvatar.textContent = '🔒';
+                authUserName.textContent = 'Not Signed In';
+                authUserInfo.textContent = 'Connect your cloud storage to upload documents';
+                authButton.textContent = 'Sign In';
+                authButton.onclick = handleAuthAction;
+                roleBadge.textContent = '-';
+                storageDot.classList.add('disconnected');
+                storageStatus.textContent = 'Not connected';
+                
+                // Disable upload
+                uploadZone.style.opacity = '0.5';
+                uploadZone.style.pointerEvents = 'none';
+            }
+        }
+        
+        function getProviderIcon(provider) {
+            const icons = {
+                'google_drive': '🔵',
+                'dropbox': '💧',
+                'onedrive': '☁️'
+            };
+            return icons[provider] || '📁';
+        }
+        
+        function handleAuthAction() {
+            // Redirect to storage providers page
+            window.location.href = `${API_BASE}/storage/providers`;
+        }
+        
+        async function handleLogout() {
+            try {
+                await fetch(`${API_BASE}/storage/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                // Clear cookie
+                document.cookie = 'semptify_uid=; path=/; max-age=0';
+
+                currentUser = null;
+                accessToken = null;
+                isAuthenticated = false;
+                documents = [];
+                selectedDocId = null;
+
+                showToast('Signed out successfully', 'success');
+                
+                // Redirect to welcome page after short delay
+                setTimeout(() => {
+                    window.location.href = '/static/welcome.html';
+                }, 1000);
+
+            } catch (error) {
+                showToast('Logout failed', 'error');
+            }
+        }
+        
+        function clearAllTabs() {
+            document.getElementById('overviewContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📄</div>
+                    <p>Select a document to view details</p>
+                </div>
+            `;
+            document.getElementById('extractionContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">🔍</div>
+                    <p>Process a document to see extracted data</p>
+                </div>
+            `;
+            document.getElementById('issuesContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⚠️</div>
+                    <p>No issues detected yet</p>
+                </div>
+            `;
+            document.getElementById('registryContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">🔐</div>
+                    <p>Register a document to view security details</p>
+                </div>
+            `;
+            document.getElementById('custodyContent').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">🔗</div>
+                    <p>Chain of custody will appear here</p>
+                </div>
+            `;
+        }
+        
+        // =====================================================================
+        // Upload Handling
+        // =====================================================================
+        uploadZone.addEventListener('click', () => {
+            if (!isAuthenticated) {
+                showToast('Please sign in first to upload documents', 'warning');
+                return;
+            }
+            fileInput.click();
+        });
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (isAuthenticated) {
+                uploadZone.classList.add('dragover');
+            }
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            if (!isAuthenticated) {
+                showToast('Please sign in first to upload documents', 'warning');
+                return;
+            }
+            
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (!isAuthenticated) {
+                showToast('Please sign in first to upload documents', 'warning');
+                fileInput.value = '';
+                return;
+            }
+            handleFiles(e.target.files);
+            fileInput.value = '';
+        });
+        
+        async function handleFiles(files) {
+            if (!isAuthenticated || !currentUser) {
+                showToast('Please sign in first', 'warning');
+                return;
+            }
+            
+            const userId = currentUser.id;
+            
+            for (const file of files) {
+                if (file.size > 25 * 1024 * 1024) {
+                    showToast(`${file.name} exceeds 25MB limit`, 'error');
+                    continue;
+                }
+                await uploadFile(file, userId);
+            }
+        }
+        
+        async function uploadFile(file, userId) {
+            showProgress(true);
+            updateProgress(10, 'Uploading...');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('user_id', userId);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/intake/upload`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Upload failed');
+                }
+                
+                const data = await response.json();
+                updateProgress(100, 'Upload complete!');
+                
+                documents.push({
+                    id: data.id,
+                    filename: data.filename,
+                    status: data.status,
+                    file: file,
+                    processed: false,
+                    registered: false,
+                    extraction: null,
+                    registration: null,
+                    userId: userId
+                });
+                
+                renderQueue();
+                showToast(`${file.name} uploaded successfully`, 'success');
+                
+            } catch (error) {
+                showToast(`Upload failed: ${error.message}`, 'error');
+            } finally {
+                setTimeout(() => showProgress(false), 1000);
+            }
+        }
+        
+        // =====================================================================
+        // Document Processing
+        // =====================================================================
+        async function processDocument(doc) {
+            updateProgress(30, `Processing ${doc.filename}...`);
+            showProgress(true);
+            
+            try {
+                // Start processing
+                const processResponse = await fetch(`${API_BASE}/api/intake/process/${doc.id}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (!processResponse.ok) {
+                    throw new Error('Processing failed');
+                }
+                
+                updateProgress(60, 'Analyzing document...');
+                
+                // Poll for status
+                let status = 'PROCESSING';
+                let attempts = 0;
+                
+                while (status === 'PROCESSING' && attempts < 30) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    
+                    const statusResponse = await fetch(`${API_BASE}/api/intake/status/${doc.id}`, {
+                        credentials: 'include'
+                    });
+                    const statusData = await statusResponse.json();
+                    status = statusData.status;
+                    
+                    updateProgress(60 + (attempts * 2), statusData.status_message);
+                    attempts++;
+                }
+                
+                // Get full document data
+                const docResponse = await fetch(`${API_BASE}/api/intake/document/${doc.id}`, {
+                    credentials: 'include'
+                });
+                const docData = await docResponse.json();
+                
+                doc.processed = true;
+                doc.status = docData.status;
+                doc.extraction = docData.extraction;
+                
+                updateProgress(100, 'Processing complete!');
+                renderQueue();
+                
+                if (selectedDocId === doc.id) {
+                    showDocumentDetails(doc);
+                }
+                
+                showToast(`${doc.filename} processed`, 'success');
+                
+            } catch (error) {
+                showToast(`Processing failed: ${error.message}`, 'error');
+            } finally {
+                setTimeout(() => showProgress(false), 1000);
+            }
+        }
+        
+        // =====================================================================
+        // Document Registration
+        // =====================================================================
+        async function registerDocument(doc) {
+            updateProgress(30, `Registering ${doc.filename}...`);
+            showProgress(true);
+            
+            const caseNumber = document.getElementById('caseNumber').value.trim();
+            const userId = currentUser?.id || doc.userId;
+            
+            const formData = new FormData();
+            formData.append('file', doc.file);
+            formData.append('user_id', userId);
+            if (caseNumber) {
+                formData.append('case_number', caseNumber);
+            }
+            if (doc.id) {
+                formData.append('intake_document_id', doc.id);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/registry/register`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Registration failed');
+                }
+                
+                const data = await response.json();
+                updateProgress(100, 'Registration complete!');
+                
+                doc.registered = true;
+                doc.registration = data;
+                doc.documentId = data.document_id;
+                
+                renderQueue();
+                
+                if (selectedDocId === doc.id) {
+                    showDocumentDetails(doc);
+                }
+                
+                showToast(`${doc.filename} registered: ${data.document_id}`, 'success');
+                
+                if (data.requires_review) {
+                    showToast('⚠️ Document requires manual review', 'warning');
+                }
+                
+            } catch (error) {
+                showToast(`Registration failed: ${error.message}`, 'error');
+            } finally {
+                setTimeout(() => showProgress(false), 1000);
+            }
+        }
+        
+        // =====================================================================
+        // Save to Vault (Cloud Storage)
+        // =====================================================================
+        async function saveToVault(doc) {
+            if (!isAuthenticated || !accessToken) {
+                showToast('Please sign in to save to vault', 'warning');
+                return;
+            }
+            
+            updateProgress(30, `Saving ${doc.filename} to vault...`);
+            showProgress(true);
+            
+            const formData = new FormData();
+            formData.append('file', doc.file);
+            formData.append('access_token', accessToken);
+            
+            // Add document type if extracted
+            if (doc.extraction?.doc_type) {
+                formData.append('document_type', doc.extraction.doc_type);
+            }
+            
+            // Add description with document ID and case number
+            let description = `Registered Document: ${doc.documentId || doc.id}`;
+            const caseNumber = document.getElementById('caseNumber').value.trim();
+            if (caseNumber) {
+                description += ` | Case: ${caseNumber}`;
+            }
+            formData.append('description', description);
+            
+            // Add tags
+            const tags = [];
+            if (doc.registered) tags.push('registered');
+            if (doc.processed) tags.push('processed');
+            if (doc.registration?.status) tags.push(doc.registration.status.toLowerCase());
+            formData.append('tags', tags.join(','));
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/vault/upload`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Vault upload failed');
+                }
+                
+                const data = await response.json();
+                updateProgress(100, 'Saved to vault!');
+                
+                doc.savedToVault = true;
+                doc.vaultInfo = data;
+                
+                renderQueue();
+                showToast(`${doc.filename} saved to ${currentUser.providerName}`, 'success');
+                
+            } catch (error) {
+                showToast(`Vault save failed: ${error.message}`, 'error');
+            } finally {
+                setTimeout(() => showProgress(false), 1000);
+            }
+        }
+        
+        // =====================================================================
+        // Fetch Chain of Custody
+        // =====================================================================
+        async function fetchCustodyChain(documentId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/registry/documents/${documentId}/custody`, {
+                    credentials: 'include'
+                });
+                if (!response.ok) throw new Error('Failed to fetch custody chain');
+                return await response.json();
+            } catch (error) {
+                console.error('Custody fetch error:', error);
+                return [];
+            }
+        }
+        
+        // =====================================================================
+        // Verify Integrity
+        // =====================================================================
+        async function verifyIntegrity(documentId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/registry/documents/${documentId}/verify`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (!response.ok) throw new Error('Verification failed');
+                return await response.json();
+            } catch (error) {
+                showToast(`Verification failed: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // =====================================================================
+        // Queue Rendering
+        // =====================================================================
+        function renderQueue() {
+            if (documents.length === 0) {
+                documentQueue.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No documents uploaded yet</p>
+                    </div>
+                `;
+                processAllBtn.disabled = true;
+                registerAllBtn.disabled = true;
+                clearQueueBtn.disabled = true;
+                return;
+            }
+            
+            documentQueue.innerHTML = documents.map(doc => `
+                <div class="queue-item ${selectedDocId === doc.id ? 'selected' : ''}" onclick="selectDocument('${doc.id}')">
+                    <div class="file-icon">${getFileIcon(doc.filename)}</div>
+                    <div class="info">
+                        <div class="filename">${doc.filename}</div>
+                        <div class="meta">
+                            ${doc.documentId || doc.id.substring(0, 12)}...
+                            ${doc.savedToVault ? '• ☁️ Vault' : doc.registered ? '• 🔐 Registered' : doc.processed ? '• ✓ Processed' : ''}
+                        </div>
+                    </div>
+                    <span class="status-badge status-${doc.savedToVault ? 'original' : doc.registered ? 'original' : doc.processed ? 'completed' : 'pending'}">
+                        ${doc.savedToVault ? 'In Vault' : doc.registered ? 'Registered' : doc.processed ? 'Processed' : 'Pending'}
+                    </span>
+                </div>
+            `).join('');
+            
+            processAllBtn.disabled = !documents.some(d => !d.processed);
+            registerAllBtn.disabled = !documents.some(d => !d.registered);
+            clearQueueBtn.disabled = false;
+        }
+        
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: '📕',
+                doc: '📘',
+                docx: '📘',
+                jpg: '🖼️',
+                jpeg: '🖼️',
+                png: '🖼️',
+                tiff: '🖼️',
+                tif: '🖼️'
+            };
+            return icons[ext] || '📄';
+        }
+        
+        // =====================================================================
+        // Document Selection & Details
+        // =====================================================================
+        function selectDocument(id) {
+            selectedDocId = id;
+            renderQueue();
+            const doc = documents.find(d => d.id === id);
+            if (doc) {
+                showDocumentDetails(doc);
+            }
+        }
+        
+        function showDocumentDetails(doc) {
+            showOverview(doc);
+            showExtraction(doc);
+            showIssues(doc);
+            showRegistry(doc);
+            showCustody(doc);
+        }
+        
+        function showOverview(doc) {
+            const container = document.getElementById('overviewContent');
+            
+            container.innerHTML = `
+                <div class="result-card">
+                    <h4>📄 Document Information</h4>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Filename</div>
+                            <div class="value">${doc.filename}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Intake ID</div>
+                            <div class="value mono">${doc.id}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Status</div>
+                            <div class="value">
+                                <span class="status-badge status-${doc.registered ? 'original' : doc.processed ? 'completed' : 'pending'}">
+                                    ${doc.registered ? 'Registered' : doc.processed ? 'Processed' : 'Pending'}
+                                </span>
+                            </div>
+                        </div>
+                        ${doc.documentId ? `
+                        <div class="result-item">
+                            <div class="label">Document ID</div>
+                            <div class="value mono">${doc.documentId}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${doc.extraction ? `
+                <div class="result-card">
+                    <h4>🏷️ Classification</h4>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Document Type</div>
+                            <div class="value">${formatDocType(doc.extraction.doc_type)}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Confidence</div>
+                            <div class="value">${(doc.extraction.doc_type_confidence * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Language</div>
+                            <div class="value">${doc.extraction.language.toUpperCase()}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Pages</div>
+                            <div class="value">${doc.extraction.page_count}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>📝 Summary</h4>
+                    <p style="color: var(--gray-700); line-height: 1.6;">${doc.extraction.summary}</p>
+                    ${doc.extraction.key_points?.length ? `
+                        <ul style="margin-top: 12px; padding-left: 20px; color: var(--gray-600);">
+                            ${doc.extraction.key_points.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                </div>
+                ` : `
+                <div class="button-group" style="margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="processDocument(documents.find(d => d.id === '${doc.id}'))">
+                        ⚙️ Process Document
+                    </button>
+                </div>
+                `}
+                
+                ${doc.processed && !doc.registered ? `
+                <div class="button-group" style="margin-top: 16px;">
+                    <button class="btn btn-success" onclick="registerDocument(documents.find(d => d.id === '${doc.id}'))">
+                        🔐 Register Document
+                    </button>
+                </div>
+                ` : ''}
+                
+                ${doc.registered && !doc.savedToVault && isAuthenticated ? `
+                <div class="button-group" style="margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="saveToVault(documents.find(d => d.id === '${doc.id}'))">
+                        ☁️ Save to ${currentUser?.providerName || 'Cloud Storage'}
+                    </button>
+                </div>
+                ` : ''}
+                
+                ${doc.savedToVault ? `
+                <div class="result-card" style="margin-top: 16px; background: #d1fae5; border-color: #10b981;">
+                    <h4>☁️ Saved to Cloud Storage</h4>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Storage Provider</div>
+                            <div class="value">${currentUser?.providerName || 'Cloud'}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Vault Path</div>
+                            <div class="value mono">${doc.vaultInfo?.storage_path || '.semptify/vault/'}</div>
+                        </div>
+                        ${doc.vaultInfo?.certificate_id ? `
+                        <div class="result-item">
+                            <div class="label">Certificate ID</div>
+                            <div class="value mono">${doc.vaultInfo.certificate_id}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        function showExtraction(doc) {
+            const container = document.getElementById('extractionContent');
+            
+            if (!doc.extraction) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔍</div>
+                        <p>Process the document to see extracted data</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const { dates, parties, amounts } = doc.extraction;
+            
+            container.innerHTML = `
+                <div class="result-card">
+                    <h4>📅 Extracted Dates (${dates?.length || 0})</h4>
+                    <div class="extracted-list">
+                        ${dates?.length ? dates.map(d => `
+                            <div class="extracted-item">
+                                <div class="main">
+                                    <div class="title">${d.date}</div>
+                                    <div class="subtitle">${d.label} ${d.is_deadline ? '⏰ Deadline' : ''}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: ${d.confidence * 100}%"></div>
+                                    </div>
+                                    <div style="font-size: 12px; color: var(--gray-500);">${(d.confidence * 100).toFixed(0)}%</div>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No dates extracted</p>'}
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>👥 Extracted Parties (${parties?.length || 0})</h4>
+                    <div class="extracted-list">
+                        ${parties?.length ? parties.map(p => `
+                            <div class="extracted-item">
+                                <div class="main">
+                                    <div class="title">${p.name}</div>
+                                    <div class="subtitle">${p.role}${p.address ? ' • ' + p.address : ''}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: ${p.confidence * 100}%"></div>
+                                    </div>
+                                    <div style="font-size: 12px; color: var(--gray-500);">${(p.confidence * 100).toFixed(0)}%</div>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No parties extracted</p>'}
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>💰 Extracted Amounts (${amounts?.length || 0})</h4>
+                    <div class="extracted-list">
+                        ${amounts?.length ? amounts.map(a => `
+                            <div class="extracted-item">
+                                <div class="main">
+                                    <div class="title">${a.currency} ${a.amount.toLocaleString()}</div>
+                                    <div class="subtitle">${a.label}${a.period ? ' • ' + a.period : ''}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: ${a.confidence * 100}%"></div>
+                                    </div>
+                                    <div style="font-size: 12px; color: var(--gray-500);">${(a.confidence * 100).toFixed(0)}%</div>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No amounts extracted</p>'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showIssues(doc) {
+            const container = document.getElementById('issuesContent');
+            
+            if (!doc.extraction?.issues?.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">✅</div>
+                        <p>No issues detected</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = doc.extraction.issues.map(issue => `
+                <div class="issue-item issue-${issue.severity.toLowerCase()}">
+                    <div class="issue-title">${getSeverityIcon(issue.severity)} ${issue.title}</div>
+                    <div class="issue-desc">${issue.description}</div>
+                    ${issue.recommended_action ? `
+                        <div style="margin-top: 8px; font-size: 13px;">
+                            <strong>Recommended Action:</strong> ${issue.recommended_action}
+                        </div>
+                    ` : ''}
+                    ${issue.deadline ? `
+                        <div style="margin-top: 4px; font-size: 13px; color: #991b1b;">
+                            <strong>⏰ Deadline:</strong> ${issue.deadline}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        async function showRegistry(doc) {
+            const container = document.getElementById('registryContent');
+            
+            if (!doc.registration) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔐</div>
+                        <p>Register the document to view security details</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const reg = doc.registration;
+            
+            container.innerHTML = `
+                <div class="integrity-indicator ${reg.integrity_status === 'VERIFIED' ? 'integrity-verified' : 'integrity-pending'}">
+                    ${reg.integrity_status === 'VERIFIED' ? '✅' : '⏳'} 
+                    Integrity Status: <strong>${reg.integrity_status}</strong>
+                </div>
+                
+                <div class="result-card">
+                    <h4>🆔 Document Identity</h4>
+                    <div class="result-grid">
+                        <div class="result-item" style="grid-column: span 2;">
+                            <div class="label">Document ID</div>
+                            <div class="value mono">${reg.document_id}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Status</div>
+                            <div class="value">
+                                <span class="status-badge status-${reg.status.toLowerCase()}">${reg.status}</span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Duplicate?</div>
+                            <div class="value">${reg.is_duplicate ? '⚠️ Yes' : '✓ Original'}</div>
+                        </div>
+                        ${reg.original_document_id ? `
+                        <div class="result-item" style="grid-column: span 2;">
+                            <div class="label">Original Document ID</div>
+                            <div class="value mono">${reg.original_document_id}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>🔒 Cryptographic Hashes</h4>
+                    <div class="result-item" style="margin-bottom: 8px;">
+                        <div class="label">Content Hash (SHA-256)</div>
+                        <div class="hash-display">${reg.content_hash}</div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>🔍 Forgery Detection</h4>
+                    <div class="score-meter" style="margin-bottom: 16px;">
+                        <span>Forgery Risk Score:</span>
+                        <div class="score-bar">
+                            <div class="score-fill ${reg.forgery_score < 0.3 ? 'low' : reg.forgery_score < 0.7 ? 'medium' : 'high'}" 
+                                 style="width: ${reg.forgery_score * 100}%"></div>
+                        </div>
+                        <span class="score-value">${(reg.forgery_score * 100).toFixed(0)}%</span>
+                    </div>
+                    
+                    ${reg.forgery_alerts?.length ? `
+                        <div style="margin-top: 12px;">
+                            <strong style="color: #991b1b;">⚠️ Alerts Detected:</strong>
+                            ${reg.forgery_alerts.map(alert => `
+                                <div class="forgery-alert">
+                                    <div class="icon">🚨</div>
+                                    <div class="content">
+                                        <div class="indicator">${alert.indicator}</div>
+                                        <div class="description">${alert.description}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <p style="color: var(--success);">✓ No forgery indicators detected</p>
+                    `}
+                </div>
+                
+                ${reg.requires_review ? `
+                <div class="forgery-alert" style="margin-top: 16px;">
+                    <div class="icon">⚠️</div>
+                    <div class="content">
+                        <div class="indicator">Manual Review Required</div>
+                        <div class="description">This document has been flagged for manual review due to detected anomalies.</div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="button-group">
+                    <button class="btn btn-outline" onclick="verifyAndUpdate('${reg.document_id}')">
+                        🔍 Verify Integrity
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function showCustody(doc) {
+            const container = document.getElementById('custodyContent');
+            
+            if (!doc.registration?.document_id) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔗</div>
+                        <p>Chain of custody will appear after registration</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `<p>Loading custody chain...</p>`;
+            
+            const custody = await fetchCustodyChain(doc.registration.document_id);
+            
+            if (!custody?.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔗</div>
+                        <p>No custody events recorded yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="custody-timeline">
+                    ${custody.map(event => `
+                        <div class="custody-event">
+                            <div class="time">${formatDateTime(event.timestamp)}</div>
+                            <div class="action">${formatAction(event.action)}</div>
+                            <div class="actor">By: ${event.actor}</div>
+                            ${event.details ? `<div style="font-size: 13px; color: var(--gray-500); margin-top: 4px;">${event.details}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        async function verifyAndUpdate(documentId) {
+            const result = await verifyIntegrity(documentId);
+            if (result) {
+                showToast(`Integrity: ${result.is_valid ? '✅ Verified' : '❌ Tampered'}`, result.is_valid ? 'success' : 'error');
+                
+                // Refresh document data
+                const doc = documents.find(d => d.registration?.document_id === documentId);
+                if (doc) {
+                    doc.registration.integrity_status = result.integrity_status;
+                    showRegistry(doc);
+                    showCustody(doc);
+                }
+            }
+        }
+        
+        // =====================================================================
+        // Tab Handling
+        // =====================================================================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+        
+        // =====================================================================
+        // Batch Operations
+        // =====================================================================
+        processAllBtn.addEventListener('click', async () => {
+            for (const doc of documents.filter(d => !d.processed)) {
+                await processDocument(doc);
+            }
+        });
+        
+        registerAllBtn.addEventListener('click', async () => {
+            for (const doc of documents.filter(d => !d.registered)) {
+                await registerDocument(doc);
+            }
+        });
+        
+        clearQueueBtn.addEventListener('click', () => {
+            documents = [];
+            selectedDocId = null;
+            renderQueue();
+            clearAllTabs();
+        });
+        
+        // =====================================================================
+        // Utility Functions
+        // =====================================================================
+        function showProgress(show) {
+            progressContainer.classList.toggle('active', show);
+        }
+        
+        function updateProgress(percent, status) {
+            progressFill.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            progressStatus.textContent = status;
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = message;
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+        
+        function formatDocType(type) {
+            return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+        
+        function formatDateTime(isoString) {
+            return new Date(isoString).toLocaleString();
+        }
+        
+        function formatAction(action) {
+            const actions = {
+                'RECEIVED': '📥 Received',
+                'VERIFIED': '✅ Verified',
+                'PROCESSED': '⚙️ Processed',
+                'ACCESSED': '👁️ Accessed',
+                'MODIFIED': '✏️ Modified',
+                'EXPORTED': '📤 Exported',
+                'SHARED': '🔗 Shared',
+                'FLAGGED': '🚩 Flagged',
+                'ARCHIVED': '📦 Archived',
+                'INTEGRITY_CHECK': '🔒 Integrity Check'
+            };
+            return actions[action] || action;
+        }
+        
+        function getSeverityIcon(severity) {
+            const icons = {
+                'HIGH': '🔴',
+                'MEDIUM': '🟡',
+                'LOW': '🔵'
+            };
+            return icons[severity.toUpperCase()] || '⚪';
+        }
+        
+        // =====================================================================
+        // Initialization
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>

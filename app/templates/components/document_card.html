@@ -1,0 +1,117 @@
+{# Document Card Component #}
+{# Usage: {% include "components/document_card.html" %} #}
+
+{% set doc = doc or {} %}
+
+<div class="doc-card" data-doc-id="{{ doc.id }}">
+    <div class="doc-card__icon">
+        {% if doc.mime_type and 'pdf' in doc.mime_type %}
+        📄
+        {% elif doc.mime_type and 'image' in doc.mime_type %}
+        🖼️
+        {% elif doc.mime_type and ('word' in doc.mime_type or 'doc' in doc.mime_type) %}
+        📝
+        {% else %}
+        📎
+        {% endif %}
+    </div>
+    
+    <div class="doc-card__info">
+        <div class="doc-card__name">{{ doc.original_filename or doc.filename or 'Untitled' }}</div>
+        <div class="doc-card__meta">
+            {% if doc.file_size %}
+            <span>{{ (doc.file_size / 1024) | round(1) }} KB</span>
+            {% endif %}
+            {% if doc.uploaded_at %}
+            <span>{{ doc.uploaded_at[:10] }}</span>
+            {% endif %}
+            {% if doc.certified %}
+            <span class="doc-card__badge doc-card__badge--certified">✓ Certified</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="doc-card__actions">
+        {% if show_download %}
+        <button class="btn btn--secondary btn--sm" onclick="downloadDocument('{{ doc.id }}')">
+            📥 Download
+        </button>
+        {% endif %}
+        {% if show_delete %}
+        <button class="btn btn--danger btn--sm" onclick="deleteDocument('{{ doc.id }}')">
+            🗑️
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.doc-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.doc-card:hover {
+    background: var(--color-bg-hover);
+}
+
+.doc-card__icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.doc-card__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.doc-card__name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+}
+
+.doc-card__badge {
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+}
+
+.doc-card__badge--certified {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--color-success);
+}
+
+.doc-card__actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .doc-card {
+        flex-wrap: wrap;
+    }
+    
+    .doc-card__actions {
+        width: 100%;
+        margin-top: var(--space-sm);
+    }
+}
+</style>

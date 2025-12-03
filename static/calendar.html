@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Semptify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* Navigation */
+        .nav {
+            background: rgba(26, 32, 44, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+        }
+
+        .nav-links a.active {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 3px;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-id {
+            font-family: monospace;
+            color: #667eea;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Calendar Container */
+        .calendar-container {
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        /* Calendar Header */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .calendar-nav-btn {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: rgba(102, 126, 234, 0.4);
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .calendar-today-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .calendar-today-btn:hover {
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Calendar Grid */
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            padding: 10px;
+            color: #a0aec0;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: rgba(26, 32, 44, 0.5);
+            border-radius: 10px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .calendar-day:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: rgba(102, 126, 234, 0.3);
+            border: 2px solid #667eea;
+        }
+
+        .calendar-day.selected {
+            background: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .day-event {
+            font-size: 0.7rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .day-event.document {
+            background: rgba(72, 187, 120, 0.3);
+            color: #48bb78;
+        }
+
+        .day-event.event {
+            background: rgba(237, 137, 54, 0.3);
+            color: #ed8936;
+        }
+
+        .day-event.deadline {
+            background: rgba(245, 101, 101, 0.3);
+            color: #f56565;
+        }
+
+        .day-event.payment {
+            background: rgba(66, 153, 225, 0.3);
+            color: #4299e1;
+        }
+
+        .day-more {
+            font-size: 0.7rem;
+            color: #667eea;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Selected Day Panel */
+        .selected-date {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .day-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .day-item {
+            background: rgba(26, 32, 44, 0.8);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid;
+        }
+
+        .day-item:hover {
+            transform: translateX(5px);
+        }
+
+        .day-item.document {
+            border-left-color: #48bb78;
+        }
+
+        .day-item.event {
+            border-left-color: #ed8936;
+        }
+
+        .day-item.deadline {
+            border-left-color: #f56565;
+        }
+
+        .day-item.payment {
+            border-left-color: #4299e1;
+        }
+
+        .day-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .day-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .day-item-time {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+
+        .day-item-desc {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            line-height: 1.4;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+        }
+
+        /* Upcoming */
+        .upcoming-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upcoming-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(26, 32, 44, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upcoming-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .upcoming-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 45px;
+            padding: 5px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+        }
+
+        .upcoming-day {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .upcoming-month {
+            font-size: 0.7rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+        }
+
+        .upcoming-info {
+            flex: 1;
+        }
+
+        .upcoming-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .upcoming-type {
+            font-size: 0.75rem;
+            color: #a0aec0;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.document { background: #48bb78; }
+        .legend-dot.event { background: #ed8936; }
+        .legend-dot.deadline { background: #f56565; }
+        .legend-dot.payment { background: #4299e1; }
+
+        /* Quick Add */
+        .quick-add {
+            display: flex;
+            gap: 10px;
+        }
+
+        .quick-add-input {
+            flex: 1;
+            background: rgba(26, 32, 44, 0.8);
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .quick-add-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .quick-add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .sidebar-card {
+                flex: 1;
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 5px;
+            }
+
+            .day-number {
+                font-size: 0.85rem;
+            }
+
+            .day-event {
+                font-size: 0.6rem;
+                padding: 1px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-brand">Semptify</div>
+        <div class="nav-links">
+            <a href="/static/document_intake.html">📄 Intake</a>
+            <a href="/static/timeline.html">📅 Timeline</a>
+            <a href="/static/calendar.html" class="active">🗓️ Calendar</a>
+        </div>
+        <div class="nav-user">
+            <div class="user-badge">
+                <span id="userIcon">👤</span>
+                <span id="userRole">User</span>
+                <span class="user-id" id="userId">-</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Calendar -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="calendar-nav-btn" onclick="previousMonth()">←</button>
+                    <h2 class="calendar-title" id="calendarTitle">December 2025</h2>
+                    <button class="calendar-nav-btn" onclick="nextMonth()">→</button>
+                </div>
+                <button class="calendar-today-btn" onclick="goToToday()">Today</button>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+
+            <div class="calendar-days" id="calendarDays">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Selected Day -->
+            <div class="sidebar-card">
+                <div class="selected-date" id="selectedDate">Select a date</div>
+                <div class="day-items" id="dayItems">
+                    <div class="no-items">Click a date to see items</div>
+                </div>
+            </div>
+
+            <!-- Upcoming -->
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">⏰ Upcoming</h3>
+                <div class="upcoming-list" id="upcomingList">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">📊 Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot document"></div>
+                        <span>Documents</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot event"></div>
+                        <span>Events</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot deadline"></div>
+                        <span>Deadlines</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot payment"></div>
+                        <span>Payments</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Add -->
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">➕ Quick Add Event</h3>
+                <div class="quick-add">
+                    <input type="text" class="quick-add-input" id="quickAddInput" placeholder="Event title...">
+                    <button class="quick-add-btn" onclick="quickAddEvent()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // Configuration
+        // =====================================================================
+        const API_BASE = window.location.origin;
+        let currentUser = null;
+        let calendarData = [];
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        let selectedDate = null;
+
+        // =====================================================================
+        // User ID Parsing
+        // =====================================================================
+        const PROVIDERS = {
+            'G': { id: 'google_drive', name: 'Google Drive', icon: '📁' },
+            'D': { id: 'dropbox', name: 'Dropbox', icon: '📦' },
+            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' }
+        };
+
+        const ROLES = {
+            'U': { id: 'user', name: 'User', icon: '👤' },
+            'M': { id: 'manager', name: 'Manager', icon: '👔' },
+            'V': { id: 'advocate', name: 'Advocate', icon: '🤝' },
+            'L': { id: 'legal', name: 'Legal', icon: '⚖️' },
+            'A': { id: 'admin', name: 'Admin', icon: '🛡️' }
+        };
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function parseUserId(userId) {
+            if (!userId || userId.length !== 10) return null;
+            const providerChar = userId[0];
+            const roleChar = userId[1];
+            const provider = PROVIDERS[providerChar];
+            const role = ROLES[roleChar];
+            if (!provider || !role) return null;
+            return {
+                provider: provider.id,
+                providerName: provider.name,
+                providerIcon: provider.icon,
+                role: role.id,
+                roleName: role.name,
+                roleIcon: role.icon,
+                uniquePart: userId.substring(2)
+            };
+        }
+
+        // =====================================================================
+        // Auth Check
+        // =====================================================================
+        async function checkAuth() {
+            const semptifyUid = getCookie('semptify_uid');
+            if (!semptifyUid) {
+                window.location.href = '/static/welcome.html';
+                return false;
+            }
+
+            const parsed = parseUserId(semptifyUid);
+            if (!parsed) {
+                document.cookie = 'semptify_uid=; path=/; max-age=0';
+                window.location.href = '/static/welcome.html';
+                return false;
+            }
+
+            currentUser = {
+                id: semptifyUid,
+                ...parsed
+            };
+
+            document.getElementById('userIcon').textContent = parsed.roleIcon;
+            document.getElementById('userRole').textContent = parsed.roleName;
+            document.getElementById('userId').textContent = semptifyUid;
+
+            return true;
+        }
+
+        // =====================================================================
+        // Load Data
+        // =====================================================================
+        async function loadCalendarData() {
+            try {
+                // Load events
+                const eventsResponse = await fetch(`${API_BASE}/api/timeline/`, {
+                    credentials: 'include'
+                });
+                const eventsData = await eventsResponse.json();
+                const events = eventsData.events || [];
+
+                // Load documents
+                const docsResponse = await fetch(`${API_BASE}/api/intake/documents?user_id=${currentUser.id}`, {
+                    credentials: 'include'
+                });
+                let documents = [];
+                if (docsResponse.ok) {
+                    const docsData = await docsResponse.json();
+                    documents = docsData.documents || [];
+                }
+
+                // Load calendar events
+                const calResponse = await fetch(`${API_BASE}/api/calendar/`, {
+                    credentials: 'include'
+                });
+                let calEvents = [];
+                if (calResponse.ok) {
+                    const calData = await calResponse.json();
+                    calEvents = calData.events || [];
+                }
+
+                // Combine all
+                calendarData = [
+                    ...events.map(e => ({
+                        type: e.event_type || 'event',
+                        title: e.title,
+                        description: e.description,
+                        date: e.event_date || e.created_at,
+                        time: e.event_time,
+                        data: e
+                    })),
+                    ...documents.map(d => ({
+                        type: 'document',
+                        title: d.filename,
+                        description: d.extraction?.summary || 'Document',
+                        date: d.uploaded_at,
+                        data: d
+                    })),
+                    ...calEvents.map(c => ({
+                        type: c.event_type || 'event',
+                        title: c.title,
+                        description: c.description,
+                        date: c.start_date,
+                        time: c.start_time,
+                        data: c
+                    }))
+                ];
+
+                renderCalendar();
+                renderUpcoming();
+
+            } catch (error) {
+                console.error('Failed to load calendar data:', error);
+                renderCalendar();
+            }
+        }
+
+        // =====================================================================
+        // Calendar Rendering
+        // =====================================================================
+        function renderCalendar() {
+            const title = new Date(currentYear, currentMonth).toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+            });
+            document.getElementById('calendarTitle').textContent = title;
+
+            const container = document.getElementById('calendarDays');
+            container.innerHTML = '';
+
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startPad = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // Previous month padding
+            const prevMonth = new Date(currentYear, currentMonth, 0);
+            for (let i = startPad - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                container.appendChild(createDayCell(day, true, prevMonth.getMonth(), prevMonth.getFullYear()));
+            }
+
+            // Current month
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate() &&
+                    currentMonth === today.getMonth() &&
+                    currentYear === today.getFullYear();
+                container.appendChild(createDayCell(day, false, currentMonth, currentYear, isToday));
+            }
+
+            // Next month padding
+            const totalCells = startPad + daysInMonth;
+            const remaining = 7 - (totalCells % 7);
+            if (remaining < 7) {
+                for (let day = 1; day <= remaining; day++) {
+                    container.appendChild(createDayCell(day, true, currentMonth + 1, currentYear));
+                }
+            }
+        }
+
+        function createDayCell(day, isOtherMonth, month, year, isToday = false) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+            if (isOtherMonth) cell.classList.add('other-month');
+            if (isToday) cell.classList.add('today');
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+            // Check if selected
+            if (selectedDate === dateStr) {
+                cell.classList.add('selected');
+            }
+
+            // Get events for this day
+            const dayEvents = calendarData.filter(item => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0];
+                return itemDate === dateStr;
+            });
+
+            cell.innerHTML = `
+                <div class="day-number">${day}</div>
+                <div class="day-events">
+                    ${dayEvents.slice(0, 3).map(e => `
+                        <div class="day-event ${e.type}">${escapeHtml(e.title.substring(0, 12))}</div>
+                    `).join('')}
+                    ${dayEvents.length > 3 ? `<div class="day-more">+${dayEvents.length - 3} more</div>` : ''}
+                </div>
+            `;
+
+            cell.onclick = () => selectDate(dateStr, dayEvents);
+
+            return cell;
+        }
+
+        function selectDate(dateStr, events) {
+            selectedDate = dateStr;
+            renderCalendar();
+
+            const date = new Date(dateStr + 'T12:00:00');
+            document.getElementById('selectedDate').textContent = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            const container = document.getElementById('dayItems');
+
+            if (events.length === 0) {
+                container.innerHTML = '<div class="no-items">No items for this date</div>';
+                return;
+            }
+
+            container.innerHTML = events.map(item => `
+                <div class="day-item ${item.type}">
+                    <div class="day-item-header">
+                        <span class="day-item-title">${getTypeIcon(item.type)} ${escapeHtml(item.title)}</span>
+                        <span class="day-item-time">${item.time || ''}</span>
+                    </div>
+                    <div class="day-item-desc">${escapeHtml(item.description || '')}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderUpcoming() {
+            const container = document.getElementById('upcomingList');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const upcoming = calendarData
+                .filter(item => new Date(item.date) >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 5);
+
+            if (upcoming.length === 0) {
+                container.innerHTML = '<div class="no-items">No upcoming items</div>';
+                return;
+            }
+
+            container.innerHTML = upcoming.map(item => {
+                const date = new Date(item.date);
+                return `
+                    <div class="upcoming-item" onclick="goToDate('${item.date}')">
+                        <div class="upcoming-date">
+                            <span class="upcoming-day">${date.getDate()}</span>
+                            <span class="upcoming-month">${date.toLocaleDateString('en-US', { month: 'short' })}</span>
+                        </div>
+                        <div class="upcoming-info">
+                            <div class="upcoming-title">${escapeHtml(item.title)}</div>
+                            <div class="upcoming-type">${getTypeIcon(item.type)} ${item.type}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =====================================================================
+        // Navigation
+        // =====================================================================
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            selectedDate = today.toISOString().split('T')[0];
+            renderCalendar();
+
+            // Select today
+            const dayEvents = calendarData.filter(item => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0];
+                return itemDate === selectedDate;
+            });
+            selectDate(selectedDate, dayEvents);
+        }
+
+        function goToDate(dateStr) {
+            const date = new Date(dateStr);
+            currentYear = date.getFullYear();
+            currentMonth = date.getMonth();
+            selectedDate = date.toISOString().split('T')[0];
+            renderCalendar();
+
+            const dayEvents = calendarData.filter(item => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0];
+                return itemDate === selectedDate;
+            });
+            selectDate(selectedDate, dayEvents);
+        }
+
+        // =====================================================================
+        // Quick Add
+        // =====================================================================
+        async function quickAddEvent() {
+            const input = document.getElementById('quickAddInput');
+            const title = input.value.trim();
+
+            if (!title) return;
+            if (!selectedDate) {
+                alert('Please select a date first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/calendar/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title: title,
+                        start_date: selectedDate,
+                        event_type: 'event'
+                    })
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    await loadCalendarData();
+                    // Re-select the date
+                    const dayEvents = calendarData.filter(item => {
+                        const itemDate = new Date(item.date).toISOString().split('T')[0];
+                        return itemDate === selectedDate;
+                    });
+                    selectDate(selectedDate, dayEvents);
+                }
+            } catch (error) {
+                console.error('Failed to add event:', error);
+            }
+        }
+
+        // Enter key to add
+        document.getElementById('quickAddInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') quickAddEvent();
+        });
+
+        // =====================================================================
+        // Utilities
+        // =====================================================================
+        function getTypeIcon(type) {
+            const icons = {
+                document: '📄',
+                event: '📌',
+                deadline: '⏰',
+                payment: '💰',
+                notice: '📬',
+                hearing: '⚖️'
+            };
+            return icons[type] || '📋';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // =====================================================================
+        // Initialize
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAuth()) {
+                await loadCalendarData();
+                goToToday();
+            }
+        });
+    </script>
+</body>
+</html>

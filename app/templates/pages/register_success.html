@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Registration Success - Semptify{% endblock %}
+
+{% block content %}
+<div class="container container--narrow">
+    <div class="card text-center" style="margin-top: 4rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+        
+        <h1 class="mb-md">Welcome to Semptify!</h1>
+        
+        <p class="text-secondary mb-lg">
+            Your account has been created. Save your <strong>one-time token</strong> below —
+            you'll need it to access your Document Vault.
+        </p>
+        
+        <div class="alert alert--warning text-left mb-lg">
+            <strong>⚠️ Important:</strong> This token will only be shown once. 
+            Write it down or save it somewhere safe. If you lose it, you'll need to register again.
+        </div>
+        
+        <div style="background: rgba(59, 130, 246, 0.1); border: 2px dashed var(--color-accent); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-xl);">
+            <p class="text-muted mb-sm">Your Access Token</p>
+            <code style="font-size: 2rem; letter-spacing: 0.25rem; font-weight: bold; color: var(--color-accent);" id="token">{{ token }}</code>
+            <button onclick="copyToken()" class="btn btn--secondary btn--sm" style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">
+                📋 Copy to Clipboard
+            </button>
+        </div>
+        
+        {% if user_id %}
+        <p class="text-muted text-sm mb-lg">
+            User ID: <code>{{ user_id }}</code>
+        </p>
+        {% endif %}
+        
+        <a href="/vault?user_token={{ token }}" class="btn btn--primary btn--lg">
+            📁 Go to Your Vault
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToken() {
+    const token = document.getElementById('token').textContent;
+    navigator.clipboard.writeText(token).then(() => {
+        showFlash('Token copied to clipboard!', 'success');
+    }).catch(() => {
+        showFlash('Failed to copy. Please select and copy manually.', 'error');
+    });
+}
+</script>
+{% endblock %}

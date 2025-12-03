@@ -1,0 +1,237 @@
+{
+  "security_deposit_general": {
+    "id": "security_deposit_general",
+    "category": "security_deposit",
+    "title": "Security Deposit Limits and Return",
+    "summary": "Landlords must return security deposits within a specified time after move-out, minus documented deductions.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Deposit must be returned within statutory timeframe",
+      "Deductions must be itemized in writing",
+      "Landlord must provide receipts for repairs",
+      "Tenant may sue for wrongful withholding"
+    ],
+    "tenant_rights": [
+      "Right to itemized statement of deductions",
+      "Right to return of deposit within time limit",
+      "Right to sue for wrongful retention"
+    ],
+    "landlord_obligations": [
+      "Return deposit within statutory period",
+      "Provide written itemized statement",
+      "Document damage beyond normal wear"
+    ],
+    "time_limits": null,
+    "keywords": [
+      "security deposit",
+      "deposit return",
+      "damage deduction",
+      "move out",
+      "move-out inspection"
+    ]
+  },
+  "habitability_general": {
+    "id": "habitability_general",
+    "category": "habitability",
+    "title": "Implied Warranty of Habitability",
+    "summary": "Landlords must maintain rental property in habitable condition with working essential services.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Heat, water, electricity must work",
+      "No serious health or safety hazards",
+      "Structural integrity maintained",
+      "Tenant may withhold rent or repair-and-deduct"
+    ],
+    "tenant_rights": [
+      "Right to habitable living conditions",
+      "Right to repair and deduct (with notice)",
+      "Right to withhold rent for serious violations",
+      "Right to terminate lease for uninhabitable conditions"
+    ],
+    "landlord_obligations": [
+      "Maintain essential services",
+      "Make timely repairs",
+      "Address health and safety issues"
+    ],
+    "time_limits": null,
+    "keywords": [
+      "habitability",
+      "repairs",
+      "maintenance",
+      "heat",
+      "water",
+      "plumbing",
+      "electrical",
+      "mold",
+      "pest",
+      "infestation"
+    ]
+  },
+  "eviction_notice_general": {
+    "id": "eviction_notice_general",
+    "category": "eviction",
+    "title": "Eviction Notice Requirements",
+    "summary": "Landlords must follow proper legal procedures and provide adequate notice before eviction.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Written notice required before filing",
+      "Notice period varies by reason",
+      "Self-help eviction is illegal",
+      "Tenant has right to contest in court"
+    ],
+    "tenant_rights": [
+      "Right to proper written notice",
+      "Right to cure violations if applicable",
+      "Right to court hearing",
+      "Protection from illegal lockouts"
+    ],
+    "landlord_obligations": [
+      "Provide proper written notice",
+      "Allow cure period where required",
+      "File in court - no self-help",
+      "Follow legal process for removal"
+    ],
+    "time_limits": {
+      "nonpayment_notice": "3-14 days typically",
+      "lease_violation_cure": "varies by jurisdiction",
+      "no_cause_notice": "30-60 days typically"
+    },
+    "keywords": [
+      "eviction",
+      "notice to quit",
+      "pay or quit",
+      "vacate",
+      "termination",
+      "unlawful detainer"
+    ]
+  },
+  "retaliation_general": {
+    "id": "retaliation_general",
+    "category": "retaliation",
+    "title": "Protection Against Retaliation",
+    "summary": "Landlords cannot retaliate against tenants for exercising legal rights.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Protected activities include complaints to authorities",
+      "Retaliation presumed if action within 90 days",
+      "Tenant may have defense to eviction",
+      "May recover damages for retaliation"
+    ],
+    "tenant_rights": [
+      "Right to complain about conditions",
+      "Right to contact housing authorities",
+      "Right to join tenant organizations",
+      "Right to assert legal rights"
+    ],
+    "landlord_obligations": null,
+    "time_limits": null,
+    "keywords": [
+      "retaliation",
+      "retaliatory eviction",
+      "complaint",
+      "housing authority",
+      "code enforcement"
+    ]
+  },
+  "entry_access_general": {
+    "id": "entry_access_general",
+    "category": "entry_access",
+    "title": "Landlord Entry and Access",
+    "summary": "Landlords must provide reasonable notice before entering rental unit.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "24-48 hours notice typically required",
+      "Entry only for legitimate purposes",
+      "Emergency entry exception",
+      "Tenant may refuse unreasonable entry"
+    ],
+    "tenant_rights": [
+      "Right to advance notice of entry",
+      "Right to quiet enjoyment",
+      "Right to refuse entry without notice"
+    ],
+    "landlord_obligations": [
+      "Provide reasonable advance notice",
+      "Enter only at reasonable times",
+      "Limit entry to legitimate purposes"
+    ],
+    "time_limits": {
+      "notice_for_entry": "24-48 hours typical"
+    },
+    "keywords": [
+      "entry",
+      "access",
+      "notice",
+      "privacy",
+      "inspection",
+      "showing",
+      "landlord entry"
+    ]
+  },
+  "rent_increase_general": {
+    "id": "rent_increase_general",
+    "category": "rent_payment",
+    "title": "Rent Increase Requirements",
+    "summary": "Rent increases must follow proper notice procedures and lease terms.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Cannot increase during lease term without clause",
+      "Written notice required for increase",
+      "Notice period varies by jurisdiction",
+      "No rent control in most areas"
+    ],
+    "tenant_rights": [
+      "Right to notice of rent increase",
+      "Right to refuse increase and terminate",
+      "Protection from increase during lease"
+    ],
+    "landlord_obligations": null,
+    "time_limits": {
+      "rent_increase_notice": "30-60 days typical"
+    },
+    "keywords": [
+      "rent increase",
+      "rent raise",
+      "rent hike",
+      "rent change"
+    ]
+  },
+  "lease_termination_general": {
+    "id": "lease_termination_general",
+    "category": "lease_termination",
+    "title": "Lease Termination and Renewal",
+    "summary": "Rules for ending tenancy and lease renewal/non-renewal.",
+    "jurisdiction": "general",
+    "statute_citation": null,
+    "key_points": [
+      "Written notice required to end month-to-month",
+      "Fixed-term leases end on their own date",
+      "Early termination may require cause or penalty",
+      "Some jurisdictions require renewal notice"
+    ],
+    "tenant_rights": [
+      "Right to notice of non-renewal",
+      "Right to terminate with proper notice",
+      "Protection from mid-lease termination without cause"
+    ],
+    "landlord_obligations": null,
+    "time_limits": {
+      "month_to_month_notice": "30 days typical",
+      "non_renewal_notice": "varies"
+    },
+    "keywords": [
+      "termination",
+      "end lease",
+      "move out",
+      "non-renewal",
+      "renewal",
+      "month-to-month"
+    ]
+  }
+}

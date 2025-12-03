@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elbow — Your Tenant Rights Assistant</title>
+    <link rel="stylesheet" href="/static/css/elbow.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="elbow-app">
+        <!-- Top Bar -->
+        <header class="elbow-header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">◢</span>
+                    <span class="logo-text">Elbow</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="intensity-indicator" id="intensity-display">
+                    <div class="intensity-bar">
+                        <div class="intensity-fill" id="intensity-fill"></div>
+                    </div>
+                    <span class="intensity-label" id="intensity-label">Calm</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="btn-notifications" title="Notifications">
+                    <span class="notification-dot" id="notification-dot" style="display:none;"></span>
+                    🔔
+                </button>
+                <button class="btn-icon" id="btn-help" title="Help">?</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="elbow-main">
+            <!-- Left Panel - Context & Status -->
+            <aside class="panel-left" id="context-panel">
+                <div class="panel-section">
+                    <h3 class="section-title">Your Situation</h3>
+                    <div class="context-card" id="situation-card">
+                        <div class="phase-badge" id="phase-badge">Getting Started</div>
+                        <div class="situation-summary" id="situation-summary">
+                            Welcome to Elbow. Upload your lease or tell us what's happening.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="section-title">Timeline</h3>
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-empty">No events yet</div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="section-title">Deadlines</h3>
+                    <div class="deadlines-list" id="deadlines">
+                        <div class="no-deadlines">No upcoming deadlines</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center - Dynamic Content -->
+            <section class="panel-center" id="main-content">
+                <!-- Urgent Alert (shows when intensity is high) -->
+                <div class="urgent-alert" id="urgent-alert" style="display:none;">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <div class="alert-title" id="alert-title">Urgent Action Required</div>
+                        <div class="alert-message" id="alert-message"></div>
+                    </div>
+                    <button class="alert-action" id="alert-action">Take Action</button>
+                </div>
+
+                <!-- Primary Action Area -->
+                <div class="action-area" id="action-area">
+                    <div class="welcome-state" id="welcome-state">
+                        <h1>What can Elbow help you with?</h1>
+                        <p class="subtitle">I'll guide you through protecting your tenant rights.</p>
+                        
+                        <div class="quick-actions">
+                            <button class="action-card" data-action="upload-lease">
+                                <span class="action-icon">📄</span>
+                                <span class="action-label">Upload Lease</span>
+                                <span class="action-desc">Let me analyze your rental agreement</span>
+                            </button>
+                            <button class="action-card" data-action="report-issue">
+                                <span class="action-icon">🔧</span>
+                                <span class="action-label">Report an Issue</span>
+                                <span class="action-desc">Problems with your unit or landlord</span>
+                            </button>
+                            <button class="action-card" data-action="got-notice">
+                                <span class="action-icon">📬</span>
+                                <span class="action-label">Got a Notice</span>
+                                <span class="action-desc">Eviction, rent increase, or other</span>
+                            </button>
+                            <button class="action-card highlight" data-action="emergency">
+                                <span class="action-icon">🚨</span>
+                                <span class="action-label">Emergency</span>
+                                <span class="action-desc">Court date, lockout, or urgent situation</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Widgets Container -->
+                    <div class="widgets-container" id="widgets-container" style="display:none;"></div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area" id="input-area">
+                    <div class="input-wrapper">
+                        <input type="text" 
+                               id="user-input" 
+                               placeholder="Type what's happening or drag a document here..."
+                               autocomplete="off">
+                        <button class="btn-attach" id="btn-attach" title="Attach file">📎</button>
+                        <button class="btn-send" id="btn-send">→</button>
+                    </div>
+                    <input type="file" id="file-input" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                </div>
+            </section>
+
+            <!-- Right Panel - Guidance & Resources -->
+            <aside class="panel-right" id="guidance-panel">
+                <div class="panel-section">
+                    <h3 class="section-title">Next Steps</h3>
+                    <div class="next-steps" id="next-steps">
+                        <div class="step-item suggested">
+                            <span class="step-icon">1</span>
+                            <span class="step-text">Upload your lease agreement</span>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-icon">2</span>
+                            <span class="step-text">Tell us about any issues</span>
+                        </div>
+                        <div class="step-item">
+                            <span class="step-icon">3</span>
+                            <span class="step-text">Get personalized guidance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="section-title">Your Rights</h3>
+                    <div class="rights-summary" id="rights-summary">
+                        <p class="rights-intro">Based on your situation, these rights apply:</p>
+                        <div class="rights-list" id="rights-list">
+                            <div class="right-item">
+                                <span class="right-icon">✓</span>
+                                <span class="right-text">Right to habitable housing</span>
+                            </div>
+                            <div class="right-item">
+                                <span class="right-icon">✓</span>
+                                <span class="right-text">Protection from retaliation</span>
+                            </div>
+                            <div class="right-item">
+                                <span class="right-icon">✓</span>
+                                <span class="right-text">Proper notice requirements</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 class="section-title">Documents</h3>
+                    <div class="documents-list" id="documents-list">
+                        <div class="no-documents">No documents uploaded yet</div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Modal Overlay -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal" id="modal">
+                <button class="modal-close" id="modal-close">×</button>
+                <div class="modal-content" id="modal-content"></div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="/static/js/elbow.js"></script>
+</body>
+</html>

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline - Semptify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* Navigation */
+        .nav {
+            background: rgba(26, 32, 44, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+        }
+
+        .nav-links a.active {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 3px;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-id {
+            font-family: monospace;
+            color: #667eea;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title-icon {
+            font-size: 2.5rem;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .filter-select, .filter-input {
+            background: rgba(26, 32, 44, 0.8);
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea, #764ba2, #667eea);
+            border-radius: 3px;
+        }
+
+        /* Date Group */
+        .date-group {
+            margin-bottom: 40px;
+        }
+
+        .date-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .date-marker {
+            position: absolute;
+            left: -40px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .date-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .date-count {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #667eea;
+        }
+
+        /* Timeline Item */
+        .timeline-item {
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            background: #4a5568;
+            border-radius: 50%;
+            border: 3px solid #1a1a2e;
+        }
+
+        .timeline-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .timeline-item.document::before {
+            background: #48bb78;
+        }
+
+        .timeline-item.event::before {
+            background: #ed8936;
+        }
+
+        .timeline-item.deadline::before {
+            background: #f56565;
+        }
+
+        .timeline-item.payment::before {
+            background: #4299e1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .item-type {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-icon {
+            font-size: 1.5rem;
+        }
+
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .item-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-document {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .badge-event {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .badge-deadline {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .badge-payment {
+            background: rgba(66, 153, 225, 0.2);
+            color: #4299e1;
+        }
+
+        .item-time {
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
+
+        .item-description {
+            color: #cbd5e0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .meta-icon {
+            font-size: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+
+        .empty-text {
+            margin-bottom: 20px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #4a5568;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Detail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #2d3748;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #a0aec0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-label {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #e2e8f0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .modal-actions {
+            padding: 20px 25px;
+            border-top: 1px solid #4a5568;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #4a5568;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6578;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-select, .filter-input {
+                flex: 1;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                padding-left: 30px;
+            }
+
+            .timeline::before {
+                left: 10px;
+            }
+
+            .date-marker {
+                left: -30px;
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
+            }
+
+            .timeline-item::before {
+                left: -25px;
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-brand">Semptify</div>
+        <div class="nav-links">
+            <a href="/documents">📄 Documents</a>
+            <a href="/timeline" class="active">📅 Timeline</a>
+            <a href="/static/calendar.html">🗓️ Calendar</a>
+        </div>
+        <div class="nav-user">
+            <div class="user-badge">
+                <span id="userIcon">👤</span>
+                <span id="userRole">User</span>
+                <span class="user-id" id="userId">-</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <span class="page-title-icon">📅</span>
+                Timeline
+            </h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <span class="filter-label">Type:</span>
+                <select class="filter-select" id="filterType">
+                    <option value="all">All Items</option>
+                    <option value="document">Documents</option>
+                    <option value="event">Events</option>
+                    <option value="deadline">Deadlines</option>
+                    <option value="payment">Payments</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">From:</span>
+                <input type="date" class="filter-input" id="filterFrom">
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">To:</span>
+                <input type="date" class="filter-input" id="filterTo">
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Search:</span>
+                <input type="text" class="filter-input" id="filterSearch" placeholder="Search...">
+            </div>
+            <button class="filter-btn" onclick="applyFilters()">Apply</button>
+        </div>
+
+        <!-- Timeline Content -->
+        <div id="timelineContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading timeline...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <span id="modalIcon">📄</span>
+                    <span id="modalTitle">Item Details</span>
+                </h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button class="btn btn-primary" id="modalAction">View Full</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // Configuration
+        // =====================================================================
+        const API_BASE = window.location.origin;
+        let currentUser = null;
+        let timelineData = [];
+
+        // =====================================================================
+        // User ID Parsing
+        // =====================================================================
+        const PROVIDERS = {
+            'G': { id: 'google_drive', name: 'Google Drive', icon: '📁' },
+            'D': { id: 'dropbox', name: 'Dropbox', icon: '📦' },
+            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' }
+        };
+
+        const ROLES = {
+            'U': { id: 'user', name: 'User', icon: '👤' },
+            'M': { id: 'manager', name: 'Manager', icon: '👔' },
+            'V': { id: 'advocate', name: 'Advocate', icon: '🤝' },
+            'L': { id: 'legal', name: 'Legal', icon: '⚖️' },
+            'A': { id: 'admin', name: 'Admin', icon: '🛡️' }
+        };
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function parseUserId(userId) {
+            if (!userId || userId.length !== 10) return null;
+            const providerChar = userId[0];
+            const roleChar = userId[1];
+            const provider = PROVIDERS[providerChar];
+            const role = ROLES[roleChar];
+            if (!provider || !role) return null;
+            return {
+                provider: provider.id,
+                providerName: provider.name,
+                providerIcon: provider.icon,
+                role: role.id,
+                roleName: role.name,
+                roleIcon: role.icon,
+                uniquePart: userId.substring(2)
+            };
+        }
+
+        // =====================================================================
+        // Auth Check
+        // =====================================================================
+        async function checkAuth() {
+            const semptifyUid = getCookie('semptify_uid');
+            if (!semptifyUid) {
+                window.location.href = '/static/welcome.html';
+                return false;
+            }
+
+            const parsed = parseUserId(semptifyUid);
+            if (!parsed) {
+                document.cookie = 'semptify_uid=; path=/; max-age=0';
+                window.location.href = '/static/welcome.html';
+                return false;
+            }
+
+            currentUser = {
+                id: semptifyUid,
+                ...parsed
+            };
+
+            // Update UI
+            document.getElementById('userIcon').textContent = parsed.roleIcon;
+            document.getElementById('userRole').textContent = parsed.roleName;
+            document.getElementById('userId').textContent = semptifyUid;
+
+            return true;
+        }
+
+        // =====================================================================
+        // Timeline Data
+        // =====================================================================
+        async function loadTimeline() {
+            try {
+                // Load events from timeline API
+                const eventsResponse = await fetch(`${API_BASE}/api/timeline/`, {
+                    credentials: 'include'
+                });
+                const eventsData = await eventsResponse.json();
+                const events = eventsData.events || [];
+
+                // Load documents from intake API (processed)
+                const docsResponse = await fetch(`${API_BASE}/api/intake/documents?user_id=${currentUser.id}`, {
+                    credentials: 'include'
+                });
+                let documents = [];
+                if (docsResponse.ok) {
+                    const docsData = await docsResponse.json();
+                    documents = docsData.documents || [];
+                }
+
+                // Combine and sort
+                timelineData = [
+                    ...events.map(e => ({
+                        type: e.event_type || 'event',
+                        title: e.title,
+                        description: e.description,
+                        date: e.event_date || e.created_at,
+                        time: e.event_time,
+                        data: e
+                    })),
+                    ...documents.map(d => ({
+                        type: 'document',
+                        title: d.filename,
+                        description: d.extraction?.summary || 'Document uploaded',
+                        date: d.uploaded_at,
+                        data: d
+                    }))
+                ];
+
+                // Sort by date descending
+                timelineData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                renderTimeline();
+
+            } catch (error) {
+                console.error('Failed to load timeline:', error);
+                renderTimeline();
+            }
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineContent');
+
+            if (timelineData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <h3 class="empty-title">No timeline items yet</h3>
+                        <p class="empty-text">Upload documents or add events to see them here</p>
+                        <a href="/documents" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
+                            📄 Upload Documents
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by date
+            const groups = {};
+            timelineData.forEach(item => {
+                const date = new Date(item.date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                if (!groups[date]) groups[date] = [];
+                groups[date].push(item);
+            });
+
+            let html = '<div class="timeline">';
+
+            Object.entries(groups).forEach(([date, items]) => {
+                const dayNum = new Date(items[0].date).getDate();
+                html += `
+                    <div class="date-group">
+                        <div class="date-header">
+                            <div class="date-marker">${dayNum}</div>
+                            <span class="date-text">${date}</span>
+                            <span class="date-count">${items.length} item${items.length > 1 ? 's' : ''}</span>
+                        </div>
+                `;
+
+                items.forEach((item, idx) => {
+                    const icon = getTypeIcon(item.type);
+                    const badgeClass = `badge-${item.type}`;
+                    const time = item.time || new Date(item.date).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+
+                    html += `
+                        <div class="timeline-item ${item.type}" onclick="showDetail(${timelineData.indexOf(item)})">
+                            <div class="item-header">
+                                <div class="item-type">
+                                    <span class="item-icon">${icon}</span>
+                                    <span class="item-title">${escapeHtml(item.title)}</span>
+                                </div>
+                                <div>
+                                    <span class="item-badge ${badgeClass}">${item.type}</span>
+                                    <span class="item-time">${time}</span>
+                                </div>
+                            </div>
+                            <p class="item-description">${escapeHtml(item.description || '')}</p>
+                            ${renderItemMeta(item)}
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function getTypeIcon(type) {
+            const icons = {
+                document: '📄',
+                event: '📌',
+                deadline: '⏰',
+                payment: '💰',
+                notice: '📬',
+                hearing: '⚖️'
+            };
+            return icons[type] || '📋';
+        }
+
+        function renderItemMeta(item) {
+            let meta = [];
+
+            if (item.type === 'document' && item.data) {
+                if (item.data.extraction?.doc_type) {
+                    meta.push(`<span class="meta-icon">📑</span> ${item.data.extraction.doc_type}`);
+                }
+                if (item.data.file_size) {
+                    meta.push(`<span class="meta-icon">💾</span> ${formatFileSize(item.data.file_size)}`);
+                }
+            }
+
+            if (item.data?.location) {
+                meta.push(`<span class="meta-icon">📍</span> ${item.data.location}`);
+            }
+
+            if (meta.length === 0) return '';
+
+            return `
+                <div class="item-meta">
+                    ${meta.map(m => `<div class="meta-item">${m}</div>`).join('')}
+                </div>
+            `;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // =====================================================================
+        // Detail Modal
+        // =====================================================================
+        function showDetail(index) {
+            const item = timelineData[index];
+            if (!item) return;
+
+            document.getElementById('modalIcon').textContent = getTypeIcon(item.type);
+            document.getElementById('modalTitle').textContent = item.title;
+
+            let bodyHtml = '';
+
+            if (item.type === 'document' && item.data) {
+                const doc = item.data;
+                bodyHtml = `
+                    <div class="detail-grid">
+                        <div class="detail-section">
+                            <div class="detail-label">Document Type</div>
+                            <div class="detail-value">${doc.extraction?.doc_type || 'Unknown'}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">File Size</div>
+                            <div class="detail-value">${formatFileSize(doc.file_size)}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">Uploaded</div>
+                            <div class="detail-value">${new Date(doc.uploaded_at).toLocaleString()}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${doc.status}</div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Summary</div>
+                        <div class="detail-value">${doc.extraction?.summary || 'No summary available'}</div>
+                    </div>
+                `;
+
+                if (doc.extraction?.parties?.length > 0) {
+                    bodyHtml += `
+                        <div class="detail-section">
+                            <div class="detail-label">Parties</div>
+                            <div class="detail-value">
+                                ${doc.extraction.parties.map(p => `${p.name} (${p.role})`).join(', ')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (doc.extraction?.dates?.length > 0) {
+                    bodyHtml += `
+                        <div class="detail-section">
+                            <div class="detail-label">Key Dates</div>
+                            <div class="detail-value">
+                                ${doc.extraction.dates.map(d => `${d.date}: ${d.description}`).join('<br>')}
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                bodyHtml = `
+                    <div class="detail-section">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">${item.description || 'No description'}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value">${new Date(item.date).toLocaleString()}</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modalBody').innerHTML = bodyHtml;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+
+        // =====================================================================
+        // Filters
+        // =====================================================================
+        function applyFilters() {
+            const type = document.getElementById('filterType').value;
+            const from = document.getElementById('filterFrom').value;
+            const to = document.getElementById('filterTo').value;
+            const search = document.getElementById('filterSearch').value.toLowerCase();
+
+            let filtered = [...timelineData];
+
+            if (type !== 'all') {
+                filtered = filtered.filter(item => item.type === type);
+            }
+
+            if (from) {
+                filtered = filtered.filter(item => new Date(item.date) >= new Date(from));
+            }
+
+            if (to) {
+                filtered = filtered.filter(item => new Date(item.date) <= new Date(to + 'T23:59:59'));
+            }
+
+            if (search) {
+                filtered = filtered.filter(item =>
+                    item.title.toLowerCase().includes(search) ||
+                    (item.description && item.description.toLowerCase().includes(search))
+                );
+            }
+
+            // Temporarily replace data for rendering
+            const original = timelineData;
+            timelineData = filtered;
+            renderTimeline();
+            timelineData = original;
+        }
+
+        // =====================================================================
+        // Initialize
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAuth()) {
+                await loadTimeline();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
