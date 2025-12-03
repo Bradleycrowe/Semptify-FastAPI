@@ -271,29 +271,51 @@ Respond in JSON format:
         return await self._call_openai(prompt)
 
     async def _call_openai(self, prompt: str) -> dict:
-        """Call AI for text analysis - tries Groq first, then Azure OpenAI."""
+        """
+        Call AI for text analysis.
+        
+        Priority order (free/local first):
+        1. Ollama - FREE, private, local (no API costs)
+        2. Rule-based - FREE, instant, no API needed
+        3. Groq - FREE tier: 14,400 req/day, then ~$0.59/M tokens
+        4. Azure OpenAI - Pay per use (~$1-3/1K docs)
+        """
         settings = get_settings()
 
-        # Try Groq first (fast & affordable cloud)
-        if settings.groq_api_key:
-            try:
-                return await self._call_groq(prompt, settings)
-            except Exception as e:
-                print(f"Groq failed, trying fallback: {e}")
-
-        # Try Ollama (free, local, private)
+        # 1. Try Ollama FIRST (completely free, local, private)
         try:
             result = await self._call_ollama(prompt, settings)
             if result:
+                print("✓ Using Ollama (free, local)")
                 return result
         except Exception as e:
-            print(f"Ollama failed: {e}")
+            pass  # Silent fail, try next
 
-        # Check if we have Azure OpenAI configured
-        if not settings.azure_openai_endpoint:
-            # Fall back to rule-based classification
-            return self._rule_based_classify(prompt)
+        # 2. Try Groq (free tier: 14,400 requests/day)
+        if settings.groq_api_key:
+            try:
+                result = await self._call_groq(prompt, settings)
+                print("✓ Using Groq (free tier)")
+                return result
+            except Exception as e:
+                print(f"Groq failed: {e}")
 
+        # 3. Try Azure OpenAI (paid, but you may have free credits)
+        if settings.azure_openai_endpoint and settings.azure_openai_api_key:
+            try:
+                result = await self._call_azure_openai(prompt, settings)
+                if result:
+                    print("✓ Using Azure OpenAI")
+                    return result
+            except Exception as e:
+                print(f"Azure OpenAI failed: {e}")
+
+        # 4. Fall back to rule-based (always free, always works)
+        print("✓ Using rule-based classification (free)")
+        return self._rule_based_classify(prompt)
+
+    async def _call_azure_openai(self, prompt: str, settings) -> Optional[dict]:
+        """Call Azure OpenAI for text analysis."""
         url = f"{settings.azure_openai_endpoint}/openai/deployments/{settings.azure_openai_deployment}/chat/completions?api-version=2024-02-15-preview"
 
         headers = {
@@ -311,17 +333,13 @@ Respond in JSON format:
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            try:
-                response = await client.post(url, headers=headers, json=payload)
-                if response.status_code == 200:
-                    result = response.json()
-                    content = result["choices"][0]["message"]["content"]
-                    # Parse JSON from response
-                    return json.loads(content)
-                else:
-                    return self._rule_based_classify(prompt)
-            except Exception:
-                return self._rule_based_classify(prompt)
+            response = await client.post(url, headers=headers, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                content = result["choices"][0]["message"]["content"]
+                return json.loads(content)
+            else:
+                return None
 
     async def _call_groq(self, prompt: str, settings) -> dict:
         """Call Groq API for fast, affordable text analysis."""
