@@ -70,6 +70,8 @@ from app.routers.briefcase import router as briefcase_router
 from app.routers.emotion import router as emotion_router
 from app.routers.court_packet import router as court_packet_router
 from app.routers.actions import router as actions_router
+from app.routers.progress import router as progress_router
+from app.routers.dashboard import router as dashboard_router
 from app.core.mesh_integration import start_mesh_network, stop_mesh_network
 
 # Dakota County Eviction Defense Module
@@ -1484,6 +1486,8 @@ def create_app() -> FastAPI:
     app.include_router(emotion_router, tags=["Emotion Engine"])  # Adaptive UI emotion tracking
     app.include_router(court_packet_router, tags=["Court Packet"])  # Export court-ready document packets
     app.include_router(actions_router, tags=["Smart Actions"])  # Personalized action recommendations
+    app.include_router(progress_router, tags=["Progress Tracker"])  # User journey progress tracking
+    app.include_router(dashboard_router, tags=["Unified Dashboard"])  # Combined dashboard data
 
     # Distributed Mesh Network - P2P Module Communication
     app.include_router(distributed_mesh_router, prefix="/api", tags=["Distributed Mesh"])
