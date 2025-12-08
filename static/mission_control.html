@@ -1119,7 +1119,7 @@
         // Load adaptive dashboard config from Emotion Engine
         async function loadDashboardConfig() {
             try {
-                const resp = await fetch('/emotion/dashboard-config');
+                const resp = await fetch('/api/emotion/dashboard-config');
                 const data = await resp.json();
                 if (data.success) {
                     dashboardConfig = data.config;

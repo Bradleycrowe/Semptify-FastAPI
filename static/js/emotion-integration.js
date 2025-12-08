@@ -22,7 +22,7 @@ const EmotionEngine = {
     
     // Configuration
     config: {
-        apiBase: '/emotion',
+        apiBase: '/api/emotion',
         updateInterval: 30000, // 30 seconds
         enableAnimations: true,
         enableSounds: false,
@@ -125,34 +125,40 @@ const EmotionEngine = {
      */
     async trigger(triggerType, metadata = {}) {
         try {
-            const response = await fetch(`${this.config.apiBase}/trigger`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    trigger_type: triggerType,
-                    metadata: metadata
-                })
+            // Build query parameters
+            const params = new URLSearchParams({
+                trigger: triggerType
             });
             
+            // Add optional parameters from metadata
+            if (metadata.days_until_deadline !== undefined) {
+                params.append('days_until_deadline', metadata.days_until_deadline);
+            }
+            if (metadata.days_until_court !== undefined) {
+                params.append('days_until_court', metadata.days_until_court);
+            }
+            
+            const response = await fetch(`${this.config.apiBase}/trigger?${params.toString()}`, {
+                method: 'POST'
+            });
+
             if (response.ok) {
                 const result = await response.json();
                 this.state = result.new_state;
                 this.applyUIAdaptation();
-                
+
                 // Dispatch custom event for listeners
                 window.dispatchEvent(new CustomEvent('emotion-change', {
                     detail: { trigger: triggerType, state: this.state }
                 }));
-                
+
                 return result;
             }
         } catch (error) {
             console.warn('Failed to trigger emotion:', error);
         }
         return null;
-    },
-    
-    /**
+    },    /**
      * Apply UI adaptations based on emotional state
      */
     applyUIAdaptation() {

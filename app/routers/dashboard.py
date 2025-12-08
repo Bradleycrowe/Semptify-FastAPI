@@ -44,9 +44,9 @@ async def get_unified_dashboard(user_id: str = Query("default")):
     - Journey overview
     """
     # Get emotional state
-    emotional_state = emotion_engine.get_state()
-    ui_adaptation = emotion_engine.calculate_ui_adaptation()
-    dashboard_config = emotion_engine.get_dashboard_config()
+    emotional_state = emotion_engine.get_state(user_id)
+    ui_adaptation = emotion_engine.calculate_ui_adaptation(user_id)
+    dashboard_config = emotion_engine.get_dashboard_config(user_id)
     
     # Get progress
     progress = progress_tracker.get_progress(user_id)
@@ -61,11 +61,18 @@ async def get_unified_dashboard(user_id: str = Query("default")):
         "maintenance_issues": "upload_maintenance" in progress.completed_milestones,
         "has_notice": "upload_notice" in progress.completed_milestones
     }
-    
-    # Get action plan
-    action_plan = action_router.generate_action_plan(emotional_state, case_context)
-    
-    # Calculate timeline info
+
+    # Get action plan (convert EmotionalState to dict for action router)
+    emotional_dict = {
+        "intensity": emotional_state.intensity,
+        "clarity": emotional_state.clarity,
+        "confidence": emotional_state.confidence,
+        "momentum": emotional_state.momentum,
+        "overwhelm": emotional_state.overwhelm,
+        "trust": emotional_state.trust,
+        "resolve": emotional_state.resolve
+    }
+    action_plan = action_router.generate_action_plan(emotional_dict, case_context)    # Calculate timeline info
     journey_days = 0
     days_to_court = None
     if progress.journey_started:
@@ -84,11 +91,12 @@ async def get_unified_dashboard(user_id: str = Query("default")):
             "capacity": action_plan.emotional_capacity.value,
             "messages": dashboard_config.get("messages", {}),
             "ui_adaptation": {
-                "color_scheme": ui_adaptation.color_scheme,
+                "color_warmth": ui_adaptation.color_warmth,
                 "animation_level": ui_adaptation.animation_level,
                 "max_items_shown": ui_adaptation.max_items_shown,
-                "show_complexity": ui_adaptation.show_complexity,
-                "primary_action_size": ui_adaptation.primary_action_size
+                "information_depth": ui_adaptation.information_depth,
+                "guidance_level": ui_adaptation.guidance_level,
+                "message_tone": ui_adaptation.message_tone
             }
         },
         
@@ -139,17 +147,26 @@ async def refresh_dashboard(context: DashboardContext, user_id: str = Query("def
     Refresh dashboard with specific context (e.g., after document upload).
     """
     # Get emotional state
-    emotional_state = emotion_engine.get_state()
-    
+    emotional_state = emotion_engine.get_state(user_id)
+
     # Build case context
     case_context = context.dict()
-    
+
+    # Convert emotional state to dict for action router
+    emotional_dict = {
+        "intensity": emotional_state.intensity,
+        "clarity": emotional_state.clarity,
+        "confidence": emotional_state.confidence,
+        "momentum": emotional_state.momentum,
+        "overwhelm": emotional_state.overwhelm,
+        "trust": emotional_state.trust,
+        "resolve": emotional_state.resolve
+    }
+
     # Get action plan with provided context
-    action_plan = action_router.generate_action_plan(emotional_state, case_context)
-    
-    # Get dashboard config
-    dashboard_config = emotion_engine.get_dashboard_config()
-    
+    action_plan = action_router.generate_action_plan(emotional_dict, case_context)    # Get dashboard config
+    dashboard_config = emotion_engine.get_dashboard_config(user_id)
+
     return {
         "success": True,
         "mode": dashboard_config.get("dashboard_mode", "guided"),
@@ -169,8 +186,19 @@ async def get_status_bar(user_id: str = Query("default")):
     """
     progress = progress_tracker.get_progress(user_id)
     readiness = progress_tracker.get_case_readiness(user_id)
-    emotional_state = emotion_engine.get_state()
-    mode = action_router.get_dashboard_mode(emotional_state)
+    emotional_state = emotion_engine.get_state(user_id)
+    
+    # Convert to dict for action router
+    emotional_dict = {
+        "intensity": emotional_state.intensity,
+        "clarity": emotional_state.clarity,
+        "confidence": emotional_state.confidence,
+        "momentum": emotional_state.momentum,
+        "overwhelm": emotional_state.overwhelm,
+        "trust": emotional_state.trust,
+        "resolve": emotional_state.resolve
+    }
+    mode = action_router.get_dashboard_mode(emotional_dict)
     
     days_to_court = None
     if progress.court_date:
@@ -195,8 +223,19 @@ async def get_personalized_greeting(user_id: str = Query("default")):
     Get personalized greeting based on time and emotional state.
     """
     progress = progress_tracker.get_progress(user_id)
-    emotional_state = emotion_engine.get_state()
-    mode = action_router.get_dashboard_mode(emotional_state)
+    emotional_state = emotion_engine.get_state(user_id)
+    
+    # Convert to dict for action router
+    emotional_dict = {
+        "intensity": emotional_state.intensity,
+        "clarity": emotional_state.clarity,
+        "confidence": emotional_state.confidence,
+        "momentum": emotional_state.momentum,
+        "overwhelm": emotional_state.overwhelm,
+        "trust": emotional_state.trust,
+        "resolve": emotional_state.resolve
+    }
+    mode = action_router.get_dashboard_mode(emotional_dict)
     
     # Time-based greeting
     hour = datetime.now().hour
