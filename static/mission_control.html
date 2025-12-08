@@ -818,6 +818,7 @@
         // State
         let dashboardConfig = null;
         let actionPlan = null;
+        let unifiedData = null;
         let devMode = false;
 
         // Initialize
@@ -825,11 +826,155 @@
             // Initialize emotion engine
             await EmotionEngine.init();
             
-            await loadDashboardConfig();
-            await loadActionPlan();
-            await loadCaseData();
+            // Load unified dashboard data (combines everything)
+            await loadUnifiedDashboard();
             recordTrigger('session_start');
         });
+
+        // Load unified dashboard data
+        async function loadUnifiedDashboard() {
+            try {
+                const resp = await fetch('/dashboard/');
+                unifiedData = await resp.json();
+                
+                if (unifiedData.success) {
+                    // Apply all data at once
+                    dashboardConfig = {
+                        dashboard_mode: unifiedData.emotion.mode,
+                        emotional_state: {
+                            composites: { crisis_level: unifiedData.emotion.state?.overwhelm || 0.3 },
+                            dominant_emotion: 'neutral'
+                        },
+                        messages: unifiedData.emotion.messages,
+                        visible_sections: unifiedData.visible_sections,
+                        ui_adaptation: unifiedData.emotion.ui_adaptation
+                    };
+                    
+                    applyDashboardConfig(dashboardConfig);
+                    
+                    // Apply action plan
+                    actionPlan = {
+                        primary_action: unifiedData.actions.primary,
+                        secondary_actions: unifiedData.actions.secondary,
+                        self_care_reminder: unifiedData.actions.self_care,
+                        encouragement_message: unifiedData.actions.encouragement,
+                        emotional_capacity: unifiedData.emotion.capacity
+                    };
+                    applyActionPlan(actionPlan);
+                    
+                    // Update stats
+                    applyProgress(unifiedData.progress);
+                    applyTimeline(unifiedData.timeline);
+                    
+                    // Load greeting
+                    loadPersonalizedGreeting();
+                }
+            } catch (e) {
+                console.log('Unified dashboard not available, using individual calls');
+                await loadDashboardConfig();
+                await loadActionPlan();
+                await loadCaseData();
+            }
+        }
+        
+        function applyProgress(progress) {
+            if (!progress) return;
+            
+            // Update stats
+            document.getElementById('statDocuments').textContent = progress.stats.documents || 0;
+            document.getElementById('statEvidence').textContent = progress.stats.documents || 0;
+            document.getElementById('statViolations').textContent = progress.stats.violations || 0;
+            
+            // Update readiness badge
+            const strengthBadge = document.getElementById('caseStrengthBadge');
+            if (strengthBadge && progress.readiness) {
+                const levelEmoji = {
+                    'excellent': '💪',
+                    'good': '✅',
+                    'fair': '📈',
+                    'developing': '🌱',
+                    'early': '🚀'
+                };
+                strengthBadge.innerHTML = `
+                    <i class="bi bi-shield-check"></i> 
+                    ${levelEmoji[progress.readiness.level] || ''} 
+                    ${Math.round(progress.readiness.percent)}% Ready
+                `;
+            }
+            
+            // Update next milestones as mission steps
+            if (progress.next_milestones && progress.next_milestones.length > 0) {
+                loadMissionStepsFromMilestones(progress.next_milestones);
+            }
+        }
+        
+        function applyTimeline(timeline) {
+            if (!timeline) return;
+            
+            if (timeline.court_date) {
+                document.getElementById('courtDate').textContent = timeline.court_date;
+                document.getElementById('courtDateMarker').textContent = timeline.court_date;
+            }
+            
+            if (timeline.days_to_court !== null) {
+                document.getElementById('statDaysLeft').textContent = timeline.days_to_court;
+                document.getElementById('caseDay').textContent = timeline.journey_days || 1;
+                document.getElementById('caseDaysTotal').textContent = timeline.days_to_court + (timeline.journey_days || 0);
+                
+                // Update timeline progress
+                const totalDays = timeline.days_to_court + (timeline.journey_days || 0);
+                const progress = ((timeline.journey_days || 0) / totalDays) * 100;
+                const progressEl = document.getElementById('timelineProgress');
+                if (progressEl) {
+                    progressEl.style.width = progress + '%';
+                }
+            }
+        }
+        
+        function loadMissionStepsFromMilestones(milestones) {
+            const container = document.getElementById('progressSteps');
+            if (!container) return;
+            
+            container.innerHTML = milestones.map((m, i) => `
+                <div class="progress-step step-${i === 0 ? 'current' : 'pending'}">
+                    <div class="step-indicator">
+                        ${i === 0 ? '<i class="bi bi-arrow-right"></i>' : (i + 1)}
+                    </div>
+                    <div class="step-content">
+                        <h4>${m.name}</h4>
+                        <p>${m.description}</p>
+                    </div>
+                    <div class="step-status">
+                        ${i === 0 ? 'NEXT' : `+${m.points} pts`}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function loadPersonalizedGreeting() {
+            try {
+                const resp = await fetch('/dashboard/greeting');
+                const greeting = await resp.json();
+                
+                if (greeting.greeting) {
+                    document.getElementById('greetingMessage').textContent = 
+                        `${greeting.greeting}! ${greeting.message}`;
+                }
+                
+                if (greeting.streak_message) {
+                    const streakEl = document.createElement('div');
+                    streakEl.className = 'streak-badge';
+                    streakEl.textContent = greeting.streak_message;
+                    document.getElementById('greetingSection').appendChild(streakEl);
+                }
+                
+                if (greeting.urgency_message) {
+                    document.getElementById('encouragementMessage').textContent = greeting.urgency_message;
+                }
+            } catch (e) {
+                // Use defaults
+            }
+        }
 
         // Load action plan from Smart Action Router
         async function loadActionPlan() {
