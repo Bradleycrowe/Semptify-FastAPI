@@ -1705,6 +1705,11 @@
         <span id="helpToggleText">Show Help</span>
     </button>
 
+    <!-- Celebration Libraries -->
+    <script src="/static/js/notification-toast.js"></script>
+    <script src="/static/js/confetti.js"></script>
+    <script src="/static/js/emotion-integration.js"></script>
+
     <script>
         // =====================================================================
         // Configuration
@@ -2232,6 +2237,14 @@
                 renderQueue();
                 showToast(`${file.name} uploaded successfully`, 'success');
                 
+                // Celebrate document upload with emotion engine
+                if (typeof EmotionEngine !== 'undefined') {
+                    EmotionEngine.trigger('document_uploaded');
+                }
+                if (typeof SemptifyConfetti !== 'undefined') {
+                    SemptifyConfetti.burst();
+                }
+
             } catch (error) {
                 showToast(`Upload failed: ${error.message}`, 'error');
             } finally {
@@ -2346,9 +2359,20 @@
                 if (selectedDocId === doc.id) {
                     showDocumentDetails(doc);
                 }
-                
+
                 showToast(`${doc.filename} registered: ${data.document_id}`, 'success');
                 
+                // 🎉 Major milestone: Document registered! Big celebration
+                if (typeof EmotionEngine !== 'undefined') {
+                    EmotionEngine.trigger('task_completed');
+                }
+                if (typeof SemptifyConfetti !== 'undefined') {
+                    SemptifyConfetti.celebrate(); // Full celebration for registration
+                }
+                if (typeof SemptifyToast !== 'undefined') {
+                    SemptifyToast.milestone('Document Registered!', 'Your document is now officially in the system.', 5000);
+                }
+
                 if (data.requires_review) {
                     showToast('⚠️ Document requires manual review', 'warning');
                 }
@@ -2413,10 +2437,18 @@
                 
                 doc.savedToVault = true;
                 doc.vaultInfo = data;
-                
+
                 renderQueue();
                 showToast(`${doc.filename} saved to ${currentUser.providerName}`, 'success');
                 
+                // Celebrate vault save
+                if (typeof EmotionEngine !== 'undefined') {
+                    EmotionEngine.trigger('evidence_saved');
+                }
+                if (typeof SemptifyConfetti !== 'undefined') {
+                    SemptifyConfetti.burst();
+                }
+
             } catch (error) {
                 showToast(`Vault save failed: ${error.message}`, 'error');
             } finally {
@@ -3928,6 +3960,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthStatus();
             loadRegisteredDocuments();
+            
+            // Welcome message with adaptive toast
+            if (typeof SemptifyToast !== 'undefined') {
+                setTimeout(() => {
+                    SemptifyToast.info('Ready to Upload', 'Drag documents here or click to browse. We\'ll help you organize everything! 📁', 5000);
+                }, 1000);
+            }
+            
+            // Initialize emotion engine
+            if (typeof EmotionEngine !== 'undefined') {
+                EmotionEngine.init();
+            }
         });
     </script>
 </body>

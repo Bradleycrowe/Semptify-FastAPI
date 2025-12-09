@@ -399,6 +399,11 @@
             }
         }
     </style>
+    
+    <!-- Celebration Libraries -->
+    <script src="/static/js/notification-toast.js"></script>
+    <script src="/static/js/confetti.js"></script>
+    <script src="/static/js/emotion-integration.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -586,6 +591,18 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderQuestion();
+            
+            // Initialize emotion engine
+            if (typeof EmotionEngine !== 'undefined') {
+                EmotionEngine.init();
+            }
+            
+            // Welcome message
+            setTimeout(() => {
+                if (typeof SemptifyToast !== 'undefined') {
+                    SemptifyToast.encourage('You\'re in the right place', 'Let\'s figure out exactly what you need. Take your time. 💙');
+                }
+            }, 1500);
         });
 
         function renderQuestion() {
@@ -857,13 +874,34 @@
                 localStorage.setItem('semptify_intake', JSON.stringify(intake));
                 localStorage.setItem('semptify_intake_complete', 'true');
 
-                // Go to first page
-                window.location.href = '/static/' + firstPage;
+                // 🎉 Celebrate completing intake! Major milestone
+                if (typeof SemptifyToast !== 'undefined') {
+                    SemptifyToast.milestone('Mission Ready!', 'Your personalized action plan is set. Let\'s do this! 🚀');
+                }
+                if (typeof SemptifyConfetti !== 'undefined') {
+                    SemptifyConfetti.fireworks();
+                }
+                if (typeof EmotionEngine !== 'undefined') {
+                    EmotionEngine.trigger('intake_completed');
+                }
+
+                // Brief delay to show celebration, then navigate
+                setTimeout(() => {
+                    window.location.href = '/static/' + firstPage;
+                }, 2000);
             } catch (e) {
                 // Still navigate even if API fails
                 localStorage.setItem('semptify_intake', JSON.stringify(intake));
                 localStorage.setItem('semptify_intake_complete', 'true');
-                window.location.href = '/static/' + firstPage;
+                
+                // Still celebrate even if API call failed
+                if (typeof SemptifyConfetti !== 'undefined') {
+                    SemptifyConfetti.celebrate();
+                }
+                
+                setTimeout(() => {
+                    window.location.href = '/static/' + firstPage;
+                }, 1500);
             }
         }
     </script>

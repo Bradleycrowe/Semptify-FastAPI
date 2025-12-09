@@ -831,13 +831,21 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize emotion engine
             await EmotionEngine.init();
-            
+
             // Load unified dashboard data (combines everything)
             await loadUnifiedDashboard();
             recordTrigger('session_start');
-        });
-
-        // Load unified dashboard data
+            
+            // Show welcome message after brief delay
+            setTimeout(() => {
+                if (window.SemptifyToast && unifiedData?.emotion?.messages?.greeting) {
+                    SemptifyToast.info(unifiedData.emotion.messages.greeting, {
+                        duration: 4000,
+                        icon: '👋'
+                    });
+                }
+            }, 1500);
+        });        // Load unified dashboard data
         async function loadUnifiedDashboard() {
             try {
                 const resp = await fetch('/dashboard/');
@@ -1513,6 +1521,141 @@
                 helpClickCount = 0;
             }, 10000);
         });
+
+        // =========================================================================
+        // MILESTONE CELEBRATION SYSTEM
+        // =========================================================================
+        
+        /**
+         * Celebrate a completed milestone with toast and confetti
+         */
+        function celebrateMilestone(milestone) {
+            // Show milestone toast
+            if (window.SemptifyToast) {
+                SemptifyToast.milestone(
+                    milestone.name || 'Milestone Complete!',
+                    milestone.description || 'Great job! You\'re making progress.',
+                    { duration: 8000 }
+                );
+            }
+            
+            // Trigger confetti effect based on milestone importance
+            if (window.SemptifyConfetti) {
+                const milestoneEffects = {
+                    'intake_complete': () => SemptifyConfetti.celebrate({ particleCount: 80 }),
+                    'first_document': () => SemptifyConfetti.celebrate({ particleCount: 60 }),
+                    'notice_uploaded': () => SemptifyConfetti.burst({ x: 0.5, y: 0.3 }),
+                    'evidence_gathered': () => SemptifyConfetti.fireworks({ bursts: 3 }),
+                    'answer_prepared': () => SemptifyConfetti.cannons(),
+                    'court_ready': () => SemptifyConfetti.schoolPride({ duration: 3000 }),
+                    'case_won': () => {
+                        SemptifyConfetti.schoolPride({ duration: 5000 });
+                        setTimeout(() => SemptifyConfetti.fireworks({ bursts: 7 }), 1000);
+                    }
+                };
+                
+                const effect = milestoneEffects[milestone.id] || (() => SemptifyConfetti.celebrate());
+                effect();
+            }
+            
+            // Record the trigger for emotion engine
+            recordTrigger('task_completed', { milestone: milestone.id });
+        }
+        
+        /**
+         * Show a success notification
+         */
+        function showSuccess(message, options = {}) {
+            if (window.SemptifyToast) {
+                SemptifyToast.success(message, options);
+            }
+        }
+        
+        /**
+         * Show an info notification
+         */
+        function showInfo(message, options = {}) {
+            if (window.SemptifyToast) {
+                SemptifyToast.info(message, options);
+            }
+        }
+        
+        /**
+         * Show a warning notification
+         */
+        function showWarning(message, options = {}) {
+            if (window.SemptifyToast) {
+                SemptifyToast.warning(message, options);
+            }
+        }
+        
+        /**
+         * Show an error notification
+         */
+        function showError(message, options = {}) {
+            if (window.SemptifyToast) {
+                SemptifyToast.error(message, options);
+            }
+        }
+        
+        /**
+         * Show an encouragement message
+         */
+        function showEncouragement(message) {
+            if (window.SemptifyToast) {
+                SemptifyToast.encourage(message);
+            }
+        }
+        
+        /**
+         * Show a progress toast (for long operations)
+         */
+        function showProgress(message) {
+            if (window.SemptifyToast) {
+                return SemptifyToast.progress(message);
+            }
+            return null;
+        }
+        
+        /**
+         * Complete a milestone via API and celebrate
+         */
+        async function completeMilestone(milestoneId, userId = 'default') {
+            try {
+                const resp = await fetch(`/progress/milestone?milestone_id=${milestoneId}&user_id=${userId}`, {
+                    method: 'POST'
+                });
+                const data = await resp.json();
+                
+                if (data.success) {
+                    // Celebrate!
+                    celebrateMilestone({
+                        id: milestoneId,
+                        name: data.milestone?.name || milestoneId,
+                        description: data.milestone?.description
+                    });
+                    
+                    // Refresh dashboard
+                    await loadUnifiedDashboard();
+                    
+                    return true;
+                }
+            } catch (e) {
+                console.error('Failed to complete milestone:', e);
+                showError('Failed to record milestone');
+            }
+            return false;
+        }
+        
+        // Make functions globally available
+        window.celebrateMilestone = celebrateMilestone;
+        window.completeMilestone = completeMilestone;
+        window.showSuccess = showSuccess;
+        window.showInfo = showInfo;
+        window.showWarning = showWarning;
+        window.showError = showError;
+        window.showEncouragement = showEncouragement;
+        window.showProgress = showProgress;
     </script>
 </body>
 </html>
