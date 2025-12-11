@@ -6,8 +6,11 @@ Integrates with Brain Mesh for real-time updates and cross-module communication.
 Includes handwriting recognition and forgery detection.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, UploadFile, File
 from pydantic import BaseModel, Field
+import io
+import tempfile
+import os
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import logging
@@ -487,6 +490,161 @@ async def analyze_text(
         
     except Exception as e:
         logger.error(f"Analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
+@router.post("/analyze-file", response_model=RecognitionResponse)
+async def analyze_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(..., description="Document file to analyze"),
+    user: StorageUser = Depends(require_user),
+):
+    """
+    📁 Analyze an uploaded document file.
+    
+    Supports:
+    - PDF files (text extraction)
+    - Images (PNG, JPG, GIF) - OCR text extraction
+    - Word documents (.doc, .docx)
+    - Text files (.txt, .rtf)
+    
+    Returns comprehensive analysis with legal insights.
+    """
+    engine = get_engine()
+    brain = get_brain()
+    
+    # Validate file type
+    allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.gif', '.txt', '.doc', '.docx', '.rtf'}
+    file_ext = os.path.splitext(file.filename or '')[1].lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Unsupported file type: {file_ext}. Allowed: {', '.join(allowed_extensions)}"
+        )
+    
+    # Read file content
+    content = await file.read()
+    if len(content) > 20 * 1024 * 1024:  # 20MB limit
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 20MB.")
+    
+    start_time = datetime.now()
+    
+    try:
+        # Extract text based on file type
+        text = ""
+        
+        if file_ext == '.txt':
+            # Plain text
+            text = content.decode('utf-8', errors='ignore')
+        
+        elif file_ext == '.rtf':
+            # RTF - basic text extraction
+            text = content.decode('utf-8', errors='ignore')
+            # Strip RTF formatting (basic)
+            import re
+            text = re.sub(r'\\[a-z]+\d*\s?', '', text)
+            text = re.sub(r'[{}]', '', text)
+        
+        elif file_ext == '.pdf':
+            # PDF text extraction
+            try:
+                import fitz  # PyMuPDF
+                with fitz.open(stream=content, filetype="pdf") as doc:
+                    text = "\n".join(page.get_text() for page in doc)
+            except ImportError:
+                # Fallback: try pdfplumber
+                try:
+                    import pdfplumber
+                    with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+                        tmp.write(content)
+                        tmp_path = tmp.name
+                    try:
+                        with pdfplumber.open(tmp_path) as pdf:
+                            text = "\n".join(page.extract_text() or '' for page in pdf.pages)
+                    finally:
+                        os.unlink(tmp_path)
+                except ImportError:
+                    raise HTTPException(
+                        status_code=500, 
+                        detail="PDF processing not available. Install PyMuPDF or pdfplumber."
+                    )
+        
+        elif file_ext in {'.png', '.jpg', '.jpeg', '.gif'}:
+            # Image OCR
+            try:
+                import pytesseract
+                from PIL import Image
+                img = Image.open(io.BytesIO(content))
+                text = pytesseract.image_to_string(img)
+            except ImportError:
+                raise HTTPException(
+                    status_code=500, 
+                    detail="Image OCR not available. Install pytesseract and Pillow."
+                )
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"OCR failed: {str(e)}")
+        
+        elif file_ext in {'.doc', '.docx'}:
+            # Word document
+            try:
+                import docx
+                with tempfile.NamedTemporaryFile(suffix=file_ext, delete=False) as tmp:
+                    tmp.write(content)
+                    tmp_path = tmp.name
+                try:
+                    doc = docx.Document(tmp_path)
+                    text = "\n".join(para.text for para in doc.paragraphs)
+                finally:
+                    os.unlink(tmp_path)
+            except ImportError:
+                raise HTTPException(
+                    status_code=500, 
+                    detail="Word document processing not available. Install python-docx."
+                )
+        
+        if not text or len(text.strip()) < 10:
+            raise HTTPException(
+                status_code=400, 
+                detail="Could not extract enough text from document. Try a different file or paste text directly."
+            )
+        
+        # Run document analysis
+        result = await engine.analyze(
+            text=text,
+            filename=file.filename,
+        )
+        
+        # Run handwriting analysis
+        analyzer = get_handwriting_analyzer()
+        handwriting_result = await analyzer.analyze(
+            text,
+            document_type=result.document_type.value,
+        )
+        
+        # Emit forgery event if high risk
+        background_tasks.add_task(
+            emit_forgery_event,
+            brain,
+            handwriting_result,
+            user.user_id,
+        )
+        
+        processing_time = (datetime.now() - start_time).total_seconds() * 1000
+        
+        # Emit analysis event
+        background_tasks.add_task(
+            emit_analysis_event,
+            brain,
+            result,
+            user.user_id,
+        )
+        
+        return result_to_response(result, processing_time, handwriting_result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"File analysis failed: {e}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 

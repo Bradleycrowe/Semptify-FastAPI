@@ -1493,13 +1493,10 @@ def create_app() -> FastAPI:
     app.include_router(progress_router, tags=["Progress Tracker"])  # User journey progress tracking
     app.include_router(dashboard_router, tags=["Unified Dashboard"])  # Combined dashboard data
     app.include_router(enterprise_dashboard_router, tags=["Enterprise Dashboard"])  # Premium enterprise UI & API
-<<<<<<< Updated upstream
 
     # Tenant Defense Module - Evidence collection, sealing petitions, demand letters
     app.include_router(tenant_defense_router, tags=["Tenant Defense"])
     logging.getLogger(__name__).info("⚖️ Tenant Defense module loaded - Evidence, petitions, and screening disputes")
-=======
->>>>>>> Stashed changes
 
     # Distributed Mesh Network - P2P Module Communication
     app.include_router(distributed_mesh_router, prefix="/api", tags=["Distributed Mesh"])
