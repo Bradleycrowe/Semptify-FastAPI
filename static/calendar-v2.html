@@ -32,7 +32,7 @@
             <div class="sidebar-logo-icon"><i class="fas fa-balance-scale"></i></div>
             <span class="sidebar-brand-text">Semptify</span>
           </a>
-          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle">
+          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
             <i class="fas fa-bars"></i>
           </button>
         </div>
@@ -91,7 +91,7 @@
       <!-- Header -->
       <header class="header">
         <div class="header-inner">
-          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle">
+          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle" title="Open menu" aria-label="Open menu">
             <i class="fas fa-bars"></i>
           </button>
           <div class="header-title">
@@ -111,11 +111,11 @@
         <div class="page-header">
           <div class="page-header-title">
             <div class="calendar-nav">
-              <button class="btn btn-ghost btn-icon" id="prev-month">
+              <button class="btn btn-ghost btn-icon" id="prev-month" title="Previous month" aria-label="Previous month">
                 <i class="fas fa-chevron-left"></i>
               </button>
               <h2 class="h2" id="current-month"></h2>
-              <button class="btn btn-ghost btn-icon" id="next-month">
+              <button class="btn btn-ghost btn-icon" id="next-month" title="Next month" aria-label="Next month">
                 <i class="fas fa-chevron-right"></i>
               </button>
             </div>
@@ -189,7 +189,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title" id="modal-title">Add Event</h2>
-        <button class="modal-close" onclick="closeEventModal()"><i class="fas fa-times"></i></button>
+        <button class="modal-close" onclick="closeEventModal()" title="Close" aria-label="Close dialog"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
         <form id="event-form">

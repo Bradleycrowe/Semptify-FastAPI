@@ -1570,6 +1570,14 @@ def create_app() -> FastAPI:
             "docs": "/api/docs" if settings.debug else "disabled",
         })
 
+    @app.get("/dashboard", response_class=HTMLResponse)
+    async def enterprise_dashboard():
+        """Direct access to enterprise dashboard for power users."""
+        enterprise_path = Path("static/enterprise-dashboard.html")
+        if enterprise_path.exists():
+            return HTMLResponse(content=enterprise_path.read_text(encoding="utf-8"))
+        return HTMLResponse(content="<h1>Dashboard not found</h1>", status_code=404)
+
     @app.get("/dev/elbow", response_class=HTMLResponse)
     async def elbow_dev():
         """

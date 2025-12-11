@@ -32,7 +32,7 @@
             <div class="sidebar-logo-icon"><i class="fas fa-balance-scale"></i></div>
             <span class="sidebar-brand-text">Semptify</span>
           </a>
-          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle">
+          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
             <i class="fas fa-bars"></i>
           </button>
         </div>
@@ -115,7 +115,7 @@
       <!-- Header -->
       <header class="header">
         <div class="header-inner">
-          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle">
+          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle" title="Open menu" aria-label="Open menu">
             <i class="fas fa-bars"></i>
           </button>
           <div class="header-title">
@@ -234,7 +234,7 @@
     <div class="modal modal-lg">
       <div class="modal-header">
         <h2 class="modal-title">Upload Document</h2>
-        <button class="modal-close" onclick="closeUploadModal()"><i class="fas fa-times"></i></button>
+        <button class="modal-close" onclick="closeUploadModal()" title="Close" aria-label="Close dialog"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
         <div class="upload-zone" id="upload-zone">
@@ -261,7 +261,7 @@
     <div class="modal modal-xl">
       <div class="modal-header">
         <h2 class="modal-title" id="preview-title">Document</h2>
-        <button class="modal-close" onclick="closePreviewModal()"><i class="fas fa-times"></i></button>
+        <button class="modal-close" onclick="closePreviewModal()" title="Close" aria-label="Close dialog"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body preview-body">
         <div id="preview-content"></div>
