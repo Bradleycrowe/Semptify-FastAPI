@@ -461,6 +461,266 @@
             background: var(--border-color);
             margin: 0.5rem 0;
         }
+        
+        /* Batch Selection */
+        .batch-toolbar {
+            display: none;
+            background: var(--primary);
+            color: #000;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .batch-toolbar.show {
+            display: flex;
+        }
+        
+        .batch-count {
+            font-weight: 600;
+        }
+        
+        .batch-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .batch-actions .btn {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+        }
+        
+        .doc-card .doc-checkbox {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .doc-card:hover .doc-checkbox,
+        .doc-card.selected .doc-checkbox {
+            opacity: 1;
+        }
+        
+        .doc-card.batch-selected .doc-checkbox {
+            opacity: 1;
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #000;
+        }
+        
+        .doc-card.batch-selected {
+            border-color: var(--primary);
+            background: rgba(74, 222, 128, 0.15);
+        }
+        
+        /* Move/Copy Modal Folder List */
+        .folder-select-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .folder-select-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .folder-select-item:hover {
+            background: var(--bg-hover);
+        }
+        
+        .folder-select-item.selected {
+            background: var(--primary);
+            color: #000;
+        }
+        
+        .folder-select-item .folder-icon {
+            font-size: 1.25rem;
+        }
+        
+        .folder-select-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Mobile toggle button for sidebar */
+        .mobile-sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 999;
+            font-size: 1.25rem;
+        }
+        
+        /* Responsive - Tablet */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 220px 1fr;
+            }
+            
+            .right-panel {
+                display: none;
+            }
+        }
+        
+        /* Responsive - Mobile */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
+            .app-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: calc(100vh - 56px);
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 56px;
+                bottom: 0;
+                width: 280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .mobile-sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+            
+            .mobile-overlay.show {
+                display: block;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+            
+            .toolbar {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .documents-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.75rem;
+            }
+            
+            .doc-card {
+                padding: 0.75rem;
+            }
+            
+            .doc-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .doc-name {
+                font-size: 0.75rem;
+            }
+            
+            .folder-card {
+                padding: 0.75rem;
+            }
+            
+            .folder-card .folder-icon {
+                font-size: 1.5rem;
+            }
+            
+            .batch-toolbar {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .batch-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .help-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+        }
+        
+        /* Responsive - Small mobile */
+        @media (max-width: 480px) {
+            .documents-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .doc-icon {
+                font-size: 2rem;
+            }
+            
+            .doc-name {
+                font-size: 0.7rem;
+            }
+            
+            .breadcrumb-nav {
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -484,10 +744,18 @@
         </div>
     </nav>
 
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Mobile Sidebar Toggle -->
+    <button class="mobile-sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <i class="bi bi-folder"></i>
+    </button>
+
     <!-- Main Container -->
     <div class="app-container">
         <!-- Sidebar - Folder Tree -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="fw-semibold">Folders</span>
                 <button class="btn btn-sm btn-outline-success" onclick="showNewFolderModal()">
@@ -504,11 +772,36 @@
             <div class="content-header">
                 <div class="breadcrumb-nav" id="breadcrumb"></div>
                 <div class="toolbar">
+                    <button class="btn btn-outline-info btn-sm d-none d-md-inline-block" onclick="toggleSelectMode()" id="selectModeBtn">
+                        <i class="bi bi-check2-square me-1"></i>Select
+                    </button>
                     <button class="btn btn-success" onclick="showUploadModal()">
                         <i class="bi bi-upload me-1"></i>Upload
                     </button>
                     <button class="btn btn-outline-light" onclick="toggleView()">
                         <i class="bi bi-grid" id="viewToggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Batch Selection Toolbar -->
+            <div class="batch-toolbar" id="batchToolbar">
+                <div class="batch-count"><span id="selectedCount">0</span> selected</div>
+                <div class="batch-actions">
+                    <button class="btn btn-dark" onclick="batchMove()">
+                        <i class="bi bi-folder-symlink me-1"></i>Move
+                    </button>
+                    <button class="btn btn-dark" onclick="batchCopy()">
+                        <i class="bi bi-copy me-1"></i>Copy
+                    </button>
+                    <button class="btn btn-dark" onclick="batchStar()">
+                        <i class="bi bi-star me-1"></i>Star
+                    </button>
+                    <button class="btn btn-danger" onclick="batchDelete()">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearSelection()">
+                        <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
             </div>
@@ -678,6 +971,30 @@
         </div>
     </div>
 
+    <!-- Move/Copy Modal -->
+    <div class="modal fade" id="moveCopyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveCopyTitle"><i class="bi bi-folder-symlink me-2"></i>Move to...</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary small mb-3" id="moveCopyDesc">Select destination folder:</p>
+                    <div class="folder-select-list" id="folderSelectList">
+                        <!-- Folders will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="moveCopyConfirm" onclick="confirmMoveCopy()">
+                        <i class="bi bi-check me-1"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Help Modal -->
     <div class="modal fade" id="helpModal" tabindex="-1">
         <div class="modal-dialog">
@@ -718,8 +1035,12 @@
         let folders = {};
         let documents = [];
         let selectedDocument = null;
+        let selectedDocuments = new Set(); // Batch selection
+        let selectMode = false;
         let viewMode = 'grid';
         let pendingFiles = [];
+        let moveCopyMode = null; // 'move' or 'copy'
+        let moveCopyTarget = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -756,8 +1077,20 @@
             document.addEventListener('keydown', e => {
                 if (e.key === 'Escape') {
                     document.getElementById('contextMenu').classList.remove('show');
+                    if (selectMode) clearSelection();
+                }
+                // Ctrl+A to select all in select mode
+                if (e.ctrlKey && e.key === 'a' && selectMode) {
+                    e.preventDefault();
+                    selectAllDocuments();
                 }
             });
+        }
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('mobileOverlay').classList.toggle('show');
         }
         
         // Draggable Help Button
@@ -1027,8 +1360,12 @@
             // Documents
             docs.forEach(doc => {
                 const icon = getDocIcon(doc.type);
+                const isSelected = selectedDocuments.has(doc.id);
                 html += `
-                    <div class="doc-card" data-id="${doc.id}" oncontextmenu="showContextMenu(event, '${doc.id}')" onclick="selectDocument('${doc.id}')">
+                    <div class="doc-card ${isSelected ? 'batch-selected' : ''}" data-id="${doc.id}" oncontextmenu="showContextMenu(event, '${doc.id}')" onclick="handleDocClick(event, '${doc.id}')">
+                        <div class="doc-checkbox" onclick="event.stopPropagation(); toggleDocSelection('${doc.id}')">
+                            ${isSelected ? '<i class="bi bi-check"></i>' : ''}
+                        </div>
                         ${doc.starred ? '<i class="bi bi-star-fill doc-star"></i>' : ''}
                         <div class="doc-icon ${doc.type}"><i class="bi bi-${icon}"></i></div>
                         <div class="doc-name">${doc.name}</div>
@@ -1065,11 +1402,64 @@
         }
         
         // Document Actions
+        function handleDocClick(e, docId) {
+            if (selectMode || e.ctrlKey || e.shiftKey) {
+                toggleDocSelection(docId);
+            } else {
+                selectDocument(docId);
+            }
+        }
+        
         function selectDocument(docId) {
             selectedDocument = docId;
             document.querySelectorAll('.doc-card').forEach(card => {
                 card.classList.toggle('selected', card.dataset.id === docId);
             });
+        }
+        
+        function toggleDocSelection(docId) {
+            if (selectedDocuments.has(docId)) {
+                selectedDocuments.delete(docId);
+            } else {
+                selectedDocuments.add(docId);
+            }
+            updateBatchToolbar();
+            loadFolderContents(currentFolderId);
+        }
+        
+        function updateBatchToolbar() {
+            const toolbar = document.getElementById('batchToolbar');
+            const count = selectedDocuments.size;
+            document.getElementById('selectedCount').textContent = count;
+            toolbar.classList.toggle('show', count > 0);
+        }
+        
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            const btn = document.getElementById('selectModeBtn');
+            btn.classList.toggle('btn-info', selectMode);
+            btn.classList.toggle('btn-outline-info', !selectMode);
+            btn.innerHTML = selectMode 
+                ? '<i class="bi bi-x-lg me-1"></i>Cancel'
+                : '<i class="bi bi-check2-square me-1"></i>Select';
+            if (!selectMode) clearSelection();
+        }
+        
+        function clearSelection() {
+            selectedDocuments.clear();
+            selectMode = false;
+            document.getElementById('selectModeBtn').innerHTML = '<i class="bi bi-check2-square me-1"></i>Select';
+            document.getElementById('selectModeBtn').classList.remove('btn-info');
+            document.getElementById('selectModeBtn').classList.add('btn-outline-info');
+            updateBatchToolbar();
+            loadFolderContents(currentFolderId);
+        }
+        
+        function selectAllDocuments() {
+            const docs = documents.filter(d => d.folder_id === currentFolderId);
+            docs.forEach(d => selectedDocuments.add(d.id));
+            updateBatchToolbar();
+            loadFolderContents(currentFolderId);
         }
         
         function showContextMenu(e, docId) {
@@ -1280,13 +1670,142 @@
             loadFolderContents(currentFolderId);
         }
         
-        // Placeholder functions for move/copy
+        // Move/Copy Functions
         function moveDocument() {
-            alert('Move functionality - select target folder');
+            if (!selectedDocument) return;
+            selectedDocuments.clear();
+            selectedDocuments.add(selectedDocument);
+            showMoveCopyModal('move');
         }
         
         function copyDocument() {
-            alert('Copy functionality - select target folder');
+            if (!selectedDocument) return;
+            selectedDocuments.clear();
+            selectedDocuments.add(selectedDocument);
+            showMoveCopyModal('copy');
+        }
+        
+        function batchMove() {
+            if (selectedDocuments.size === 0) return;
+            showMoveCopyModal('move');
+        }
+        
+        function batchCopy() {
+            if (selectedDocuments.size === 0) return;
+            showMoveCopyModal('copy');
+        }
+        
+        async function batchStar() {
+            if (selectedDocuments.size === 0) return;
+            
+            for (const docId of selectedDocuments) {
+                try {
+                    await fetch(`/api/briefcase/document/${docId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ starred: true })
+                    });
+                } catch (error) {
+                    console.error('Failed to star:', docId, error);
+                }
+            }
+            
+            clearSelection();
+            loadBriefcase();
+        }
+        
+        async function batchDelete() {
+            if (selectedDocuments.size === 0) return;
+            
+            if (!confirm(`Delete ${selectedDocuments.size} document(s)?`)) return;
+            
+            for (const docId of selectedDocuments) {
+                try {
+                    await fetch(`/api/briefcase/document/${docId}`, { method: 'DELETE' });
+                } catch (error) {
+                    console.error('Failed to delete:', docId, error);
+                }
+            }
+            
+            clearSelection();
+            loadBriefcase();
+        }
+        
+        function showMoveCopyModal(mode) {
+            moveCopyMode = mode;
+            moveCopyTarget = null;
+            
+            const title = mode === 'move' ? 'Move to...' : 'Copy to...';
+            const icon = mode === 'move' ? 'folder-symlink' : 'copy';
+            const count = selectedDocuments.size;
+            
+            document.getElementById('moveCopyTitle').innerHTML = `<i class="bi bi-${icon} me-2"></i>${title}`;
+            document.getElementById('moveCopyDesc').textContent = `Select destination folder for ${count} document(s):`;
+            document.getElementById('moveCopyConfirm').innerHTML = `<i class="bi bi-check me-1"></i>${mode === 'move' ? 'Move' : 'Copy'}`;
+            
+            // Render folder list
+            renderFolderSelectList();
+            
+            const modal = new bootstrap.Modal(document.getElementById('moveCopyModal'));
+            modal.show();
+        }
+        
+        function renderFolderSelectList() {
+            const container = document.getElementById('folderSelectList');
+            let html = '';
+            
+            // Render all folders
+            Object.values(folders).forEach(folder => {
+                const isCurrentFolder = folder.id === currentFolderId;
+                const isDisabled = isCurrentFolder && moveCopyMode === 'move';
+                const isSelected = moveCopyTarget === folder.id;
+                
+                html += `
+                    <div class="folder-select-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}" 
+                         data-id="${folder.id}"
+                         onclick="${isDisabled ? '' : `selectMoveTarget('${folder.id}')`}">
+                        <span class="folder-icon" style="color: ${folder.color || '#3b82f6'};">
+                            <i class="bi bi-${folder.icon || 'folder'}"></i>
+                        </span>
+                        <span>${folder.name}</span>
+                        ${isCurrentFolder ? '<span class="badge bg-secondary ms-auto">Current</span>' : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function selectMoveTarget(folderId) {
+            moveCopyTarget = folderId;
+            renderFolderSelectList();
+        }
+        
+        async function confirmMoveCopy() {
+            if (!moveCopyTarget || selectedDocuments.size === 0) {
+                alert('Please select a destination folder');
+                return;
+            }
+            
+            const endpoint = moveCopyMode === 'move' ? 'move' : 'copy';
+            
+            for (const docId of selectedDocuments) {
+                try {
+                    const formData = new FormData();
+                    formData.append('folder_id', moveCopyTarget);
+                    
+                    await fetch(`/api/briefcase/document/${docId}/${endpoint}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (error) {
+                    console.error(`Failed to ${moveCopyMode}:`, docId, error);
+                }
+            }
+            
+            bootstrap.Modal.getInstance(document.getElementById('moveCopyModal')).hide();
+            clearSelection();
+            loadBriefcase();
         }
     </script>
 </body>
