@@ -1,10 +1,13 @@
 """
 Semptify 5.0 - Document Processing Pipeline
 Handles the full lifecycle: Upload → Analyze → Classify → Store → Cross-reference
+
+Enhanced with world-class document intelligence integration.
 """
 
 import hashlib
 import json
+import logging
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from enum import Enum
@@ -13,6 +16,18 @@ from typing import Optional
 from uuid import uuid4
 
 from app.services.azure_ai import get_azure_ai, DocumentType, ExtractedDocument
+
+logger = logging.getLogger(__name__)
+
+# Import document intelligence service
+try:
+    from app.services.document_intelligence import (
+        get_document_intelligence,
+        IntelligenceResult,
+    )
+    HAS_INTELLIGENCE = True
+except ImportError:
+    HAS_INTELLIGENCE = False
 
 # Import context loop for event emission
 try:
@@ -67,6 +82,11 @@ class TenancyDocument:
     
     # Law cross-references (populated by law engine)
     law_references: Optional[list] = None
+    
+    # Intelligence analysis (populated by document intelligence service)
+    intelligence_result: Optional[dict] = None
+    urgency_level: Optional[str] = None
+    action_items: Optional[list] = None
     
     # Timestamps
     uploaded_at: Optional[datetime] = None
@@ -432,6 +452,80 @@ class DocumentPipeline:
             "earliest": min(all_dates).isoformat(),
             "latest": max(all_dates).isoformat()
         }
+
+    async def get_intelligence(self, doc_id: str) -> Optional[dict]:
+        """
+        Get full document intelligence analysis.
+        
+        This uses the world-class Document Intelligence Service to provide:
+        - Multi-layered classification with reasoning
+        - Entity extraction with contextual understanding
+        - Legal reasoning with MN tenant law
+        - Automatic timeline event generation
+        - Action items with deadlines
+        - Urgency assessment
+        """
+        doc = self._documents.get(doc_id)
+        if not doc:
+            return None
+        
+        if not doc.full_text:
+            return None
+        
+        if not HAS_INTELLIGENCE:
+            logger.warning("Document Intelligence service not available")
+            return None
+        
+        try:
+            intelligence = get_document_intelligence()
+            result = await intelligence.analyze(
+                text=doc.full_text,
+                filename=doc.filename,
+                document_id=doc.id,
+            )
+            
+            # Store intelligence result on document
+            doc.intelligence_result = result.to_dict()
+            doc.urgency_level = result.urgency.value
+            doc.action_items = [a.to_dict() for a in result.action_items]
+            self._save_index()
+            
+            return result.to_dict()
+            
+        except Exception as e:
+            logger.error(f"Intelligence analysis failed: {e}")
+            return None
+
+    async def get_urgent_documents(self, user_id: str) -> list[dict]:
+        """
+        Get all urgent documents for a user.
+        
+        Returns documents sorted by urgency level.
+        """
+        urgent_docs = []
+        
+        for doc in self.get_user_documents(user_id):
+            if doc.status == ProcessingStatus.CLASSIFIED and doc.full_text:
+                # Get intelligence if not already cached
+                if not doc.intelligence_result:
+                    await self.get_intelligence(doc.id)
+                
+                if doc.urgency_level and doc.urgency_level in ["critical", "high"]:
+                    urgent_docs.append({
+                        "id": doc.id,
+                        "filename": doc.filename,
+                        "doc_type": doc.doc_type.value if doc.doc_type else "unknown",
+                        "title": doc.title,
+                        "urgency_level": doc.urgency_level,
+                        "action_items": doc.action_items or [],
+                        "uploaded_at": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
+                    })
+        
+        # Sort by urgency (critical first)
+        urgency_order = {"critical": 0, "high": 1, "medium": 2, "normal": 3, "low": 4}
+        urgent_docs.sort(key=lambda d: urgency_order.get(d["urgency_level"], 5))
+        
+        return urgent_docs
 
 
 # Singleton instance

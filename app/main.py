@@ -72,6 +72,7 @@ from app.routers.court_packet import router as court_packet_router
 from app.routers.actions import router as actions_router
 from app.routers.progress import router as progress_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.enterprise_dashboard import router as enterprise_dashboard_router
 from app.core.mesh_integration import start_mesh_network, stop_mesh_network
 
 # Tenant Defense Module
@@ -1491,6 +1492,7 @@ def create_app() -> FastAPI:
     app.include_router(actions_router, tags=["Smart Actions"])  # Personalized action recommendations
     app.include_router(progress_router, tags=["Progress Tracker"])  # User journey progress tracking
     app.include_router(dashboard_router, tags=["Unified Dashboard"])  # Combined dashboard data
+    app.include_router(enterprise_dashboard_router, tags=["Enterprise Dashboard"])  # Premium enterprise UI & API
 
     # Tenant Defense Module - Evidence collection, sealing petitions, demand letters
     app.include_router(tenant_defense_router, tags=["Tenant Defense"])
@@ -1548,6 +1550,11 @@ def create_app() -> FastAPI:
     @app.get("/", response_class=HTMLResponse)
     async def root():
         """Serve the unified dashboard - main user-facing page."""
+        # Try enterprise dashboard first (premium UI)
+        enterprise_path = Path("static/enterprise-dashboard.html")
+        if enterprise_path.exists():
+            return HTMLResponse(content=enterprise_path.read_text(encoding="utf-8"))
+        # Fallback to standard dashboard
         dashboard_path = Path("static/dashboard.html")
         if dashboard_path.exists():
             return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
