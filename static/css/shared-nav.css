@@ -1,0 +1,381 @@
+/**
+ * Semptify Shared Navigation Styles
+ * Works with shared-nav.js component
+ */
+
+/* CSS Variables - matches design-system.css */
+:root {
+    --nav-bg: #1e293b;
+    --nav-surface: #334155;
+    --nav-border: #475569;
+    --nav-text: #f1f5f9;
+    --nav-text-muted: #94a3b8;
+    --nav-primary: #3b82f6;
+    --nav-primary-hover: #2563eb;
+    --nav-width: 260px;
+    --nav-collapsed-width: 60px;
+    --nav-radius: 4px;
+    --nav-transition: 0.2s ease;
+}
+
+/* Hamburger Button - Mobile */
+.nav-hamburger {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1001;
+    width: 44px;
+    height: 44px;
+    background: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: var(--nav-radius);
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+}
+
+.hamburger-line {
+    width: 20px;
+    height: 2px;
+    background: var(--nav-text);
+    transition: var(--nav-transition);
+}
+
+.nav-hamburger:hover {
+    background: var(--nav-surface);
+}
+
+.nav-hamburger:hover .hamburger-line {
+    background: var(--nav-primary);
+}
+
+/* Mobile Overlay */
+.semptify-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--nav-transition);
+}
+
+.semptify-nav-overlay.open {
+    opacity: 1;
+}
+
+/* Sidebar */
+.semptify-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--nav-width);
+    background: var(--nav-bg);
+    border-right: 1px solid var(--nav-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    transition: transform var(--nav-transition);
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--nav-border);
+    min-height: 60px;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--nav-text);
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+}
+
+.logo-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.sidebar-close {
+    display: none;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: var(--nav-text-muted);
+    cursor: pointer;
+    border-radius: var(--nav-radius);
+    font-size: 1.25rem;
+}
+
+.sidebar-close:hover {
+    background: var(--nav-surface);
+    color: var(--nav-text);
+}
+
+/* Sidebar Content */
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: var(--nav-border);
+    border-radius: 2px;
+}
+
+/* Nav Sections */
+.nav-section {
+    margin-bottom: 0.5rem;
+}
+
+.nav-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-radius: var(--nav-radius);
+    transition: background var(--nav-transition);
+}
+
+.nav-section-header:hover {
+    background: var(--nav-surface);
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--nav-text-muted);
+}
+
+.nav-section-chevron {
+    font-size: 0.625rem;
+    color: var(--nav-text-muted);
+    transition: transform var(--nav-transition);
+}
+
+.nav-section.collapsed .nav-section-chevron {
+    transform: rotate(-90deg);
+}
+
+.nav-section.collapsed .nav-section-items {
+    display: none;
+}
+
+/* Nav Items */
+.nav-section-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 0.25rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    color: var(--nav-text);
+    text-decoration: none;
+    border-radius: var(--nav-radius);
+    transition: all var(--nav-transition);
+    font-size: 0.875rem;
+}
+
+.nav-item:hover {
+    background: var(--nav-surface);
+    color: var(--nav-text);
+}
+
+.nav-item.active {
+    background: var(--nav-primary);
+    color: white;
+}
+
+.nav-item.active:hover {
+    background: var(--nav-primary-hover);
+}
+
+.nav-icon {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.nav-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-badge {
+    background: var(--nav-primary);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.125rem 0.375rem;
+    border-radius: 9999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.nav-item.active .nav-badge {
+    background: white;
+    color: var(--nav-primary);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--nav-border);
+    text-align: center;
+}
+
+.sidebar-version {
+    font-size: 0.75rem;
+    color: var(--nav-text-muted);
+}
+
+/* Main Content Offset */
+body.has-nav .main-content,
+body.has-nav main,
+body.has-nav .content,
+body.has-nav .main-container {
+    margin-left: var(--nav-width);
+}
+
+body.has-nav .header {
+    margin-left: var(--nav-width);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .nav-hamburger {
+        display: flex;
+    }
+
+    .semptify-nav-overlay {
+        display: block;
+        pointer-events: none;
+    }
+
+    .semptify-nav-overlay.open {
+        pointer-events: auto;
+    }
+
+    .semptify-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .semptify-sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar-close {
+        display: block;
+    }
+
+    /* Reset main content offset on mobile */
+    body.has-nav .main-content,
+    body.has-nav main,
+    body.has-nav .content,
+    body.has-nav .main-container,
+    body.has-nav .header {
+        margin-left: 0;
+    }
+
+    /* Add padding for hamburger button */
+    body.has-nav .header {
+        padding-left: 60px;
+    }
+}
+
+/* Tablet - Collapsed sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .semptify-sidebar {
+        width: var(--nav-collapsed-width);
+    }
+
+    .semptify-sidebar:hover {
+        width: var(--nav-width);
+    }
+
+    .semptify-sidebar:not(:hover) .logo-text,
+    .semptify-sidebar:not(:hover) .nav-label,
+    .semptify-sidebar:not(:hover) .nav-section-title,
+    .semptify-sidebar:not(:hover) .nav-section-chevron,
+    .semptify-sidebar:not(:hover) .sidebar-version {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .semptify-sidebar:not(:hover) .nav-section-header {
+        justify-content: center;
+    }
+
+    .semptify-sidebar:not(:hover) .nav-item {
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    body.has-nav .main-content,
+    body.has-nav main,
+    body.has-nav .content,
+    body.has-nav .main-container,
+    body.has-nav .header {
+        margin-left: var(--nav-collapsed-width);
+    }
+}
+
+/* Dark theme support (already dark by default) */
+@media (prefers-color-scheme: light) {
+    /* Keep dark sidebar even in light mode for contrast */
+}
+
+/* Print - hide nav */
+@media print {
+    .semptify-sidebar,
+    .nav-hamburger,
+    .semptify-nav-overlay {
+        display: none !important;
+    }
+
+    body.has-nav .main-content,
+    body.has-nav main,
+    body.has-nav .content,
+    body.has-nav .main-container,
+    body.has-nav .header {
+        margin-left: 0 !important;
+    }
+}

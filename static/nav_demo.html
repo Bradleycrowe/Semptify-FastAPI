@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Demo - Semptify</title>
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* Main content area */
+        .main-content {
+            padding: 2rem;
+            transition: margin-left 0.2s ease;
+        }
+
+        .demo-header {
+            margin-bottom: 2rem;
+        }
+
+        .demo-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-header p {
+            color: #94a3b8;
+        }
+
+        /* Feature cards */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1.5rem;
+        }
+
+        .feature-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: #3b82f6;
+        }
+
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        .feature-card code {
+            background: #0f172a;
+            padding: 0.125rem 0.375rem;
+            border-radius: 2px;
+            font-size: 0.875rem;
+            color: #22c55e;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .code-block .comment {
+            color: #6b7280;
+        }
+
+        .code-block .tag {
+            color: #f472b6;
+        }
+
+        .code-block .attr {
+            color: #a78bfa;
+        }
+
+        .code-block .string {
+            color: #22c55e;
+        }
+
+        /* Status indicator */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            border-radius: 4px;
+            color: #22c55e;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        /* Migration guide */
+        .migration {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1.5rem;
+        }
+
+        .migration h2 {
+            margin-bottom: 1rem;
+        }
+
+        .migration ol {
+            margin-left: 1.5rem;
+            color: #94a3b8;
+        }
+
+        .migration li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .migration strong {
+            color: #f1f5f9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+                padding-top: 70px; /* Space for hamburger */
+            }
+
+            .demo-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="has-nav">
+    <!-- Shared Navigation Component -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="demo-header">
+            <h1>🧭 Shared Navigation Component</h1>
+            <p>One navigation, all pages. Edit once, update everywhere.</p>
+        </div>
+
+        <div class="status">
+            ✅ Navigation loaded successfully
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>📱 Mobile Hamburger</h3>
+                <p>Resize your browser below 768px to see the hamburger menu appear. Click it to open the mobile nav overlay.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📂 Collapsible Sections</h3>
+                <p>Click any section header to collapse/expand. State is saved to <code>localStorage</code> and persists across pages.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎯 Active Page Detection</h3>
+                <p>The current page is automatically highlighted in blue. Works with query strings and partial paths.</p>
+            </div>
+            <div class="feature-card">
+                <h3>💻 Tablet Mode</h3>
+                <p>On tablets (769-1024px), sidebar collapses to icons only. Hover to expand and see labels.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⌨️ Keyboard Support</h3>
+                <p>Press <code>Escape</code> to close mobile nav. All links are keyboard accessible.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔧 Single Source</h3>
+                <p>Edit <code>shared-nav.js</code> to add/remove/reorder nav items. Changes apply to ALL pages instantly.</p>
+            </div>
+        </div>
+
+        <div class="code-block">
+            <pre><span class="comment">&lt;!-- Add to ANY page: --&gt;</span>
+
+<span class="comment">&lt;!-- 1. Add container div --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"semptify-nav"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- 2. Include the script --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="string">"/static/js/shared-nav.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- 3. Add body class for content offset --&gt;</span>
+<span class="tag">&lt;body</span> <span class="attr">class</span>=<span class="string">"has-nav"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- That's it! CSS is auto-loaded. --&gt;</span></pre>
+        </div>
+
+        <div class="migration">
+            <h2>📋 Migration Guide</h2>
+            <ol>
+                <li><strong>Remove old sidebar HTML</strong> - Delete the entire <code>&lt;nav class="sidebar"&gt;...&lt;/nav&gt;</code> block</li>
+                <li><strong>Add the container</strong> - Place <code>&lt;div id="semptify-nav"&gt;&lt;/div&gt;</code> at the start of body</li>
+                <li><strong>Add the script</strong> - Include <code>/static/js/shared-nav.js</code></li>
+                <li><strong>Add body class</strong> - Add <code>class="has-nav"</code> to the body tag</li>
+                <li><strong>Remove old CSS</strong> - Delete inline sidebar styles (optional, will be overridden)</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

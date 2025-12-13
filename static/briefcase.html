@@ -414,6 +414,7 @@
             justify-content: center;
             z-index: 9999;
             transition: transform 0.15s ease, box-shadow 0.15s ease;
+            -webkit-user-select: none;
             user-select: none;
         }
         
@@ -741,7 +742,7 @@
                 <button class="btn btn-outline-light btn-sm" onclick="exportBriefcase()">
                     <i class="bi bi-download me-1"></i>Export
                 </button>
-                <a href="command_center.html" class="btn btn-outline-light btn-sm">
+                <a href="command_center.html" class="btn btn-outline-light btn-sm" title="Command Center" aria-label="Command Center">
                     <i class="bi bi-house"></i>
                 </a>
             </div>
@@ -762,7 +763,7 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="fw-semibold">Folders</span>
-                <button class="btn btn-sm btn-outline-success" onclick="showNewFolderModal()">
+                <button class="btn btn-sm btn-outline-success" onclick="showNewFolderModal()" title="New folder" aria-label="New folder">
                     <i class="bi bi-folder-plus"></i>
                 </button>
             </div>
@@ -782,7 +783,7 @@
                     <button class="btn btn-success" onclick="showUploadModal()">
                         <i class="bi bi-upload me-1"></i>Upload
                     </button>
-                    <button class="btn btn-outline-light" onclick="toggleView()">
+                    <button class="btn btn-outline-light" onclick="toggleView()" title="Toggle view" aria-label="Toggle view">
                         <i class="bi bi-grid" id="viewToggleIcon"></i>
                     </button>
                 </div>
@@ -901,7 +902,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Upload Document</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="upload-zone" id="uploadZone">
@@ -939,14 +940,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>New Folder</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="text" class="form-control" id="newFolderName" placeholder="Folder name">
                     <div class="mt-3">
                         <label class="form-label">Color</label>
                         <div class="d-flex gap-2">
-                            <input type="color" id="folderColor" value="#3b82f6" class="form-control form-control-color">
+                            <input type="color" id="folderColor" value="#3b82f6" class="form-control form-control-color" title="Choose folder color" aria-label="Choose folder color">
                         </div>
                     </div>
                 </div>
@@ -964,7 +965,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="previewTitle">Document Preview</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="min-height: 400px;">
                     <div id="previewContent" class="text-center">
@@ -981,7 +982,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="moveCopyTitle"><i class="bi bi-folder-symlink me-2"></i>Move to...</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-secondary small mb-3" id="moveCopyDesc">Select destination folder:</p>
@@ -1005,7 +1006,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Briefcase Help</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <h6><i class="bi bi-briefcase me-2 text-success"></i>About Briefcase</h6>

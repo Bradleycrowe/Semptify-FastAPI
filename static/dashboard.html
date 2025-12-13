@@ -389,16 +389,17 @@
             background: var(--primary-dark);
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
+        /* Panel Sidebar (internal navigation) */
+        .panel-sidebar {
+            width: 220px;
             background: var(--dark);
             border-right: 1px solid var(--surface);
             display: flex;
             flex-direction: column;
             position: fixed;
+            left: 260px; /* After shared nav */
             height: 100vh;
-            z-index: 100;
+            z-index: 90;
         }
 
         .logo {
@@ -513,7 +514,7 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: 280px;
+            margin-left: 480px; /* 260px shared nav + 220px panel sidebar */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -1226,23 +1227,27 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar .logo h1,
-            .sidebar .nav-label,
-            .sidebar .nav-item span,
-            .sidebar .case-status {
+            .panel-sidebar {
                 display: none;
             }
             
             .main-content {
-                margin-left: 70px;
+                margin-left: 0;
+                padding-top: 60px;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .panel-sidebar {
+                left: 60px;
+                width: 180px;
+            }
+            .main-content {
+                margin-left: 240px;
             }
         }
 
@@ -1260,12 +1265,16 @@
     </style>
     <script src="/static/js/law-linker.js"></script>
 </head>
-<body>
+<body class="has-nav">
+    <!-- Shared Navigation Component -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+
     <!-- Site-wide header -->
     <script src="/static/js/header.js"></script>
 
-    <!-- Sidebar -->
-    <nav class="sidebar">
+    <!-- Internal Panel Sidebar -->
+    <nav class="sidebar panel-sidebar">
         <div class="logo">
             <h1>📓 Semptify</h1>
             <span>Tenant Logbook & Document Organizer</span>
