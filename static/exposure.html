@@ -104,24 +104,12 @@
         }
     </style>
     <link rel="stylesheet" href="/static/css/help-system.css">
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
 </head>
 <body>
-    <!-- Site-wide header -->
-    <script src="/static/js/header.js"></script>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/static/dashboard-v2.html">
-                <i class="bi bi-shield-check"></i> Semptify
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/static/dashboard-v2.html">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Shared Navigation -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
 
     <div class="container py-4">
         <!-- Header -->
@@ -314,7 +302,8 @@
         document.getElementById('pressReleaseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const data = {
+            // Collect form data for local generation
+            const formData = {
                 case_id: document.getElementById('caseId').value,
                 headline: document.getElementById('headline').value,
                 summary: document.getElementById('summary').value,
@@ -324,21 +313,33 @@
                 contact_email: document.getElementById('contactEmail').value
             };
             
+            // Map to backend API schema
+            const apiData = {
+                property_address: formData.case_id || 'Property Address',
+                violations: formData.summary ? [formData.summary] : [],
+                contact_info: {
+                    name: formData.contact_name || 'Media Relations',
+                    email: formData.contact_email || 'media@example.com'
+                },
+                language: formData.language,
+                bundle_link: null
+            };
+            
             try {
                 const response = await fetch('/api/exposure/press-release', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(apiData)
                 });
                 
                 if (response.ok) {
                     const result = await response.json();
-                    displayPressRelease(result);
+                    displayPressRelease(result, formData);
                 } else {
-                    generateLocalPressRelease(data);
+                    generateLocalPressRelease(formData);
                 }
             } catch (error) {
-                generateLocalPressRelease(data);
+                generateLocalPressRelease(formData);
             }
         });
 
@@ -386,12 +387,67 @@
                 `${data.headline}\n\n${data.summary}\n\nLearn more about tenant rights in Minnesota.\n\n#TenantRights #HousingJustice #Minnesota`;
         }
 
-        function displayPressRelease(result) {
-            if (result.content) {
-                document.getElementById('previewContent').innerHTML = result.content;
+        function displayPressRelease(result, formData) {
+            // Use API result with user's headline
+            const headline = formData?.headline || result.headline;
+            const summary = formData?.summary || result.lede;
+            const contactName = formData?.contact_name || result.contact_info?.name || 'Media Relations';
+            const contactEmail = formData?.contact_email || result.contact_info?.email || 'media@example.com';
+            
+            const today = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            
+            let pressRelease = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <strong>FOR IMMEDIATE RELEASE</strong><br>
+                    ${today}
+                </div>
+                
+                <h1>${headline}</h1>
+                ${result.subheadline ? `<h3>${result.subheadline}</h3>` : ''}
+                
+                <p class="dateline">MINNEAPOLIS, MN —</p>
+                
+                <p>${result.lede || summary}</p>
+            `;
+            
+            if (result.body && result.body.length > 0) {
+                result.body.forEach(para => {
+                    pressRelease += `<p>${para}</p>`;
+                });
+            } else if (formData?.full_story) {
+                pressRelease += `<p>${formData.full_story}</p>`;
             }
+            
+            if (result.quotes && result.quotes.length > 0) {
+                result.quotes.forEach(quote => {
+                    pressRelease += `<blockquote>"${quote.text}" — ${quote.attribution}</blockquote>`;
+                });
+            }
+            
+            pressRelease += `
+                <p>${result.call_to_action || 'Affected residents are encouraged to contact local housing authorities and tenant advocacy organizations for assistance.'}</p>
+                
+                <p><strong>###</strong></p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+                    <strong>Media Contact:</strong><br>
+                    ${contactName}<br>
+                    ${contactEmail}
+                </div>
+            `;
+            
+            document.getElementById('previewContent').innerHTML = pressRelease;
             document.getElementById('previewSection').style.display = 'block';
             document.getElementById('initialState').style.display = 'none';
+            
+            // Generate social posts
+            const twitterPost = `🏠 ${headline.substring(0, 200)} #TenantRights #MinnesotaHousing #HousingJustice`;
+            document.getElementById('twitterPost').value = twitterPost.substring(0, 280);
+            
+            document.getElementById('facebookPost').value = 
+                `${headline}\n\n${summary}\n\nLearn more about tenant rights in Minnesota.\n\n#TenantRights #HousingJustice #Minnesota`;
         }
 
         function copyToClipboard() {

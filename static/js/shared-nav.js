@@ -15,6 +15,7 @@ const SemptifyNav = {
             title: '🎯 Mission Control',
             items: [
                 { icon: '🎯', label: 'Dashboard', href: '/static/dashboard.html' },
+                { icon: '�️', label: 'Command Center', href: '/static/command_center.html' },
                 { icon: '🆘', label: 'Crisis Assessment', href: '/static/crisis_intake.html' },
             ]
         },
@@ -22,7 +23,7 @@ const SemptifyNav = {
             id: 'journey',
             title: '🏠 Tenant Journey',
             items: [
-                { icon: '�', label: 'My Tenancy', href: '/static/my_tenancy.html' },
+                { icon: '📋', label: 'My Tenancy', href: '/static/my_tenancy.html' },
                 { icon: '�📝', label: '1. Lease & Move-In', href: '/static/journey.html' },
                 { icon: '💰', label: '2. Rent Payments', href: '/static/document_intake.html?type=payment' },
                 { icon: '🔧', label: '3. Maintenance', href: '/static/document_intake.html?type=maintenance' },
@@ -79,6 +80,8 @@ const SemptifyNav = {
                 { icon: '💰', label: 'Funding Search', href: '/static/funding_search.html' },
                 { icon: '🏠', label: 'HUD Funding Guide', href: '/static/hud_funding.html' },
                 { icon: '📢', label: 'Campaign', href: '/static/campaign.html' },
+                { icon: '🔎', label: 'Fraud Analysis', href: '/static/fraud.html' },
+                { icon: '📰', label: 'Press Release', href: '/static/exposure.html' },
             ]
         },
         {
