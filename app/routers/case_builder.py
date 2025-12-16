@@ -103,37 +103,70 @@ class DefenseCreate(BaseModel):
 
 
 # =============================================================================
-# DATA STORAGE PATH
+# DATA STORAGE PATH - USER-SCOPED FOR PRIVACY
 # =============================================================================
 
+def get_user_case_data_dir(user_id: str):
+    """Get/create the user-specific case data directory."""
+    # Sanitize user_id to prevent path traversal
+    safe_user_id = "".join(c for c in user_id if c.isalnum() or c in '_-')
+    data_dir = os.path.join(os.getcwd(), "data", "cases", safe_user_id)
+    os.makedirs(data_dir, exist_ok=True)
+    return data_dir
+
+
 def get_case_data_dir():
-    """Get/create the case data directory."""
+    """Get/create the legacy case data directory (for migration only)."""
     data_dir = os.path.join(os.getcwd(), "data", "cases")
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
 
-def get_case_file(case_id: str) -> str:
-    """Get path to case file."""
-    data_dir = get_case_data_dir()
-    return os.path.join(data_dir, f"{case_id.replace('-', '_').replace(' ', '_')}.json")
+def get_case_file(case_id: str, user_id: str) -> str:
+    """Get path to case file for a specific user."""
+    data_dir = get_user_case_data_dir(user_id)
+    safe_case_id = case_id.replace('-', '_').replace(' ', '_').replace('/', '_').replace('\\', '_')
+    return os.path.join(data_dir, f"{safe_case_id}.json")
 
 
-def load_case(case_id: str) -> Optional[Dict]:
-    """Load case from file."""
-    file_path = get_case_file(case_id)
+def load_case(case_id: str, user_id: str) -> Optional[Dict]:
+    """Load case from file, ensuring user ownership."""
+    file_path = get_case_file(case_id, user_id)
     if os.path.exists(file_path):
         with open(file_path, 'r') as f:
-            return json.load(f)
+            case = json.load(f)
+            # Verify user ownership (defense in depth)
+            if case.get("user_id") and case.get("user_id") != user_id:
+                logger.warning(f"User {user_id} attempted to access case owned by {case.get('user_id')}")
+                return None
+            return case
     return None
 
 
-def save_case(case_id: str, case_data: Dict):
-    """Save case to file."""
-    file_path = get_case_file(case_id)
+def save_case(case_id: str, case_data: Dict, user_id: str):
+    """Save case to file in user's directory."""
+    # Ensure user_id is set in case data
+    case_data["user_id"] = user_id
     case_data["updated_at"] = datetime.now().isoformat()
+    
+    file_path = get_case_file(case_id, user_id)
     with open(file_path, 'w') as f:
         json.dump(case_data, f, indent=2, default=str)
+
+
+def verify_case_ownership(case_id: str, user_id: str) -> bool:
+    """Verify that a case belongs to a specific user."""
+    file_path = get_case_file(case_id, user_id)
+    if not os.path.exists(file_path):
+        return False
+    
+    with open(file_path, 'r') as f:
+        case = json.load(f)
+        # Case is owned if user_id matches or user_id not set (legacy)
+        stored_user_id = case.get("user_id")
+        if stored_user_id and stored_user_id != user_id:
+            return False
+    return True
 
 
 # =============================================================================
@@ -504,33 +537,128 @@ async def case_builder_info():
 
 @router.get("/cases")
 async def list_cases(user: StorageUser = Depends(require_user)):
-    """List all cases for the user."""
-    data_dir = get_case_data_dir()
+    """List all cases for the authenticated user with computed status and progress."""
+    user_id = user.user_id
+    data_dir = get_user_case_data_dir(user_id)
     cases = []
+    
+    # Only list cases from user's directory
+    if not os.path.exists(data_dir):
+        return {"cases": [], "count": 0}
     
     for filename in os.listdir(data_dir):
         if filename.endswith('.json'):
             file_path = os.path.join(data_dir, filename)
-            with open(file_path, 'r') as f:
-                case = json.load(f)
+            try:
+                with open(file_path, 'r') as f:
+                    case = json.load(f)
+                
+                # Double-check user ownership (defense in depth)
+                if case.get("user_id") and case.get("user_id") != user_id:
+                    logger.warning(f"Skipping case with mismatched user_id in {filename}")
+                    continue
+                
+                # Compute case status based on data
+                status = case.get("status", "draft")
+                if not status:
+                    # Auto-determine status
+                    has_answer = any(m.get("motion_type") == "answer" for m in case.get("motions", []))
+                    has_hearing = bool(case.get("hearing_date"))
+                    if has_answer:
+                        status = "filed"
+                    elif has_hearing:
+                        status = "active"
+                    else:
+                        status = "draft"
+                
+                # Compute progress
+                progress = 0
+                if case.get("case_number"):
+                    progress += 10
+                if case.get("property_address"):
+                    progress += 10
+                if case.get("plaintiff", {}).get("name"):
+                    progress += 10
+                if len(case.get("timeline", [])) > 0:
+                    progress += 15
+                if len(case.get("evidence", [])) > 0:
+                    progress += 20
+                if len(case.get("defenses", [])) > 0:
+                    progress += 15
+                if len(case.get("motions", [])) > 0:
+                    progress += 20
+                progress = min(progress, 100)
+                
+                # Find next deadline
+                deadlines = case.get("deadlines", [])
+                next_deadline = None
+                next_deadline_task = None
+                urgent = False
+                
+                if deadlines:
+                    today = date.today()
+                    upcoming = sorted([
+                        d for d in deadlines 
+                        if d.get("deadline") and datetime.fromisoformat(d["deadline"]).date() >= today
+                    ], key=lambda x: x["deadline"])
+                    
+                    if upcoming:
+                        next_dl = upcoming[0]
+                        next_deadline = next_dl.get("deadline")
+                        next_deadline_task = next_dl.get("title", "Deadline")
+                        days_until = (datetime.fromisoformat(next_deadline).date() - today).days
+                        urgent = days_until <= 7
+                
+                # If no deadline set but has hearing, use hearing as deadline
+                if not next_deadline and case.get("hearing_date"):
+                    next_deadline = case.get("hearing_date")
+                    next_deadline_task = "Hearing"
+                    try:
+                        days_until = (datetime.fromisoformat(next_deadline).date() - date.today()).days
+                        urgent = days_until <= 7
+                    except:
+                        pass
+                
+                # Build case ID from filename
+                case_id = filename.replace('.json', '')
+                
                 cases.append({
+                    "id": case_id,
                     "case_number": case.get("case_number"),
                     "case_type": case.get("case_type"),
+                    "status": status,
                     "court": case.get("court"),
                     "property_address": case.get("property_address"),
                     "hearing_date": case.get("hearing_date"),
                     "plaintiff_name": case.get("plaintiff", {}).get("name"),
                     "defendant_name": case.get("defendant", {}).get("name"),
+                    "progress": progress,
+                    "next_deadline": next_deadline,
+                    "next_deadline_task": next_deadline_task,
+                    "urgent": urgent,
+                    "defenses": [d.get("defense_type") for d in case.get("defenses", [])],
+                    "evidence_count": len(case.get("evidence", [])),
+                    "timeline_events": [
+                        {"date": e.get("date"), "title": e.get("title")}
+                        for e in (case.get("timeline", []) or [])[:5]
+                    ],
                     "updated_at": case.get("updated_at")
                 })
+            except Exception as e:
+                logger.error(f"Error loading case file {filename}: {e}")
+                continue
+    
+    # Sort by updated_at descending
+    cases.sort(key=lambda x: x.get("updated_at") or "", reverse=True)
     
     return {"cases": cases, "count": len(cases)}
 
 
 @router.get("/cases/{case_id}")
 async def get_case(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get a specific case."""
-    case = load_case(case_id)
+    """Get a specific case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     return case
@@ -538,8 +666,11 @@ async def get_case(case_id: str, user: StorageUser = Depends(require_user)):
 
 @router.post("/cases")
 async def create_case(case: CaseCreate, user: StorageUser = Depends(require_user)):
-    """Create a new case."""
+    """Create a new case for the authenticated user."""
+    user_id = user.user_id
+    
     case_data = {
+        "user_id": user_id,  # Store user ownership
         "case_number": case.case_number,
         "case_type": case.case_type,
         "court": case.court,
@@ -569,22 +700,48 @@ async def create_case(case: CaseCreate, user: StorageUser = Depends(require_user
         "updated_at": datetime.now().isoformat()
     }
     
-    save_case(case.case_number, case_data)
+    save_case(case.case_number, case_data, user_id)
     
     return {"success": True, "case_number": case.case_number, "case": case_data}
 
 
 @router.put("/cases/{case_id}")
 async def update_case(case_id: str, updates: Dict[str, Any] = Body(...), user: StorageUser = Depends(require_user)):
-    """Update a case."""
-    case = load_case(case_id)
+    """Update a case belonging to the authenticated user."""
+    user_id = user.user_id
+    
+    # Verify ownership before loading
+    if not verify_case_ownership(case_id, user_id):
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
+    # Prevent user_id from being changed
+    updates.pop("user_id", None)
+    
     case.update(updates)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "case": case}
+
+
+@router.delete("/cases/{case_id}")
+async def delete_case(case_id: str, user: StorageUser = Depends(require_user)):
+    """Delete a case belonging to the authenticated user."""
+    user_id = user.user_id
+    
+    # Verify ownership before deletion
+    if not verify_case_ownership(case_id, user_id):
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    file_path = get_case_file(case_id, user_id)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    os.remove(file_path)
+    return {"success": True, "message": f"Case {case_id} deleted"}
 
 
 # -----------------------------------------------------------------------------
@@ -593,8 +750,9 @@ async def update_case(case_id: str, updates: Dict[str, Any] = Body(...), user: S
 
 @router.get("/cases/{case_id}/timeline")
 async def get_timeline(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all timeline events for a case."""
-    case = load_case(case_id)
+    """Get all timeline events for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -607,8 +765,9 @@ async def get_timeline(case_id: str, user: StorageUser = Depends(require_user)):
 
 @router.post("/cases/{case_id}/timeline")
 async def add_timeline_event(case_id: str, event: TimelineEventCreate, user: StorageUser = Depends(require_user)):
-    """Add a timeline event."""
-    case = load_case(case_id)
+    """Add a timeline event to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -628,20 +787,21 @@ async def add_timeline_event(case_id: str, event: TimelineEventCreate, user: Sto
     if "timeline" not in case:
         case["timeline"] = []
     case["timeline"].append(event_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "event_id": event_id, "event": event_data}
 
 
 @router.delete("/cases/{case_id}/timeline/{event_id}")
 async def delete_timeline_event(case_id: str, event_id: str, user: StorageUser = Depends(require_user)):
-    """Delete a timeline event."""
-    case = load_case(case_id)
+    """Delete a timeline event from a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
     case["timeline"] = [e for e in case.get("timeline", []) if e.get("id") != event_id]
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True}
 
@@ -652,8 +812,9 @@ async def delete_timeline_event(case_id: str, event_id: str, user: StorageUser =
 
 @router.get("/cases/{case_id}/evidence")
 async def get_evidence(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all evidence for a case."""
-    case = load_case(case_id)
+    """Get all evidence for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -662,8 +823,9 @@ async def get_evidence(case_id: str, user: StorageUser = Depends(require_user)):
 
 @router.post("/cases/{case_id}/evidence")
 async def add_evidence(case_id: str, evidence: EvidenceCreate, user: StorageUser = Depends(require_user)):
-    """Add evidence to a case."""
-    case = load_case(case_id)
+    """Add evidence to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -685,7 +847,7 @@ async def add_evidence(case_id: str, evidence: EvidenceCreate, user: StorageUser
     if "evidence" not in case:
         case["evidence"] = []
     case["evidence"].append(evidence_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "evidence_id": evidence_id, "evidence": evidence_data}
 
@@ -696,8 +858,9 @@ async def add_evidence(case_id: str, evidence: EvidenceCreate, user: StorageUser
 
 @router.get("/cases/{case_id}/counterclaims")
 async def get_counterclaims(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all counterclaims for a case."""
-    case = load_case(case_id)
+    """Get all counterclaims for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -706,8 +869,9 @@ async def get_counterclaims(case_id: str, user: StorageUser = Depends(require_us
 
 @router.post("/cases/{case_id}/counterclaims")
 async def add_counterclaim(case_id: str, claim: CounterclaimCreate, user: StorageUser = Depends(require_user)):
-    """Add a counterclaim to a case."""
-    case = load_case(case_id)
+    """Add a counterclaim to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -733,7 +897,7 @@ async def add_counterclaim(case_id: str, claim: CounterclaimCreate, user: Storag
     if "counterclaims" not in case:
         case["counterclaims"] = []
     case["counterclaims"].append(claim_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "claim_id": claim_id, "counterclaim": claim_data}
 
@@ -744,8 +908,9 @@ async def add_counterclaim(case_id: str, claim: CounterclaimCreate, user: Storag
 
 @router.get("/cases/{case_id}/motions")
 async def get_motions(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all motions for a case."""
-    case = load_case(case_id)
+    """Get all motions for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -754,8 +919,9 @@ async def get_motions(case_id: str, user: StorageUser = Depends(require_user)):
 
 @router.post("/cases/{case_id}/motions")
 async def add_motion(case_id: str, motion: MotionCreate, user: StorageUser = Depends(require_user)):
-    """Add a motion to a case."""
-    case = load_case(case_id)
+    """Add a motion to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -783,7 +949,7 @@ async def add_motion(case_id: str, motion: MotionCreate, user: StorageUser = Dep
     if "motions" not in case:
         case["motions"] = []
     case["motions"].append(motion_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "motion_id": motion_id, "motion": motion_data}
 
@@ -794,8 +960,9 @@ async def add_motion(case_id: str, motion: MotionCreate, user: StorageUser = Dep
 
 @router.get("/cases/{case_id}/deadlines")
 async def get_deadlines(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all deadlines for a case."""
-    case = load_case(case_id)
+    """Get all deadlines for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -827,8 +994,9 @@ async def get_deadlines(case_id: str, user: StorageUser = Depends(require_user))
 
 @router.post("/cases/{case_id}/deadlines")
 async def add_deadline(case_id: str, deadline: DeadlineCreate, user: StorageUser = Depends(require_user)):
-    """Add a deadline to a case."""
-    case = load_case(case_id)
+    """Add a deadline to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -848,15 +1016,16 @@ async def add_deadline(case_id: str, deadline: DeadlineCreate, user: StorageUser
     if "deadlines" not in case:
         case["deadlines"] = []
     case["deadlines"].append(deadline_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "deadline_id": deadline_id, "deadline": deadline_data}
 
 
 @router.put("/cases/{case_id}/deadlines/{deadline_id}/complete")
 async def complete_deadline(case_id: str, deadline_id: str, user: StorageUser = Depends(require_user)):
-    """Mark a deadline as complete."""
-    case = load_case(case_id)
+    """Mark a deadline as complete for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -865,7 +1034,7 @@ async def complete_deadline(case_id: str, deadline_id: str, user: StorageUser = 
             d["completed"] = True
             d["completed_at"] = datetime.now().isoformat()
     
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     return {"success": True}
 
 
@@ -875,8 +1044,9 @@ async def complete_deadline(case_id: str, deadline_id: str, user: StorageUser = 
 
 @router.get("/cases/{case_id}/defenses")
 async def get_defenses(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get all defenses for a case."""
-    case = load_case(case_id)
+    """Get all defenses for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -885,8 +1055,9 @@ async def get_defenses(case_id: str, user: StorageUser = Depends(require_user)):
 
 @router.post("/cases/{case_id}/defenses")
 async def add_defense(case_id: str, defense: DefenseCreate, user: StorageUser = Depends(require_user)):
-    """Add a defense strategy."""
-    case = load_case(case_id)
+    """Add a defense strategy to a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -910,7 +1081,7 @@ async def add_defense(case_id: str, defense: DefenseCreate, user: StorageUser = 
     if "defenses" not in case:
         case["defenses"] = []
     case["defenses"].append(defense_data)
-    save_case(case_id, case)
+    save_case(case_id, case, user_id)
     
     return {"success": True, "defense_id": defense_id, "defense": defense_data}
 
@@ -943,8 +1114,9 @@ async def get_motion_templates():
 
 @router.post("/cases/{case_id}/generate/counterclaim")
 async def generate_counterclaim_doc(case_id: str, user: StorageUser = Depends(require_user)):
-    """Generate the counterclaim document for a case."""
-    case = load_case(case_id)
+    """Generate the counterclaim document for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -1040,8 +1212,9 @@ async def generate_counterclaim_doc(case_id: str, user: StorageUser = Depends(re
 
 @router.post("/cases/{case_id}/generate/motion/{motion_type}")
 async def generate_motion_doc(case_id: str, motion_type: str, params: Dict[str, Any] = Body(default={}), user: StorageUser = Depends(require_user)):
-    """Generate a motion document."""
-    case = load_case(case_id)
+    """Generate a motion document for a case belonging to the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     
@@ -1095,8 +1268,9 @@ async def generate_motion_doc(case_id: str, motion_type: str, params: Dict[str, 
 
 @router.get("/cases/{case_id}/summary")
 async def get_case_summary(case_id: str, user: StorageUser = Depends(require_user)):
-    """Get a complete case summary with reminders."""
-    case = load_case(case_id)
+    """Get a complete case summary with reminders for the authenticated user."""
+    user_id = user.user_id
+    case = load_case(case_id, user_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     

@@ -47,7 +47,8 @@ const SemptifyNav = {
             id: 'dakota',
             title: '🏛️ Dakota County Eviction',
             items: [
-                { icon: '🛡️', label: 'Defense Center', href: '/static/dakota_defense.html' },
+                { icon: '�', label: 'Case Management', href: '/static/cases.html' },
+                { icon: '�🛡️', label: 'Defense Center', href: '/static/dakota_defense.html' },
                 { icon: '📝', label: 'File Answer', href: '/static/eviction_answer.html' },
                 { icon: '⚔️', label: 'Counterclaim', href: '/static/counterclaim.html' },
                 { icon: '📋', label: 'File Motion', href: '/static/motions.html' },
