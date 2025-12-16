@@ -631,7 +631,8 @@
         const PROVIDERS = {
             'G': { id: 'google_drive', name: 'Google Drive', icon: '📁' },
             'D': { id: 'dropbox', name: 'Dropbox', icon: '📦' },
-            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' }
+            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' },
+            'S': { id: 'session', name: 'Session', icon: '🔐' }
         };
 
         const ROLES = {
@@ -650,7 +651,7 @@
         }
 
         function parseUserId(userId) {
-            if (!userId || userId.length !== 10) return null;
+            if (!userId || userId.length < 3) return null;
             const providerChar = userId[0];
             const roleChar = userId[1];
             const provider = PROVIDERS[providerChar];

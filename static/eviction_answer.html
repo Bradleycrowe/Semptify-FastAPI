@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Your Answer to Eviction - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+            max-width: 900px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 1rem; }
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 2rem;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        
+        .step-circle.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .step-circle.completed {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        /* Step Content */
+        .step-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+        
+        /* Defense Checkboxes */
+        .defense-options {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .defense-option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .defense-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .defense-option.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .defense-option input {
+            display: none;
+        }
+        
+        .defense-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .defense-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .defense-option.selected .defense-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .defense-option.selected .defense-checkbox::after {
+            content: '✓';
+            color: white;
+        }
+        
+        .defense-title {
+            font-weight: 600;
+        }
+        
+        .defense-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-left: 36px;
+        }
+        
+        /* Navigation Buttons */
+        .step-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Review Section */
+        .review-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .review-section h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        
+        .review-label {
+            color: var(--text-muted);
+        }
+        
+        /* Alert Boxes */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+        
+        .alert-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--primary);
+        }
+        
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid var(--success);
+        }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step" data-step="1">
+                    <div class="step-circle active">1</div>
+                    <span class="step-label">Basic Info</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <span class="step-label">Defenses</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <span class="step-label">Details</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <span class="step-label">Review</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <span class="step-label">Download</span>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 20%"></div>
+            </div>
+        </div>
+        
+        <!-- Step 1: Basic Info -->
+        <div id="step1" class="step-content">
+            <h2 class="step-title">📝 Basic Information</h2>
+            <p class="step-description">Enter the basic details from your eviction papers.</p>
+            
+            <div class="alert alert-warning">
+                ⏰ <strong>Important:</strong> In Minnesota, you have <strong>7 days</strong> to respond to an eviction complaint.
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tenantName">Your Full Name *</label>
+                    <input type="text" id="tenantName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="landlordName">Landlord/Plaintiff Name *</label>
+                    <input type="text" id="landlordName" required placeholder="ABC Properties LLC">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="caseNumber">Case Number (if known)</label>
+                    <input type="text" id="caseNumber" placeholder="27-CV-XX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="servedDate">Date You Were Served *</label>
+                    <input type="date" id="servedDate" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="propertyAddress">Property Address *</label>
+                <input type="text" id="propertyAddress" required placeholder="123 Main St, Apt 4B, Eagan, MN 55122">
+            </div>
+            
+            <div class="step-nav">
+                <a href="/static/dakota_defense.html" class="btn btn-outline">← Back to Menu</a>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Select Defenses →</button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Select Defenses -->
+        <div id="step2" class="step-content hidden">
+            <h2 class="step-title">⚔️ Select Your Defenses</h2>
+            <p class="step-description">Check all defenses that apply to your situation. Don't worry - you can select multiple.</p>
+            
+            <div class="defense-options">
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="rent_paid">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">💰 Rent Was Paid</span>
+                    </div>
+                    <p class="defense-desc">I paid rent but landlord claims I didn't. I have receipts, bank statements, or other proof of payment.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="habitability">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">🔧 Uninhabitable Conditions</span>
+                    </div>
+                    <p class="defense-desc">The unit has serious issues (no heat, water leaks, mold, pests, broken appliances) that landlord refused to fix.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="retaliation">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">🎯 Retaliation</span>
+                    </div>
+                    <p class="defense-desc">Landlord is evicting me because I complained about repairs, reported code violations, or joined a tenant group.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="improper_notice">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">📋 Improper Notice</span>
+                    </div>
+                    <p class="defense-desc">I didn't receive proper written notice, the notice was too short, or it wasn't served correctly.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="discrimination">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">🚫 Discrimination</span>
+                    </div>
+                    <p class="defense-desc">Landlord is evicting me because of my race, religion, disability, family status, or other protected class.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="lease_violation_disputed">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">📜 Disputed Lease Violation</span>
+                    </div>
+                    <p class="defense-desc">Landlord claims I violated the lease but I dispute the claim or it's not a valid reason for eviction.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="deposit_issues">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">💵 Security Deposit Issues</span>
+                    </div>
+                    <p class="defense-desc">Landlord didn't return my deposit, made illegal deductions, or owes me money.</p>
+                </label>
+                
+                <label class="defense-option" onclick="toggleDefense(this)">
+                    <input type="checkbox" name="defense" value="other">
+                    <div class="defense-header">
+                        <div class="defense-checkbox"></div>
+                        <span class="defense-title">📝 Other Defense</span>
+                    </div>
+                    <p class="defense-desc">I have another defense not listed here that I want to explain.</p>
+                </label>
+            </div>
+            
+            <div class="step-nav" style="margin-top: 2rem;">
+                <button class="btn btn-outline" onclick="prevStep()">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Add Details →</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Defense Details -->
+        <div id="step3" class="step-content hidden">
+            <h2 class="step-title">📋 Tell Your Story</h2>
+            <p class="step-description">Explain your situation in your own words. Be specific with dates, names, and what happened.</p>
+            
+            <div class="alert alert-info">
+                💡 <strong>Tip:</strong> Include specific dates, describe any communication with landlord, and mention any evidence you have.
+            </div>
+            
+            <div class="form-group">
+                <label for="defenseDetails">Your Statement</label>
+                <textarea id="defenseDetails" rows="8" placeholder="Explain what happened in your own words. For example:
+
+On January 15, 2024, I paid my rent of $1,200 via money order. I have the receipt showing payment.
+
+The landlord has refused to fix the broken heater since November 2023. I reported this in writing on November 10th and again on December 1st. My apartment has been below 60 degrees for two months.
+
+I believe this eviction is retaliation because I reported the heating issue to the city inspector on December 15th. The city found violations and now the landlord is trying to evict me."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="evidenceList">Evidence You Have (optional)</label>
+                <textarea id="evidenceList" rows="4" placeholder="List any documents, photos, or other evidence:
+- Rent receipts
+- Bank statements
+- Photos of damage
+- Text messages with landlord
+- Written notices
+- City inspection reports"></textarea>
+            </div>
+            
+            <div class="step-nav">
+                <button class="btn btn-outline" onclick="prevStep()">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Review →</button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Review -->
+        <div id="step4" class="step-content hidden">
+            <h2 class="step-title">👀 Review Your Answer</h2>
+            <p class="step-description">Please review all information before generating your document.</p>
+            
+            <div class="review-section">
+                <h4>📋 Basic Information</h4>
+                <div class="review-item">
+                    <span class="review-label">Your Name:</span>
+                    <span id="reviewTenantName">-</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Landlord:</span>
+                    <span id="reviewLandlordName">-</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Case Number:</span>
+                    <span id="reviewCaseNumber">-</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Property:</span>
+                    <span id="reviewAddress">-</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Served Date:</span>
+                    <span id="reviewServedDate">-</span>
+                </div>
+            </div>
+            
+            <div class="review-section">
+                <h4>⚔️ Selected Defenses</h4>
+                <div id="reviewDefenses">-</div>
+            </div>
+            
+            <div class="review-section">
+                <h4>📝 Your Statement</h4>
+                <div id="reviewStatement" style="white-space: pre-wrap;">-</div>
+            </div>
+            
+            <div class="alert alert-warning">
+                ⚠️ <strong>Disclaimer:</strong> This tool generates a draft document to help you. It is NOT legal advice. 
+                Review your document carefully and consider consulting with a legal aid organization before filing.
+            </div>
+            
+            <div class="step-nav">
+                <button class="btn btn-outline" onclick="prevStep()">← Edit</button>
+                <button class="btn btn-success" onclick="generateDocument()">✅ Generate Answer PDF</button>
+            </div>
+        </div>
+        
+        <!-- Step 5: Download -->
+        <div id="step5" class="step-content hidden">
+            <h2 class="step-title">🎉 Your Answer is Ready!</h2>
+            <p class="step-description">Your Answer to Eviction has been generated. Here's what to do next:</p>
+            
+            <div class="alert alert-success">
+                ✅ Your document has been generated successfully!
+            </div>
+            
+            <div class="review-section">
+                <h4>📋 Next Steps</h4>
+                <ol style="padding-left: 1.5rem; line-height: 2;">
+                    <li><strong>Print</strong> - Print two copies of your Answer</li>
+                    <li><strong>Sign</strong> - Sign both copies where indicated</li>
+                    <li><strong>File</strong> - Take to Dakota County Courthouse (or file electronically if available)</li>
+                    <li><strong>Serve</strong> - Give/mail one copy to the landlord or their attorney</li>
+                    <li><strong>Keep</strong> - Keep one copy for your records</li>
+                </ol>
+            </div>
+            
+            <div class="review-section">
+                <h4>📍 Dakota County Court Information</h4>
+                <p><strong>Address:</strong> 1560 Highway 55, Hastings, MN 55033</p>
+                <p><strong>Phone:</strong> (651) 438-8100</p>
+                <p><strong>Hours:</strong> 8:00 AM - 4:30 PM, Monday - Friday</p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 2rem 0;">
+                <button class="btn btn-primary" onclick="downloadPDF()" id="downloadBtn">
+                    📥 Download PDF
+                </button>
+                <button class="btn btn-outline" onclick="printDocument()">
+                    🖨️ Print
+                </button>
+                <a href="/static/counterclaim.html" class="btn btn-outline">
+                    ⚔️ File Counterclaim
+                </a>
+                <a href="/static/dakota_defense.html" class="btn btn-outline">
+                    ← Back to Defense Center
+                </a>
+            </div>
+            
+            <div class="review-section">
+                <h4>🆘 Need More Help?</h4>
+                <p style="margin-bottom: 0.5rem;"><strong>Mid-Minnesota Legal Aid:</strong> <a href="tel:612-334-5970">612-334-5970</a></p>
+                <p style="margin-bottom: 0.5rem;"><strong>HOME Line Tenant Hotline:</strong> <a href="tel:612-728-5767">612-728-5767</a></p>
+                <p><strong>Dakota County Self-Help Center:</strong> <a href="tel:651-438-8100">651-438-8100</a></p>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Generating your document...</p>
+    </div>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        let formData = {};
+        let generatedPDFBlob = null;
+        
+        // Defense labels for display
+        const defenseLabels = {
+            'rent_paid': '💰 Rent Was Paid',
+            'habitability': '🔧 Uninhabitable Conditions',
+            'retaliation': '🎯 Retaliation',
+            'improper_notice': '📋 Improper Notice',
+            'discrimination': '🚫 Discrimination',
+            'lease_violation_disputed': '📜 Disputed Lease Violation',
+            'deposit_issues': '💵 Security Deposit Issues',
+            'other': '📝 Other Defense'
+        };
+        
+        function toggleDefense(element) {
+            element.classList.toggle('selected');
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = element.classList.contains('selected');
+        }
+        
+        function updateProgressBar() {
+            // Update circles
+            document.querySelectorAll('.step-circle').forEach((circle, index) => {
+                circle.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    circle.classList.add('completed');
+                    circle.innerHTML = '✓';
+                } else if (index + 1 === currentStep) {
+                    circle.classList.add('active');
+                    circle.innerHTML = index + 1;
+                } else {
+                    circle.innerHTML = index + 1;
+                }
+            });
+            
+            // Update progress bar
+            const progress = (currentStep / totalSteps) * 100;
+            document.querySelector('.progress-fill').style.width = progress + '%';
+        }
+        
+        function showStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById('step' + i).classList.add('hidden');
+            }
+            // Show current step
+            document.getElementById('step' + step).classList.remove('hidden');
+            currentStep = step;
+            updateProgressBar();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function validateStep(step) {
+            if (step === 1) {
+                const tenantName = document.getElementById('tenantName').value.trim();
+                const landlordName = document.getElementById('landlordName').value.trim();
+                const servedDate = document.getElementById('servedDate').value;
+                const address = document.getElementById('propertyAddress').value.trim();
+                
+                if (!tenantName || !landlordName || !servedDate || !address) {
+                    alert('Please fill in all required fields (marked with *)');
+                    return false;
+                }
+                
+                formData.tenant_name = tenantName;
+                formData.landlord_name = landlordName;
+                formData.case_number = document.getElementById('caseNumber').value.trim();
+                formData.served_date = servedDate;
+                formData.address = address;
+            }
+            
+            if (step === 2) {
+                const selectedDefenses = [];
+                document.querySelectorAll('.defense-option.selected input').forEach(input => {
+                    selectedDefenses.push(input.value);
+                });
+                
+                if (selectedDefenses.length === 0) {
+                    alert('Please select at least one defense');
+                    return false;
+                }
+                
+                formData.defenses = selectedDefenses;
+            }
+            
+            if (step === 3) {
+                formData.defense_details = document.getElementById('defenseDetails').value.trim();
+                formData.evidence = document.getElementById('evidenceList').value.trim();
+            }
+            
+            return true;
+        }
+        
+        function nextStep() {
+            if (!validateStep(currentStep)) return;
+            
+            if (currentStep === 3) {
+                // Populate review
+                populateReview();
+            }
+            
+            if (currentStep < totalSteps) {
+                showStep(currentStep + 1);
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+        
+        function populateReview() {
+            document.getElementById('reviewTenantName').textContent = formData.tenant_name;
+            document.getElementById('reviewLandlordName').textContent = formData.landlord_name;
+            document.getElementById('reviewCaseNumber').textContent = formData.case_number || 'Not specified';
+            document.getElementById('reviewAddress').textContent = formData.address;
+            document.getElementById('reviewServedDate').textContent = new Date(formData.served_date).toLocaleDateString();
+            
+            // Format defenses
+            const defensesHtml = formData.defenses.map(d => 
+                `<div style="margin: 0.5rem 0;">• ${defenseLabels[d] || d}</div>`
+            ).join('');
+            document.getElementById('reviewDefenses').innerHTML = defensesHtml;
+            
+            document.getElementById('reviewStatement').textContent = formData.defense_details || 'No statement provided';
+        }
+        
+        async function generateDocument() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('hidden');
+            
+            try {
+                // Try API first
+                const response = await fetch('/eviction/answer/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    generatedPDFBlob = await response.blob();
+                    
+                    // Save case data for other forms
+                    localStorage.setItem('semptify_case_data', JSON.stringify(formData));
+                    
+                    showStep(5);
+                } else {
+                    // Generate client-side if API fails
+                    generateClientSidePDF();
+                    showStep(5);
+                }
+            } catch (e) {
+                console.error('API failed:', e);
+                // Generate client-side
+                generateClientSidePDF();
+                showStep(5);
+            } finally {
+                overlay.classList.add('hidden');
+            }
+        }
+        
+        function generateClientSidePDF() {
+            // Create HTML content for PDF
+            const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Answer to Eviction Complaint</title>
+    <style>
+        body { font-family: Times New Roman, serif; font-size: 12pt; line-height: 1.5; margin: 1in; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .court-info { text-transform: uppercase; font-weight: bold; }
+        .title { font-size: 14pt; font-weight: bold; text-align: center; margin: 20px 0; text-decoration: underline; }
+        .parties { margin: 20px 0; }
+        .section { margin: 15px 0; }
+        .section h3 { font-size: 12pt; text-decoration: underline; margin-bottom: 10px; }
+        .signature { margin-top: 40px; }
+        .signature-line { margin-top: 30px; border-top: 1px solid black; width: 300px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="court-info">STATE OF MINNESOTA</div>
+        <div class="court-info">COUNTY OF DAKOTA</div>
+        <div class="court-info">DISTRICT COURT - FIRST JUDICIAL DISTRICT</div>
+        <br>
+        <div>Case No: ${formData.case_number || '_______________'}</div>
+    </div>
+    
+    <div class="parties">
+        <p><strong>${formData.landlord_name}</strong><br>Plaintiff(s)</p>
+        <p>vs.</p>
+        <p><strong>${formData.tenant_name}</strong><br>Defendant(s)</p>
+    </div>
+    
+    <div class="title">ANSWER TO EVICTION COMPLAINT</div>
+    
+    <div class="section">
+        <p>The Defendant(s), residing at <strong>${formData.address}</strong>, hereby responds to the Eviction Complaint as follows:</p>
+    </div>
+    
+    <div class="section">
+        <h3>DEFENSES</h3>
+        <p>Defendant asserts the following defenses:</p>
+        <ol>
+            ${formData.defenses.map(d => `<li>${defenseLabels[d] || d}</li>`).join('\n            ')}
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h3>STATEMENT OF FACTS</h3>
+        <p>${formData.defense_details || 'See attached documentation.'}</p>
+    </div>
+    
+    <div class="section">
+        <h3>RELIEF REQUESTED</h3>
+        <p>Defendant respectfully requests that this Court:</p>
+        <ol>
+            <li>Dismiss the eviction complaint with prejudice;</li>
+            <li>Award Defendant costs and disbursements;</li>
+            <li>Grant such other relief as the Court deems just and equitable.</li>
+        </ol>
+    </div>
+    
+    <div class="signature">
+        <p>Date: ${new Date().toLocaleDateString()}</p>
+        <div class="signature-line"></div>
+        <p>${formData.tenant_name}, Defendant Pro Se</p>
+        <p>${formData.address}</p>
+    </div>
+    
+    <div style="margin-top: 40px; font-size: 10pt; color: #666;">
+        <p><em>Date Served: ${new Date(formData.served_date).toLocaleDateString()}</em></p>
+        <p><em>This Answer must be filed with the Court within 7 days of service.</em></p>
+        <p><em>Generated by Semptify Eviction Defense System</em></p>
+    </div>
+</body>
+</html>`;
+            
+            // Store HTML for printing/download
+            localStorage.setItem('semptify_answer_html', html);
+            generatedPDFBlob = new Blob([html], { type: 'text/html' });
+        }
+        
+        function downloadPDF() {
+            if (generatedPDFBlob) {
+                const url = window.URL.createObjectURL(generatedPDFBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const isPDF = generatedPDFBlob.type === 'application/pdf';
+                a.download = `Answer_to_Eviction_${formData.tenant_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.${isPDF ? 'pdf' : 'html'}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert('Please generate the document first.');
+            }
+        }
+        
+        function printDocument() {
+            const html = localStorage.getItem('semptify_answer_html');
+            if (html) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => printWindow.print(), 500);
+            } else if (generatedPDFBlob) {
+                const url = window.URL.createObjectURL(generatedPDFBlob);
+                window.open(url, '_blank');
+            }
+        }
+        
+        // Load saved data if available
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('semptify_case_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.tenant_name) document.getElementById('tenantName').value = data.tenant_name;
+                    if (data.landlord_name) document.getElementById('landlordName').value = data.landlord_name;
+                    if (data.case_number) document.getElementById('caseNumber').value = data.case_number;
+                    if (data.address) document.getElementById('propertyAddress').value = data.address;
+                } catch (e) {
+                    console.log('No saved data to load');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

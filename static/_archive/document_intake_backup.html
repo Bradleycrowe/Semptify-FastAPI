@@ -2299,7 +2299,7 @@
                         ${dates?.length ? dates.map(d => `
                             <div class="extracted-item">
                                 <div class="main">
-                                    <div class="title">${d.date}</div>
+                                    <div class="title">${formatDate(d.date)}</div>
                                     <div class="subtitle">${d.label} ${d.is_deadline ? '⏰ Deadline' : ''}</div>
                                 </div>
                                 <div style="text-align: right;">
@@ -2609,6 +2609,22 @@
         
         function formatDateTime(isoString) {
             return new Date(isoString).toLocaleString();
+        }
+        
+        function formatDate(isoString) {
+            // Handle various date formats including ISO strings
+            if (!isoString) return 'N/A';
+            try {
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString; // Return original if invalid
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return isoString; // Return original on error
+            }
         }
         
         function formatAction(action) {

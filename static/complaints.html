@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complaint Filing Wizard - Semptify</title>
-    <!-- Page uses inline styles below -->
+    <meta name="theme-color" content="#6366f1">
+    <title>Complaint Builder - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
     <style>
         :root {
             --primary: #6366f1;
@@ -238,6 +239,105 @@
 
         .search-input::placeholder {
             color: var(--text-muted);
+        }
+
+        /* Voice Input */
+        .voice-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .voice-btn:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .voice-btn.listening {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* AI Assistance Panel */
+        .ai-assist-panel {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-assist-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-assist-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .ai-suggestion-chip {
+            display: inline-block;
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-card);
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ai-suggestion-chip:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .input-with-voice {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .input-with-voice .form-input,
+        .input-with-voice .form-textarea {
+            flex: 1;
+        }
+
+        /* Timeline Link Button */
+        .timeline-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            color: var(--success);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .timeline-link-btn:hover {
+            background: var(--success);
+            color: white;
         }
 
         /* Buttons */
@@ -722,16 +822,72 @@
         .mt-1 { margin-top: 1rem; }
         .mt-1-5 { margin-top: 1.5rem; }
         .text-right { text-align: right; }
-        .flex-between { display: flex; justify-content: space-between; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .mr-half { margin-right: 0.5rem; }
         .grid-auto-fit { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .h4-warning { color: var(--warning); margin-bottom: 0.75rem; }
         .required-docs-list { color: var(--text-muted); padding-left: 1.5rem; }
         .checklist-header { margin-bottom: 1rem; }
+
+        /* Evidence document list */
+        .evidence-item {
+            transition: all 0.2s ease;
+        }
+        .evidence-item:hover {
+            background: var(--bg-elevated) !important;
+            transform: translateX(4px);
+        }
+        .evidence-item input[type="checkbox"]:checked + div {
+            color: var(--primary);
+        }
+
+        /* Print styles */
+        @media print {
+            .page-header, .tabs, .wizard-steps, .btn, .ai-assist-panel {
+                display: none !important;
+            }
+            .card { box-shadow: none !important; border: 1px solid #ccc; }
+            .preview-box { white-space: pre-wrap; }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Toast animation */
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
         .required-docs-card { background: rgba(245, 158, 11, 0.1); border-color: var(--warning); }
     </style>
 </head>
 <body>
+    <!-- Shared Navigation -->
+    <script src="/static/js/shared-nav.js"></script>
+    
     <!-- Site-wide header -->
     <script src="/static/js/header.js"></script>
 
@@ -740,12 +896,49 @@
         <header class="page-header">
             <h1 class="page-title">
                 <span>⚖️</span>
-                Complaint Filing Wizard
+                Complaint Builder
             </h1>
             <div class="header-actions">
-                <a href="/static/dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+                <button class="btn btn-sm" onclick="showKeyboardShortcuts()" title="Keyboard shortcuts">⌨️</button>
+                <a href="/static/timeline-builder.html" class="timeline-link-btn">⚡ Timeline Builder</a>
+                <a href="/static/dashboard.html" class="btn btn-secondary">← Dashboard</a>
             </div>
         </header>
+
+        <!-- Keyboard Shortcuts Modal -->
+        <div id="keyboard-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="flex-between mb-1">
+                    <h3 style="margin: 0;">⌨️ Keyboard Shortcuts</h3>
+                    <button class="btn btn-sm" onclick="closeKeyboardModal()">×</button>
+                </div>
+                <div class="shortcuts-list" style="display: grid; gap: 0.5rem;">
+                    <div class="shortcut-item" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>Save Draft</span>
+                        <kbd style="background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Ctrl + S</kbd>
+                    </div>
+                    <div class="shortcut-item" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>Voice Input</span>
+                        <kbd style="background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Ctrl + M</kbd>
+                    </div>
+                    <div class="shortcut-item" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>Next Step</span>
+                        <kbd style="background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Alt + →</kbd>
+                    </div>
+                    <div class="shortcut-item" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>Previous Step</span>
+                        <kbd style="background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Alt + ←</kbd>
+                    </div>
+                    <div class="shortcut-item" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                        <span>Close Modal</span>
+                        <kbd style="background: var(--bg-elevated); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Esc</kbd>
+                    </div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
+                    💡 Use 🎤 buttons for voice input if typing is difficult
+                </p>
+            </div>
+        </div>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
@@ -764,8 +957,9 @@
                 <div class="search-box">
                     <input type="text" class="search-input" id="keyword-search" 
                            placeholder="Describe your issue (e.g., discrimination, security deposit, harassment)">
+                    <button class="voice-btn" onclick="startVoiceInput('keyword-search')" title="Voice search" aria-label="Voice search">🎤</button>
                     <button class="btn btn-primary" id="search-agencies-btn">
-                        Get Recommendations
+                        🔍 Get Recommendations
                     </button>
                 </div>
             </div>
@@ -828,17 +1022,40 @@
             <!-- Step 2: Complaint Details -->
             <div id="wizard-step-2" class="wizard-content hidden">
                 <div class="card">
-                    <h3 class="card-title">Complaint Details</h3>
+                    <h3 class="card-title">📝 Complaint Details</h3>
+                    
+                    <!-- AI Assistance Panel -->
+                    <div class="ai-assist-panel">
+                        <div class="ai-assist-header">
+                            <span>🤖</span>
+                            <span class="ai-assist-title">AI Writing Assistant</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Click a suggestion to add to your description:</p>
+                        <div id="ai-suggestions">
+                            <span class="ai-suggestion-chip" onclick="addSuggestion('My landlord failed to return my security deposit within 21 days as required by MN law.')">Security deposit not returned</span>
+                            <span class="ai-suggestion-chip" onclick="addSuggestion('I reported maintenance issues on [DATE] but my landlord has failed to make repairs, violating the warranty of habitability.')">Repair issues ignored</span>
+                            <span class="ai-suggestion-chip" onclick="addSuggestion('I believe I am being discriminated against based on [PROTECTED CLASS].')">Discrimination</span>
+                            <span class="ai-suggestion-chip" onclick="addSuggestion('My landlord entered my unit without proper notice or consent.')">Illegal entry</span>
+                            <span class="ai-suggestion-chip" onclick="addSuggestion('I am being retaliated against for exercising my tenant rights.')">Retaliation</span>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label">Subject <span>*</span></label>
-                        <input type="text" class="form-input" id="complaint-subject"
-                               placeholder="Brief summary of your complaint">
+                        <div class="input-with-voice">
+                            <input type="text" class="form-input" id="complaint-subject"
+                                   placeholder="Brief summary of your complaint">
+                            <button class="voice-btn" onclick="startVoiceInput('complaint-subject')" title="Voice input">🎤</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Description <span>*</span></label>
-                        <textarea class="form-textarea" id="complaint-description"
-                                  placeholder="Describe what happened in detail..."></textarea>
-                        <p class="form-help">Include dates, names, and specific incidents.</p>
+                        <div class="input-with-voice">
+                            <textarea class="form-textarea" id="complaint-description"
+                                      placeholder="Describe what happened in detail..."></textarea>
+                            <button class="voice-btn" onclick="startVoiceInput('complaint-description')" title="Voice input">🎤</button>
+                        </div>
+                        <p class="form-help">Include dates, names, and specific incidents. Use voice input 🎤 if typing is difficult.</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Incident Dates</label>
@@ -853,11 +1070,14 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Relief Sought</label>
-                            <input type="text" class="form-input" id="complaint-relief"
-                                   placeholder="What outcome do you want?">
+                            <div class="input-with-voice">
+                                <input type="text" class="form-input" id="complaint-relief"
+                                       placeholder="What outcome do you want?">
+                                <button class="voice-btn" onclick="startVoiceInput('complaint-relief')" title="Voice input">🎤</button>
+                            </div>
                         </div>
                     </div>
-                    <h4 class="mt-1-5">Respondent Information</h4>
+                    <h4 class="mt-1-5">👤 Respondent Information</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Respondent Name <span>*</span></label>
@@ -892,19 +1112,23 @@
             <!-- Step 3: Attach Evidence -->
             <div id="wizard-step-3" class="wizard-content hidden">
                 <div class="card">
-                    <h3 class="card-title">📎 Attach Evidence</h3>
-                    <p class="text-muted mb-1">
-                        Select documents from your uploaded files to attach as evidence.
-                    </p>
-                    <div class="document-list" id="evidence-list">
-                        <div class="empty-state">
-                            <div class="empty-icon">📄</div>
-                            <p>No documents uploaded yet.</p>
-                            <a href="/static/documents.html" class="btn btn-primary btn-sm mt-1">
-                                Upload Documents
-                            </a>
+                    <div class="flex-between mb-1">
+                        <h3 class="card-title">📎 Attach Evidence</h3>
+                        <div>
+                            <button class="btn btn-sm" onclick="loadDocumentsForEvidence()" title="Refresh documents">🔄 Refresh</button>
+                            <button class="btn btn-sm" onclick="importTimelineEvents()" title="Import from timeline">📅 Import Timeline</button>
                         </div>
                     </div>
+                    <p class="text-muted mb-1">
+                        Select documents from your uploaded files to attach as evidence. Click checkboxes to attach.
+                    </p>
+                    <div class="document-list" id="evidence-list">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading your documents...
+                        </div>
+                    </div>
+                    <div id="selected-evidence-count" class="text-muted mt-1" style="font-size: 0.85rem;"></div>
                     <div id="required-docs" class="card mt-1-5 required-docs-card">
                         <h4 class="h4-warning">📋 Required Documents</h4>
                         <ul id="required-docs-list" class="required-docs-list"></ul>
@@ -919,7 +1143,12 @@
             <!-- Step 4: Review & File -->
             <div id="wizard-step-4" class="wizard-content hidden">
                 <div class="card">
-                    <h3 class="card-title">📝 Review Your Complaint</h3>
+                    <div class="flex-between mb-1">
+                        <h3 class="card-title">📝 Review Your Complaint</h3>
+                        <button class="btn btn-sm" onclick="copyComplaintText()" title="Copy complaint text">
+                            📋 Copy Text
+                        </button>
+                    </div>
                     <div class="preview-box" id="complaint-preview"></div>
                     
                     <div class="checklist mt-1-5">
@@ -944,12 +1173,18 @@
 
                     <div class="mt-1-5 flex-between">
                         <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
-                        <div>
-                            <button class="btn btn-secondary mr-half" id="save-draft-btn">
-                                💾 Save Draft
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="printComplaint()" title="Print preview">
+                                🖨️ Print
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportComplaintPDF()" title="Export as PDF">
+                                📄 Export PDF
+                            </button>
+                            <button class="btn btn-secondary" id="save-draft-btn">
+                                💾 Save
                             </button>
                             <button class="btn btn-success" id="file-complaint-btn">
-                                📤 File Complaint
+                                📤 File
                             </button>
                         </div>
                     </div>
@@ -1187,6 +1422,7 @@
                 card.classList.toggle('selected', card.dataset.id === agencyId);
             });
             document.getElementById('step1-next').disabled = false;
+            updateAISuggestions(); // Update AI suggestions based on agency
         }
 
         function selectAgencyAndStart(agencyId) {
@@ -1194,6 +1430,7 @@
             switchTab('new-complaint');
             loadWizardAgencies();
             document.getElementById('step1-next').disabled = false;
+            updateAISuggestions(); // Update AI suggestions based on agency
         }
 
         document.getElementById('step1-next').addEventListener('click', async () => {
@@ -1361,16 +1598,20 @@
                 const statusClass = draft.status === 'filed' ? 'status-filed' : 
                                    draft.status === 'ready' ? 'status-ready' : 'status-draft';
                 return `
-                    <div class="draft-item" onclick="loadDraft('${draft.id}')">
-                        <span class="draft-icon">📋</span>
-                        <div class="draft-info">
-                            <div class="draft-title">${draft.subject || 'Untitled Complaint'}</div>
-                            <div class="draft-meta">
-                                ${agency?.name || 'Unknown Agency'} • 
-                                Updated ${new Date(draft.updated_at).toLocaleDateString()}
+                    <div class="draft-item">
+                        <div style="display: flex; align-items: center; flex: 1; cursor: pointer;" onclick="loadDraft('${draft.id}')">
+                            <span class="draft-icon">📋</span>
+                            <div class="draft-info">
+                                <div class="draft-title">${draft.subject || 'Untitled Complaint'}</div>
+                                <div class="draft-meta">
+                                    ${agency?.name || 'Unknown Agency'} • 
+                                    Updated ${new Date(draft.updated_at).toLocaleDateString()}
+                                </div>
                             </div>
+                            <span class="status-badge ${statusClass}">${draft.status}</span>
                         </div>
-                        <span class="status-badge ${statusClass}">${draft.status}</span>
+                        <button class="btn btn-sm" style="margin-left: 0.5rem; color: var(--danger-color);" 
+                                onclick="event.stopPropagation(); deleteDraft('${draft.id}')" title="Delete draft">🗑️</button>
                     </div>
                 `;
             }).join('');
@@ -1402,6 +1643,488 @@
                 console.error('Failed to load draft:', err);
             }
         }
+
+        // =============================================
+        // Voice Input Support (Accessibility)
+        // =============================================
+        let voiceRecognition = null;
+
+        function startVoiceInput(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input.closest('.input-with-voice, .search-box')?.querySelector('.voice-btn');
+            
+            // Check if already listening
+            if (voiceRecognition && btn?.classList.contains('listening')) {
+                voiceRecognition.stop();
+                btn.classList.remove('listening');
+                return;
+            }
+
+            // Check browser support
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Voice input is not supported in this browser. Please try Chrome, Edge, or Safari.');
+                return;
+            }
+
+            voiceRecognition = new SpeechRecognition();
+            voiceRecognition.continuous = false;
+            voiceRecognition.interimResults = true;
+            voiceRecognition.lang = 'en-US';
+
+            if (btn) btn.classList.add('listening');
+            input.placeholder = '🎤 Listening... speak now';
+
+            voiceRecognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                
+                // For textarea, append. For input, replace
+                if (input.tagName === 'TEXTAREA') {
+                    input.value = input.value ? input.value + ' ' + transcript : transcript;
+                } else {
+                    input.value = transcript;
+                }
+            };
+
+            voiceRecognition.onend = () => {
+                if (btn) btn.classList.remove('listening');
+                input.placeholder = input.dataset.placeholder || '';
+            };
+
+            voiceRecognition.onerror = (event) => {
+                if (btn) btn.classList.remove('listening');
+                if (event.error === 'no-speech') {
+                    alert('No speech detected. Please try again.');
+                } else if (event.error !== 'aborted') {
+                    alert('Voice recognition error: ' + event.error);
+                }
+            };
+
+            // Store original placeholder
+            input.dataset.placeholder = input.placeholder;
+            voiceRecognition.start();
+        }
+
+        // =============================================
+        // AI Suggestion Helper
+        // =============================================
+        function addSuggestion(text) {
+            const description = document.getElementById('complaint-description');
+            description.value = description.value ? description.value + '\n\n' + text : text;
+            description.focus();
+            description.scrollTop = description.scrollHeight;
+        }
+
+        // Update AI suggestions based on selected agency
+        function updateAISuggestions() {
+            const agency = agencies.find(a => a.id === selectedAgencyId);
+            if (!agency) return;
+            
+            const suggestionsDiv = document.getElementById('ai-suggestions');
+            const suggestions = [];
+            
+            // Add relevant suggestions based on complaint types
+            if (agency.complaint_types.some(t => t.toLowerCase().includes('deposit'))) {
+                suggestions.push({text: 'My landlord failed to return my security deposit within 21 days as required by MN law.', label: 'Security deposit'});
+            }
+            if (agency.complaint_types.some(t => t.toLowerCase().includes('discrimination') || t.toLowerCase().includes('fair housing'))) {
+                suggestions.push({text: 'I believe I am being discriminated against based on [PROTECTED CLASS: race, color, religion, sex, familial status, national origin, or disability].', label: 'Discrimination'});
+            }
+            if (agency.complaint_types.some(t => t.toLowerCase().includes('repair') || t.toLowerCase().includes('habitability'))) {
+                suggestions.push({text: 'I reported maintenance issues on [DATE] but my landlord has failed to make repairs, violating the warranty of habitability under MN Stat. § 504B.161.', label: 'Repair issues'});
+            }
+            if (agency.complaint_types.some(t => t.toLowerCase().includes('retaliation'))) {
+                suggestions.push({text: 'I am being retaliated against for exercising my tenant rights (reporting code violations, requesting repairs, etc.).', label: 'Retaliation'});
+            }
+            
+            // Always include generic suggestions
+            suggestions.push({text: 'My landlord entered my unit without proper 24-hour notice or consent.', label: 'Illegal entry'});
+            suggestions.push({text: 'I have documentation and evidence to support my complaint including [photos, emails, receipts, witnesses].', label: 'Evidence statement'});
+            
+            suggestionsDiv.innerHTML = suggestions.slice(0, 6).map(s => 
+                `<span class="ai-suggestion-chip" onclick="addSuggestion('${s.text.replace(/'/g, "\\'")}')">${s.label}</span>`
+            ).join('');
+        }
+
+        // =============================================
+        // Auto-Save Feature
+        // =============================================
+        let autoSaveTimer = null;
+        let lastSavedData = '';
+
+        function startAutoSave() {
+            // Debounce auto-save on input changes
+            const inputs = document.querySelectorAll('#wizard-step-2 input, #wizard-step-2 textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    clearTimeout(autoSaveTimer);
+                    autoSaveTimer = setTimeout(autoSaveIfNeeded, 3000); // Save 3 seconds after typing stops
+                });
+            });
+        }
+
+        async function autoSaveIfNeeded() {
+            if (!currentDraftId) return;
+            
+            const currentData = JSON.stringify({
+                subject: document.getElementById('complaint-subject').value,
+                description: document.getElementById('complaint-description').value
+            });
+            
+            if (currentData === lastSavedData) return; // No changes
+            
+            try {
+                await saveDraft(true); // silent save
+                lastSavedData = currentData;
+                showAutoSaveIndicator();
+            } catch (err) {
+                console.error('Auto-save failed:', err);
+            }
+        }
+
+        function showAutoSaveIndicator() {
+            // Create indicator if not exists
+            let indicator = document.querySelector('.autosave-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'autosave-indicator';
+                indicator.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: var(--success-color); color: white;
+                    padding: 8px 16px; border-radius: 8px;
+                    font-size: 0.85rem; z-index: 1000;
+                    opacity: 0; transition: opacity 0.3s;
+                `;
+                document.body.appendChild(indicator);
+            }
+            
+            indicator.textContent = '✓ Auto-saved';
+            indicator.style.opacity = '1';
+            setTimeout(() => indicator.style.opacity = '0', 2000);
+        }
+
+        // =============================================
+        // Keyboard Shortcuts
+        // =============================================
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S = Save draft
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (currentDraftId) {
+                    saveDraft();
+                }
+            }
+            
+            // Ctrl/Cmd + V when focused on voice field = Start voice input
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                const activeInput = document.activeElement;
+                if (activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName === 'TEXTAREA')) {
+                    startVoiceInput(activeInput.id);
+                }
+            }
+            
+            // Alt + Arrow Right/Left = Navigate steps
+            if (e.altKey && e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentStep < 4) goToStep(currentStep + 1);
+            }
+            if (e.altKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentStep > 1) goToStep(currentStep - 1);
+            }
+            
+            // Escape = Close modal if open
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal.active');
+                if (modal) modal.classList.remove('active');
+            }
+        });
+
+        // =============================================
+        // Copy Complaint Text
+        // =============================================
+        async function copyComplaintText() {
+            const previewEl = document.getElementById('complaint-preview');
+            if (!previewEl) return;
+            
+            try {
+                await navigator.clipboard.writeText(previewEl.innerText);
+                showToast('Copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.style.cssText = `
+                position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                background: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? 'var(--danger-color)' : 'var(--primary-color)'};
+                color: white; padding: 12px 24px; border-radius: 8px;
+                font-size: 0.9rem; z-index: 1000; animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // =============================================
+        // Keyboard Shortcuts Modal
+        // =============================================
+        function showKeyboardShortcuts() {
+            document.getElementById('keyboard-modal').classList.add('active');
+        }
+
+        function closeKeyboardModal() {
+            document.getElementById('keyboard-modal').classList.remove('active');
+        }
+
+        // =============================================
+        // Evidence Document Loading
+        // =============================================
+        let selectedDocumentIds = [];
+
+        async function loadDocumentsForEvidence() {
+            const list = document.getElementById('evidence-list');
+            list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading documents...</div>';
+            
+            try {
+                const response = await fetch(`/api/documents?user_id=${getUserId()}`);
+                if (!response.ok) throw new Error('Failed to load documents');
+                
+                const docs = await response.json();
+                renderEvidenceDocuments(docs);
+            } catch (err) {
+                console.error('Failed to load documents:', err);
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <p>Unable to load documents</p>
+                        <a href="/static/documents.html" class="btn btn-primary btn-sm mt-1">
+                            Upload Documents
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEvidenceDocuments(docs) {
+            const list = document.getElementById('evidence-list');
+            
+            if (!docs || docs.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <p>No documents uploaded yet</p>
+                        <a href="/static/documents.html" class="btn btn-primary btn-sm mt-1">
+                            Upload Documents
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = docs.map(doc => `
+                <label class="evidence-item" style="display: flex; align-items: center; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" 
+                           id="doc-${doc.id}" 
+                           value="${doc.id}"
+                           ${selectedDocumentIds.includes(doc.id) ? 'checked' : ''}
+                           onchange="toggleDocumentSelection('${doc.id}')"
+                           style="margin-right: 0.75rem; width: 18px; height: 18px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">${doc.filename || doc.name || 'Document'}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                            ${doc.category || doc.type || 'General'} • ${formatFileSize(doc.file_size || 0)}
+                        </div>
+                    </div>
+                    <span style="font-size: 1.2rem;">${getDocIcon(doc.category || doc.type)}</span>
+                </label>
+            `).join('');
+            
+            updateSelectedCount();
+        }
+
+        function toggleDocumentSelection(docId) {
+            const idx = selectedDocumentIds.indexOf(docId);
+            if (idx > -1) {
+                selectedDocumentIds.splice(idx, 1);
+            } else {
+                selectedDocumentIds.push(docId);
+            }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const countEl = document.getElementById('selected-evidence-count');
+            countEl.textContent = selectedDocumentIds.length > 0 
+                ? `📎 ${selectedDocumentIds.length} document(s) selected` 
+                : '';
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function getDocIcon(category) {
+            const icons = {
+                'lease': '📄', 'agreement': '📄', 'contract': '📄',
+                'notice': '📬', 'letter': '✉️',
+                'photo': '📷', 'image': '📷',
+                'receipt': '🧾', 'payment': '💰',
+                'court': '⚖️', 'legal': '⚖️',
+                'email': '📧', 'communication': '💬',
+                'evidence': '📋'
+            };
+            const lc = (category || '').toLowerCase();
+            for (const [key, icon] of Object.entries(icons)) {
+                if (lc.includes(key)) return icon;
+            }
+            return '📄';
+        }
+
+        // =============================================
+        // Timeline Import
+        // =============================================
+        async function importTimelineEvents() {
+            try {
+                const response = await fetch(`/api/timeline/events?user_id=${getUserId()}`);
+                if (!response.ok) throw new Error('Failed to load timeline');
+                
+                const events = await response.json();
+                if (!events || events.length === 0) {
+                    showToast('No timeline events found', 'info');
+                    return;
+                }
+
+                // Format timeline events for complaint description
+                const timelineText = events.slice(0, 20).map(e => 
+                    `• ${e.date || 'Unknown date'}: ${e.title || e.description || 'Event'}`
+                ).join('\n');
+
+                const desc = document.getElementById('complaint-description');
+                const prefix = desc.value ? desc.value + '\n\n--- TIMELINE EVENTS ---\n' : '--- TIMELINE EVENTS ---\n';
+                desc.value = prefix + timelineText;
+                
+                // Mark timeline as included
+                document.getElementById('complaint-dates').value = events
+                    .filter(e => e.date)
+                    .map(e => e.date)
+                    .slice(0, 10)
+                    .join(', ');
+
+                showToast(`Imported ${events.length} timeline events`, 'success');
+            } catch (err) {
+                console.error('Failed to import timeline:', err);
+                showToast('Failed to import timeline', 'error');
+            }
+        }
+
+        // =============================================
+        // Delete Draft
+        // =============================================
+        async function deleteDraft(draftId) {
+            if (!confirm('Are you sure you want to delete this draft? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/complaints/drafts/${draftId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showToast('Draft deleted', 'success');
+                    loadDrafts(); // Refresh list
+                } else {
+                    showToast('Failed to delete draft', 'error');
+                }
+            } catch (err) {
+                console.error('Failed to delete:', err);
+                showToast('Failed to delete draft', 'error');
+            }
+        }
+
+        // =============================================
+        // Print & Export
+        // =============================================
+        function printComplaint() {
+            const preview = document.getElementById('complaint-preview');
+            if (!preview) return;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Complaint - Print Preview</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; padding: 40px; line-height: 1.6; }
+                        h1 { font-size: 14pt; margin-bottom: 20px; }
+                        pre { white-space: pre-wrap; font-size: 11pt; }
+                    </style>
+                </head>
+                <body>
+                    <pre>${preview.innerText}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        async function exportComplaintPDF() {
+            showToast('Generating PDF...', 'info');
+            
+            // Use browser print to PDF as fallback
+            const preview = document.getElementById('complaint-preview');
+            if (!preview) return;
+
+            // Try server-side PDF generation first
+            try {
+                const response = await fetch(`/api/complaints/drafts/${currentDraftId}/export?format=pdf`, {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `complaint_${currentDraftId.substring(0, 8)}.pdf`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('PDF downloaded!', 'success');
+                    return;
+                }
+            } catch (err) {
+                console.log('Server PDF not available, using print');
+            }
+
+            // Fallback: Open print dialog (user can save as PDF)
+            printComplaint();
+            showToast('Use "Save as PDF" in the print dialog', 'info');
+        }
+
+        // Load documents when entering Step 3
+        const originalGoToStep = goToStep;
+        goToStep = function(step) {
+            originalGoToStep(step);
+            if (step === 3) {
+                loadDocumentsForEvidence();
+            }
+        };
+
+        // Initialize auto-save
+        startAutoSave();
 
         // Initialize
         loadAgencies();

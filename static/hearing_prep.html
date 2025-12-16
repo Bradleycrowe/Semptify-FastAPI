@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hearing Preparation - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-dark: #2563eb; --success: #22c55e;
+            --warning: #f59e0b; --danger: #ef4444; --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f; --text: #ffffff; --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text); min-height: 100vh;
+        }
+        .main-content { margin-left: 280px; padding: 2rem; max-width: 1000px; }
+        @media (max-width: 768px) { .main-content { margin-left: 0; padding: 1rem; } }
+        
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        .page-subtitle { color: var(--text-muted); }
+        
+        /* Countdown */
+        .countdown-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border: 2px solid var(--warning); border-radius: 1rem;
+            padding: 1.5rem; margin-bottom: 2rem; color: #1a1a1a;
+        }
+        .countdown-title { color: #b45309; font-size: 1.25rem; margin-bottom: 1rem; }
+        .countdown-form { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .countdown-form input { padding: 0.75rem; border: 2px solid #d97706; border-radius: 0.5rem; }
+        .countdown-result { font-size: 1.5rem; font-weight: bold; color: #b45309; }
+        .countdown-result.urgent { color: #dc2626; }
+        
+        /* Sections */
+        .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Checklist */
+        .checklist { list-style: none; }
+        .checklist-item {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;
+            background: rgba(255,255,255,0.05); cursor: pointer; transition: all 0.2s;
+        }
+        .checklist-item:hover { background: rgba(255,255,255,0.1); }
+        .checklist-item.done { background: rgba(34, 197, 94, 0.2); }
+        .checklist-checkbox {
+            width: 24px; height: 24px; border: 2px solid var(--border);
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.2s;
+        }
+        .checklist-item.done .checklist-checkbox { background: var(--success); border-color: var(--success); }
+        .checklist-item.done .checklist-checkbox::after { content: '✓'; color: white; }
+        .checklist-text { flex: 1; }
+        .checklist-text strong { display: block; margin-bottom: 0.25rem; }
+        .checklist-text small { color: var(--text-muted); }
+        
+        /* Document List */
+        .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .doc-item {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;
+        }
+        .doc-icon { font-size: 1.5rem; }
+        .doc-name { font-weight: 500; }
+        .doc-status { font-size: 0.8rem; color: var(--success); }
+        
+        /* Tips Grid */
+        .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .tip-card { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; }
+        .tip-card h4 { color: var(--primary); margin-bottom: 0.5rem; }
+        .tip-card ul { padding-left: 1.25rem; color: var(--text-muted); line-height: 1.8; }
+        
+        /* Progress Bar */
+        .progress-section { margin-bottom: 1.5rem; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .progress-bar { height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); transition: width 0.3s; }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; border: none; display: inline-flex; align-items: center;
+            gap: 0.5rem; text-decoration: none; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+        
+        /* Alert */
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .alert-info { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary); }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🎯 Hearing Preparation</h1>
+            <p class="page-subtitle">Get ready for your day in court with this comprehensive checklist</p>
+        </div>
+        
+        <!-- Countdown -->
+        <div class="countdown-card">
+            <h3 class="countdown-title">⏰ When is Your Hearing?</h3>
+            <div class="countdown-form">
+                <input type="date" id="hearingDate" onchange="updateCountdown()">
+                <input type="time" id="hearingTime" value="09:00" onchange="updateCountdown()">
+                <div id="countdownResult" class="countdown-result"></div>
+            </div>
+        </div>
+        
+        <!-- Progress -->
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>Preparation Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <!-- Pre-Hearing Checklist -->
+        <div class="section">
+            <h2 class="section-title">📋 Pre-Hearing Checklist</h2>
+            <ul class="checklist" id="checklist">
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>File your Answer</strong>
+                        <small>Submit your Answer to Eviction to the court clerk before the deadline</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Serve the landlord</strong>
+                        <small>Give a copy of your Answer to the landlord or their attorney</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Gather all evidence</strong>
+                        <small>Collect receipts, photos, text messages, emails, and any other proof</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Organize documents</strong>
+                        <small>Put papers in chronological order, make copies for court and landlord</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Write your statement</strong>
+                        <small>Practice what you'll say to the judge - stick to facts and dates</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Identify witnesses</strong>
+                        <small>Ask anyone who can support your case if they can testify</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Plan transportation</strong>
+                        <small>Know how you'll get to court and leave extra time</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Arrange childcare</strong>
+                        <small>Courts can be unpredictable - plan for a full day if needed</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Prepare appropriate attire</strong>
+                        <small>Business casual at minimum - show respect for the court</small>
+                    </div>
+                </li>
+                <li class="checklist-item" onclick="toggleItem(this)">
+                    <div class="checklist-checkbox"></div>
+                    <div class="checklist-text">
+                        <strong>Check if hearing is Zoom or in-person</strong>
+                        <small>Verify location and format - test Zoom beforehand if virtual</small>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Documents to Bring -->
+        <div class="section">
+            <h2 class="section-title">📁 Documents to Bring</h2>
+            <div class="doc-grid">
+                <div class="doc-item"><span class="doc-icon">📜</span><div><div class="doc-name">Your Answer (filed copy)</div></div></div>
+                <div class="doc-item"><span class="doc-icon">📋</span><div><div class="doc-name">Eviction Complaint (landlord's)</div></div></div>
+                <div class="doc-item"><span class="doc-icon">📝</span><div><div class="doc-name">Lease Agreement</div></div></div>
+                <div class="doc-item"><span class="doc-icon">💵</span><div><div class="doc-name">Rent Receipts/Bank Statements</div></div></div>
+                <div class="doc-item"><span class="doc-icon">📷</span><div><div class="doc-name">Photos (conditions, damage)</div></div></div>
+                <div class="doc-item"><span class="doc-icon">💬</span><div><div class="doc-name">Text/Email Communications</div></div></div>
+                <div class="doc-item"><span class="doc-icon">🔧</span><div><div class="doc-name">Repair Requests (dated)</div></div></div>
+                <div class="doc-item"><span class="doc-icon">🆔</span><div><div class="doc-name">Government ID</div></div></div>
+            </div>
+        </div>
+        
+        <!-- Tips -->
+        <div class="section">
+            <h2 class="section-title">💡 Court Day Tips</h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <h4>🗣️ What to Say</h4>
+                    <ul>
+                        <li>Address judge as "Your Honor"</li>
+                        <li>Speak clearly and slowly</li>
+                        <li>Stick to facts, not emotions</li>
+                        <li>Answer questions directly</li>
+                        <li>Say "I don't know" if unsure</li>
+                    </ul>
+                </div>
+                <div class="tip-card">
+                    <h4>🚫 What NOT to Do</h4>
+                    <ul>
+                        <li>Don't interrupt anyone</li>
+                        <li>Don't argue with landlord directly</li>
+                        <li>Don't use your phone</li>
+                        <li>Don't bring food/drinks</li>
+                        <li>Don't wear hats inside</li>
+                    </ul>
+                </div>
+                <div class="tip-card">
+                    <h4>⏰ Timing</h4>
+                    <ul>
+                        <li>Arrive 30 minutes early</li>
+                        <li>Go through security first</li>
+                        <li>Find your courtroom</li>
+                        <li>Check in with clerk</li>
+                        <li>Wait to be called</li>
+                    </ul>
+                </div>
+                <div class="tip-card">
+                    <h4>📍 Dakota County Court</h4>
+                    <ul>
+                        <li>1560 Highway 55, Hastings, MN</li>
+                        <li>Phone: (651) 438-8100</li>
+                        <li>Hours: 8:00 AM - 4:30 PM</li>
+                        <li>Parking available on site</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zoom Court Tips -->
+        <div class="section">
+            <h2 class="section-title">💻 If Your Hearing is on Zoom</h2>
+            <div class="alert alert-info">
+                Many eviction hearings are conducted via Zoom. Here's how to prepare for a virtual hearing.
+            </div>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <h4>🔧 Technical Setup</h4>
+                    <ul>
+                        <li>Test Zoom beforehand</li>
+                        <li>Ensure stable internet</li>
+                        <li>Use computer over phone if possible</li>
+                        <li>Have backup plan (phone)</li>
+                        <li>Charge all devices</li>
+                    </ul>
+                </div>
+                <div class="tip-card">
+                    <h4>📍 Environment</h4>
+                    <ul>
+                        <li>Find quiet, private space</li>
+                        <li>Good lighting on your face</li>
+                        <li>Plain background preferred</li>
+                        <li>Mute when not speaking</li>
+                        <li>Camera at eye level</li>
+                    </ul>
+                </div>
+                <div class="tip-card">
+                    <h4>👔 Appearance</h4>
+                    <ul>
+                        <li>Dress professionally (full outfit!)</li>
+                        <li>Look at camera when speaking</li>
+                        <li>Avoid distracting jewelry</li>
+                        <li>Keep expressions neutral</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="btn-group" style="margin-top: 1rem;">
+                <a href="/static/zoom_court.html" class="btn btn-primary">💻 Zoom Court Helper</a>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="section">
+            <h2 class="section-title">🚀 Next Steps</h2>
+            <div class="btn-group">
+                <a href="/static/eviction_answer.html" class="btn btn-primary">📝 File Your Answer</a>
+                <a href="/static/counterclaim.html" class="btn btn-outline">⚔️ File Counterclaim</a>
+                <a href="/static/motions.html" class="btn btn-outline">📋 File a Motion</a>
+                <a href="/static/briefcase.html" class="btn btn-outline">💼 Open Briefcase</a>
+                <a href="/static/dakota_defense.html" class="btn btn-outline">← Defense Center</a>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        function updateCountdown() {
+            const date = document.getElementById('hearingDate').value;
+            const time = document.getElementById('hearingTime').value;
+            const result = document.getElementById('countdownResult');
+            
+            if (!date) { result.textContent = ''; return; }
+            
+            const hearing = new Date(`${date}T${time || '09:00'}`);
+            const now = new Date();
+            const diff = hearing - now;
+            
+            if (diff < 0) {
+                result.textContent = 'Hearing date has passed';
+                result.classList.add('urgent');
+            } else {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                
+                if (days === 0) {
+                    result.textContent = `TODAY in ${hours} hours!`;
+                    result.classList.add('urgent');
+                } else if (days === 1) {
+                    result.textContent = 'TOMORROW!';
+                    result.classList.add('urgent');
+                } else if (days <= 3) {
+                    result.textContent = `${days} days away - prepare now!`;
+                    result.classList.add('urgent');
+                } else {
+                    result.textContent = `${days} days until hearing`;
+                    result.classList.remove('urgent');
+                }
+            }
+            
+            localStorage.setItem('semptify_hearing_date', date);
+            localStorage.setItem('semptify_hearing_time', time);
+        }
+        
+        function toggleItem(item) {
+            item.classList.toggle('done');
+            updateProgress();
+            saveChecklist();
+        }
+        
+        function updateProgress() {
+            const items = document.querySelectorAll('.checklist-item');
+            const done = document.querySelectorAll('.checklist-item.done');
+            const percent = Math.round((done.length / items.length) * 100);
+            
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+        
+        function saveChecklist() {
+            const items = document.querySelectorAll('.checklist-item');
+            const state = Array.from(items).map(i => i.classList.contains('done'));
+            localStorage.setItem('semptify_hearing_checklist', JSON.stringify(state));
+        }
+        
+        function loadChecklist() {
+            const saved = localStorage.getItem('semptify_hearing_checklist');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const items = document.querySelectorAll('.checklist-item');
+                state.forEach((done, i) => {
+                    if (done && items[i]) items[i].classList.add('done');
+                });
+            }
+            updateProgress();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedDate = localStorage.getItem('semptify_hearing_date');
+            const savedTime = localStorage.getItem('semptify_hearing_time');
+            if (savedDate) document.getElementById('hearingDate').value = savedDate;
+            if (savedTime) document.getElementById('hearingTime').value = savedTime;
+            updateCountdown();
+            loadChecklist();
+        });
+    </script>
+</body>
+</html>

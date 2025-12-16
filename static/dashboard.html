@@ -49,7 +49,7 @@
         }
 
         .onboarding-overlay.hidden {
-            display: none;
+            display: none !important;
         }
 
         .onboarding-card {
@@ -534,6 +534,7 @@
             border-radius: 3px;
             border: 1px solid var(--surface);
             width: 400px;
+            position: relative;
         }
 
         .search-box input {
@@ -546,6 +547,132 @@
 
         .search-box input::placeholder {
             color: var(--muted);
+        }
+
+        /* Global Search Results Dropdown */
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0 0 8px 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin-top: 4px;
+            min-width: 500px;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+        }
+
+        .search-results-header span {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .close-search {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-search:hover {
+            color: var(--light);
+        }
+
+        .search-results-content {
+            padding: 0.5rem;
+        }
+
+        .search-category {
+            margin-bottom: 1rem;
+        }
+
+        .search-category-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .search-result-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg);
+        }
+
+        .search-result-title {
+            font-weight: 500;
+            color: var(--light);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-result-title .type-icon {
+            font-size: 1rem;
+        }
+
+        .search-result-snippet {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .search-result-snippet mark {
+            background: rgba(255, 193, 7, 0.3);
+            color: var(--warning);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .search-result-meta {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        .search-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+        }
+
+        .search-no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+        }
+
+        .search-no-results p {
+            margin: 0.5rem 0;
         }
 
         .topbar-actions {
@@ -1260,7 +1387,16 @@
         <header class="topbar">
             <div class="search-box">
                 <span>🔍</span>
-                <input type="text" placeholder="Search documents, laws, motions..." id="global-search">
+                <input type="text" placeholder="Search documents, laws, motions..." id="global-search" autocomplete="off">
+                <div class="search-results-dropdown" id="search-results-dropdown" style="display: none;">
+                    <div class="search-results-header">
+                        <span id="search-results-count">0 results</span>
+                        <button class="close-search" onclick="closeSearchResults()">×</button>
+                    </div>
+                    <div class="search-results-content" id="search-results-content">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
             </div>
             <div class="topbar-actions">
                 <button class="btn btn-outline" onclick="openUploadModal()">
@@ -1444,8 +1580,8 @@
         </div>
     </main>
 
-    <!-- Onboarding Overlay - Storage Required -->
-    <div class="onboarding-overlay" id="onboarding-overlay">
+    <!-- Onboarding Overlay - Storage Required (starts hidden, JS shows if needed) -->
+    <div class="onboarding-overlay hidden" id="onboarding-overlay">
         <div class="onboarding-card">
             <h1>📓 Welcome to Semptify</h1>
             <p>Your tenant logbook and document organizer. Know your rights, stay organized, and take proactive steps to prevent disputes before they start. If issues do arise, you'll be prepared.</p>
@@ -1607,13 +1743,17 @@
 
         // Onboarding - Storage is REQUIRED
         async function checkOnboarding() {
+            console.log('🔍 checkOnboarding called');
             const storageStatus = await checkStorageStatus();
+            console.log('📊 Storage status:', storageStatus);
             
             // Storage is required - show onboarding if not connected
             if (!storageStatus.authenticated) {
+                console.log('❌ Not authenticated, showing overlay');
                 document.getElementById('onboarding-overlay').classList.remove('hidden');
                 isNewUser = true;
             } else {
+                console.log('✅ Authenticated, hiding overlay');
                 document.getElementById('onboarding-overlay').classList.add('hidden');
                 isNewUser = false;
                 showToast(`Connected to ${storageProvider}`, 'success');
@@ -1765,17 +1905,36 @@
                 const response = await fetch('/api/documents/');
                 if (response.ok) {
                     const data = await response.json();
-                    documents = data.documents || data || [];
-                    renderDocuments();
-                    document.getElementById('doc-count').textContent = documents.length;
-                    document.getElementById('stat-documents').textContent = documents.length;
-                    document.getElementById('stat-docs-change').textContent = `${documents.length} in vault`;
+                    // Handle array or object with documents property
+                    if (Array.isArray(data)) {
+                        documents = data;
+                    } else if (data && Array.isArray(data.documents)) {
+                        documents = data.documents;
+                    } else {
+                        documents = [];
+                    }
+                    console.log('📄 Loaded documents:', documents.length);
+                } else {
+                    console.warn('Documents API returned error:', response.status);
+                    documents = [];
                 }
             } catch (e) {
                 console.error('Error loading documents:', e);
                 documents = [];
-                renderDocuments();
             }
+            
+            // Always update UI
+            renderDocuments();
+            
+            // Safely update stat elements (they may not exist)
+            const count = documents.length || 0;
+            const docCount = document.getElementById('doc-count');
+            const statDocs = document.getElementById('stat-documents');
+            const statChange = document.getElementById('stat-docs-change');
+            
+            if (docCount) docCount.textContent = count;
+            if (statDocs) statDocs.textContent = count;
+            if (statChange) statChange.textContent = count > 0 ? `${count} in vault` : 'No documents yet';
         }
 
         function renderDocuments() {
@@ -1829,20 +1988,37 @@
                 const response = await fetch('/api/timeline/');
                 if (response.ok) {
                     const data = await response.json();
-                    timeline = data.events || data || [];
-                    renderTimeline();
-                    
-                    // Count upcoming deadlines
-                    const now = new Date();
-                    const upcoming = timeline.filter(e => new Date(e.date) > now).length;
-                    document.getElementById('stat-deadlines').textContent = upcoming;
-                    document.getElementById('stat-deadline-change').textContent = upcoming > 0 ? `Next in ${getDaysUntil(timeline[0]?.date)} days` : 'None scheduled';
+                    if (Array.isArray(data)) {
+                        timeline = data;
+                    } else if (data && Array.isArray(data.events)) {
+                        timeline = data.events;
+                    } else {
+                        timeline = [];
+                    }
+                } else {
+                    console.warn('Timeline API returned error:', response.status);
+                    timeline = [];
                 }
             } catch (e) {
                 console.error('Error loading timeline:', e);
                 timeline = [];
-                renderTimeline();
             }
+            
+            // Always update UI
+            renderTimeline();
+            
+            // Count upcoming deadlines (use event_date from API)
+            const now = new Date();
+            const upcoming = timeline.filter(e => {
+                const eventDate = e.event_date || e.date;
+                return eventDate && new Date(eventDate) > now;
+            }).length || 0;
+            const statDeadlines = document.getElementById('stat-deadlines');
+            const statDeadlineChange = document.getElementById('stat-deadline-change');
+            
+            if (statDeadlines) statDeadlines.textContent = upcoming;
+            const firstEventDate = timeline[0]?.event_date || timeline[0]?.date;
+            if (statDeadlineChange) statDeadlineChange.textContent = upcoming > 0 ? `Next in ${getDaysUntil(firstEventDate)} days` : 'None scheduled';
         }
 
         function renderTimeline() {
@@ -1857,15 +2033,21 @@
             }
             
             const render = (events) => events.map(event => {
-                const date = new Date(event.date);
+                // Use event_date from API, fallback to date
+                const dateStr = event.event_date || event.date;
+                const date = dateStr ? new Date(dateStr) : null;
+                const isValidDate = date && !isNaN(date.getTime());
+                const dayNum = isValidDate ? date.getDate() : '?';
+                const monthStr = isValidDate ? date.toLocaleString('default', { month: 'short' }) : 'Unknown';
+                
                 return `
                     <div class="timeline-item">
                         <div class="timeline-date">
-                            <div class="day">${date.getDate()}</div>
-                            <div class="month">${date.toLocaleString('default', { month: 'short' })}</div>
+                            <div class="day">${dayNum}</div>
+                            <div class="month">${monthStr}</div>
                         </div>
                         <div class="timeline-content">
-                            <h4>${event.title || event.event_type}</h4>
+                            <h4>${event.title || event.event_type || 'Event'}</h4>
                             <p>${event.description || ''}</p>
                             <span class="tag ${event.event_type?.toLowerCase() || 'document'}">${event.event_type || 'Event'}</span>
                         </div>
@@ -1883,15 +2065,27 @@
                 const response = await fetch('/api/eviction-defense/defenses');
                 if (response.ok) {
                     const data = await response.json();
-                    defenses = data.defenses || data || [];
-                    renderDefenses();
-                    document.getElementById('stat-defenses').textContent = defenses.length;
+                    if (Array.isArray(data)) {
+                        defenses = data;
+                    } else if (data && Array.isArray(data.defenses)) {
+                        defenses = data.defenses;
+                    } else {
+                        defenses = [];
+                    }
+                } else {
+                    console.warn('Defenses API returned error:', response.status);
+                    defenses = [];
                 }
             } catch (e) {
                 console.error('Error loading defenses:', e);
                 defenses = [];
-                renderDefenses();
             }
+            
+            // Always update UI
+            renderDefenses();
+            const count = defenses.length || 0;
+            const statDefenses = document.getElementById('stat-defenses');
+            if (statDefenses) statDefenses.textContent = count;
         }
 
         function renderDefenses() {
@@ -1922,15 +2116,27 @@
                 const response = await fetch('/api/eviction-defense/motions');
                 if (response.ok) {
                     const data = await response.json();
-                    motions = data.motions || data || [];
-                    renderMotions();
-                    document.getElementById('stat-motions').textContent = motions.length;
+                    if (Array.isArray(data)) {
+                        motions = data;
+                    } else if (data && Array.isArray(data.motions)) {
+                        motions = data.motions;
+                    } else {
+                        motions = [];
+                    }
+                } else {
+                    console.warn('Motions API returned error:', response.status);
+                    motions = [];
                 }
             } catch (e) {
                 console.error('Error loading motions:', e);
                 motions = [];
-                renderMotions();
             }
+            
+            // Always update UI
+            renderMotions();
+            const count = motions.length || 0;
+            const statMotions = document.getElementById('stat-motions');
+            if (statMotions) statMotions.textContent = count;
         }
 
         function renderMotions() {
@@ -2141,15 +2347,25 @@
         // Utility Functions
         function formatDate(dateStr) {
             if (!dateStr) return 'Unknown date';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown date';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch (e) {
+                return 'Unknown date';
+            }
         }
 
         function getDaysUntil(dateStr) {
             if (!dateStr) return 0;
-            const date = new Date(dateStr);
-            const now = new Date();
-            return Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 0;
+                const now = new Date();
+                return Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+            } catch (e) {
+                return 0;
+            }
         }
 
         function viewDocument(id) {
@@ -2161,7 +2377,8 @@
         }
 
         function viewMotionDetails(motionId) {
-            alert(`Motion details for: ${motionId}\n\nFull motion generation coming soon!`);
+            // Navigate to motions page with pre-selected motion
+            window.location.href = `/static/motions.html?motion=${motionId}`;
         }
 
         function browseCategory(categoryId) {
@@ -2207,16 +2424,209 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Global Search
-        document.getElementById('global-search').addEventListener('keypress', async (e) => {
+        // =========================================================================
+        // Global Search Implementation
+        // =========================================================================
+        let searchDebounceTimer = null;
+        const searchInput = document.getElementById('global-search');
+        const searchDropdown = document.getElementById('search-results-dropdown');
+        const searchContent = document.getElementById('search-results-content');
+        const searchCount = document.getElementById('search-results-count');
+
+        // Search on input (with debounce)
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                closeSearchResults();
+                return;
+            }
+            
+            // Debounce: wait 300ms after typing stops
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => performSearch(query), 300);
+        });
+
+        // Also search on Enter
+        searchInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 const query = e.target.value.trim();
                 if (!query) return;
-                
-                // Search across all content
-                alert(`Searching for: ${query}\n\nGlobal search feature coming soon!`);
+                clearTimeout(searchDebounceTimer);
+                performSearch(query);
             }
         });
+
+        // Close on Escape
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSearchResults();
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) {
+                closeSearchResults();
+            }
+        });
+
+        function closeSearchResults() {
+            searchDropdown.style.display = 'none';
+        }
+
+        async function performSearch(query) {
+            // Show loading state
+            searchDropdown.style.display = 'block';
+            searchContent.innerHTML = '<div class="search-loading">🔍 Searching...</div>';
+            searchCount.textContent = 'Searching...';
+
+            try {
+                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}&limit=20`);
+                
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+                
+                const data = await response.json();
+                displaySearchResults(data, query);
+            } catch (error) {
+                console.error('Search error:', error);
+                searchContent.innerHTML = `
+                    <div class="search-no-results">
+                        <p>⚠️ Search unavailable</p>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+                searchCount.textContent = 'Error';
+            }
+        }
+
+        function displaySearchResults(data, query) {
+            const { results, total_count, query: searchQuery, sources } = data;
+            
+            if (total_count === 0) {
+                searchContent.innerHTML = `
+                    <div class="search-no-results">
+                        <p>🔍 No results found for "${escapeHtml(query)}"</p>
+                        <p>Try different keywords or check spelling</p>
+                    </div>
+                `;
+                searchCount.textContent = '0 results';
+                return;
+            }
+
+            searchCount.textContent = `${total_count} result${total_count !== 1 ? 's' : ''}`;
+
+            // Group results by source
+            const grouped = {
+                documents: results.filter(r => r.source === 'documents'),
+                timeline: results.filter(r => r.source === 'timeline'),
+                contacts: results.filter(r => r.source === 'contacts'),
+                laws: results.filter(r => r.source === 'laws')
+            };
+
+            let html = '';
+
+            // Documents
+            if (grouped.documents.length > 0) {
+                html += `
+                    <div class="search-category">
+                        <div class="search-category-title">📄 Documents (${grouped.documents.length})</div>
+                        ${grouped.documents.map(r => renderSearchResult(r, 'document')).join('')}
+                    </div>
+                `;
+            }
+
+            // Timeline Events
+            if (grouped.timeline.length > 0) {
+                html += `
+                    <div class="search-category">
+                        <div class="search-category-title">📅 Timeline (${grouped.timeline.length})</div>
+                        ${grouped.timeline.map(r => renderSearchResult(r, 'timeline')).join('')}
+                    </div>
+                `;
+            }
+
+            // Contacts
+            if (grouped.contacts.length > 0) {
+                html += `
+                    <div class="search-category">
+                        <div class="search-category-title">👤 Contacts (${grouped.contacts.length})</div>
+                        ${grouped.contacts.map(r => renderSearchResult(r, 'contact')).join('')}
+                    </div>
+                `;
+            }
+
+            // Laws
+            if (grouped.laws.length > 0) {
+                html += `
+                    <div class="search-category">
+                        <div class="search-category-title">⚖️ Laws & Statutes (${grouped.laws.length})</div>
+                        ${grouped.laws.map(r => renderSearchResult(r, 'law')).join('')}
+                    </div>
+                `;
+            }
+
+            searchContent.innerHTML = html;
+        }
+
+        function renderSearchResult(result, type) {
+            const icons = {
+                document: '📄',
+                timeline: '📅',
+                contact: '👤',
+                law: '⚖️'
+            };
+
+            const icon = icons[type] || '📋';
+            
+            // Create link based on type
+            let href = '#';
+            let onclick = '';
+            
+            if (type === 'document' && result.id) {
+                onclick = `onclick="viewDocument('${result.id}')"`;
+            } else if (type === 'timeline') {
+                onclick = `onclick="showPanel('timeline')"`;
+            } else if (type === 'contact') {
+                href = '/contacts';
+            } else if (type === 'law') {
+                href = '/law-library';
+            }
+
+            return `
+                <a class="search-result-item" ${href !== '#' ? `href="${href}"` : ''} ${onclick}>
+                    <div class="search-result-title">
+                        <span class="type-icon">${icon}</span>
+                        ${escapeHtml(result.title)}
+                    </div>
+                    ${result.snippet ? `<div class="search-result-snippet">${result.snippet}</div>` : ''}
+                    ${result.metadata ? `<div class="search-result-meta">${formatMetadata(result.metadata)}</div>` : ''}
+                </a>
+            `;
+        }
+
+        function formatMetadata(metadata) {
+            const parts = [];
+            if (metadata.doc_type) parts.push(metadata.doc_type);
+            if (metadata.event_type) parts.push(metadata.event_type);
+            if (metadata.role) parts.push(metadata.role);
+            if (metadata.citation) parts.push(metadata.citation);
+            if (metadata.date) {
+                const d = new Date(metadata.date);
+                if (!isNaN(d.getTime())) {
+                    parts.push(d.toLocaleDateString());
+                }
+            }
+            return parts.join(' • ');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         // Filter tabs for documents
         document.querySelectorAll('.filter-tab').forEach(tab => {

@@ -956,8 +956,13 @@
         // Format date
         function formatDate(dateStr) {
             if (!dateStr) return 'Unknown';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString();
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown';
+                return date.toLocaleDateString();
+            } catch (e) {
+                return 'Unknown';
+            }
         }
 
         // View toggle

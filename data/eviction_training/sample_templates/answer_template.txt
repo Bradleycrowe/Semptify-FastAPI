@@ -1,0 +1,54 @@
+MINNESOTA DISTRICT COURT
+{county} COUNTY                                    FIRST JUDICIAL DISTRICT
+
+{plaintiff_name},                                  Case No.: {case_number}
+                    Plaintiff,
+        vs.                                        ANSWER TO COMPLAINT
+                                                   FOR EVICTION
+{defendant_name},
+                    Defendant.
+
+COMES NOW the Defendant, {defendant_name}, and for their Answer to Plaintiff's 
+Complaint states as follows:
+
+DENIALS
+
+1. Defendant denies each and every allegation in Plaintiff's Complaint not 
+   specifically admitted herein.
+
+2. Defendant denies that Plaintiff is entitled to possession of the premises.
+
+3. Defendant denies that rent is owed as alleged.
+
+AFFIRMATIVE DEFENSES
+
+1. IMPROPER SERVICE: The Summons and Complaint were not properly served as 
+   required by Minnesota Statute § 504B.331.
+
+2. HABITABILITY DEFENSE: Plaintiff failed to maintain the premises in 
+   compliance with the implied warranty of habitability under Minnesota 
+   Statute § 504B.161. Specifically:
+   [List specific habitability issues]
+
+3. RETALIATION: This eviction action is retaliatory in violation of 
+   Minnesota Statute § 504B.285 because:
+   [Describe protected activity and timing]
+
+4. RENT PAYMENT: All rent due and owing has been paid.
+
+COUNTERCLAIM
+
+[See attached Counterclaim]
+
+WHEREFORE, Defendant requests that this Court:
+1. Dismiss Plaintiff's Complaint with prejudice;
+2. Award Defendant damages on their Counterclaim;
+3. Award attorney's fees and costs;
+4. Grant such other relief as the Court deems just.
+
+Dated: _______________
+
+_______________________
+{defendant_name}, Pro Se Defendant
+{defendant_address}
+{defendant_phone}

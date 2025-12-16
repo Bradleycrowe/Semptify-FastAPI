@@ -34,7 +34,7 @@
             min-height: 100vh;
         }
 
-        #navbar {
+        #semptify-nav {
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -923,7 +923,9 @@
 </head>
 <body>
     <!-- Navigation -->
-    <div id="navbar"></div>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
 
     <!-- Header -->
     <header class="page-header">
@@ -1029,11 +1031,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Load navbar
-        fetch('/static/components/navbar.html')
-            .then(response => response.text())
-            .then(html => document.getElementById('navbar').innerHTML = html);
-
         // State
         let currentWizard = null;
         let currentStep = 0;

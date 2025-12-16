@@ -28,6 +28,8 @@ httpx>=0.26.0
 python-multipart>=0.0.6     # Form data / file uploads
 passlib[bcrypt]>=1.7.4      # Password hashing (if needed)
 cryptography>=41.0.0        # AES-256-GCM encryption for storage tokens
+slowapi>=0.1.9              # API rate limiting
+redis>=5.0.0                # Redis client for sessions (production)
 
 # =============================================================================
 # File Processing
@@ -51,6 +53,7 @@ icalendar>=5.0.0
 # =============================================================================
 pytest>=7.4.0
 pytest-asyncio>=0.23.0
+pytest-cov>=7.0.0           # Test coverage metrics
 httpx>=0.26.0               # For TestClient
 
 # =============================================================================
@@ -75,3 +78,5 @@ pymupdf>=1.23.0
 
 # PostgreSQL driver for production
 psycopg2-binary>=2.9.9
+
+alembic>=1.17.0

@@ -17,6 +17,14 @@ from app.services.form_data import get_form_data_service
 
 router = APIRouter(prefix="/api/eviction-defense", tags=["Eviction Defense"])
 
+# Legal disclaimer - required on all legal information
+LEGAL_DISCLAIMER = (
+    "This information is provided for educational purposes only and does not constitute "
+    "legal advice. Semptify is a tenant documentation tool, not a law firm. For legal "
+    "advice specific to your situation, please consult with a licensed attorney or contact "
+    "your local legal aid organization."
+)
+
 
 # =============================================================================
 # Enums & Data Models

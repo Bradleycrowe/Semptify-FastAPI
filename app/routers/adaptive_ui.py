@@ -6,9 +6,10 @@ The frontend calls these to get widgets to display.
 Now integrated with the Context Loop for unified state.
 """
 
-from fastapi import APIRouter, Header, Query
+from fastapi import APIRouter, Header, Query, Depends
 from typing import Optional
 
+from app.core.security import get_optional_user_id
 from app.services.adaptive_ui import (
     adaptive_ui, 
     TenancyPhase,
@@ -20,10 +21,17 @@ from app.services.adaptive_ui import (
 router = APIRouter(prefix="/api/ui", tags=["Adaptive UI"])
 
 
+def resolve_user_id(
+    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
+    session_user_id: Optional[str] = Depends(get_optional_user_id),
+) -> str:
+    """Resolve user_id from header or session, fallback to anonymous."""
+    return x_user_id or session_user_id or "anonymous"
+
+
 @router.get("/widgets")
 async def get_widgets(
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """
     Get the adaptive UI widgets for this user.
@@ -32,8 +40,6 @@ async def get_widgets(
     The frontend renders these widgets dynamically.
     Order matters - first widgets are highest priority.
     """
-    uid = x_user_id or user_id or "anonymous"
-    
     # Use integrated builder with intensity
     result = build_ui_with_intensity(uid)
     
@@ -47,12 +53,9 @@ async def get_widgets(
 
 @router.get("/context")
 async def get_context(
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """Get the current user context (what we know about them)."""
-    uid = x_user_id or user_id or "anonymous"
-    
     ctx = adaptive_ui.get_or_create_context(uid)
     
     return {
@@ -64,12 +67,9 @@ async def get_context(
 @router.post("/dismiss/{widget_id}")
 async def dismiss_widget(
     widget_id: str,
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """Dismiss a widget so it doesn't show again."""
-    uid = x_user_id or user_id or "anonymous"
-    
     adaptive_ui.dismiss_widget(uid, widget_id)
     
     return {"status": "dismissed", "widget_id": widget_id}
@@ -78,12 +78,9 @@ async def dismiss_widget(
 @router.post("/action/{action}")
 async def record_action(
     action: str,
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """Record that the user took an action (for learning)."""
-    uid = x_user_id or user_id or "anonymous"
-    
     adaptive_ui.record_action(uid, action)
     
     return {"status": "recorded", "action": action}
@@ -93,12 +90,9 @@ async def record_action(
 async def update_context(
     phase: Optional[str] = None,
     jurisdiction: Optional[str] = None,
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """Manually update user context."""
-    uid = x_user_id or user_id or "anonymous"
-    
     ctx = adaptive_ui.get_or_create_context(uid)
     
     if phase:
@@ -118,8 +112,7 @@ async def update_context(
 
 @router.get("/predictions")
 async def get_predictions(
-    x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    user_id: Optional[str] = Query(None),
+    uid: str = Depends(resolve_user_id),
 ):
     """
     Get predictions about what the user might need.
@@ -127,8 +120,6 @@ async def get_predictions(
     This is Semptify being smart - anticipating needs
     based on their situation and patterns.
     """
-    uid = x_user_id or user_id or "anonymous"
-    
     ctx = adaptive_ui.get_or_create_context(uid)
     predictions = adaptive_ui._predict_next_needs(ctx)
     

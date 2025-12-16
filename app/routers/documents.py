@@ -559,6 +559,130 @@ async def download_document(
     raise HTTPException(status_code=404, detail="Document file not found")
 
 
+@router.get("/export/download")
+async def export_documents(
+    doc_type: Optional[str] = Query(None, description="Filter by document type"),
+    format: str = Query("zip", description="Export format: zip, json, or csv"),
+    user: StorageUser = Depends(require_user)
+):
+    """
+    Export all user documents as a ZIP archive, JSON, or CSV.
+    
+    - **zip**: Downloads all documents as a ZIP file with metadata
+    - **json**: Downloads document metadata as JSON
+    - **csv**: Downloads document metadata as CSV
+    """
+    import io
+    import json
+    import csv
+    import zipfile
+    import os
+    from datetime import datetime
+    from fastapi.responses import StreamingResponse
+    
+    pipeline = get_document_pipeline()
+    docs = pipeline.get_user_documents(user.user_id)
+    
+    # Filter by doc_type if specified
+    if doc_type:
+        docs = [d for d in docs if d.doc_type and d.doc_type.value == doc_type]
+    
+    if not docs:
+        raise HTTPException(status_code=404, detail="No documents found to export")
+    
+    # Prepare document metadata
+    doc_metadata = []
+    for doc in docs:
+        metadata = {
+            "id": doc.id,
+            "filename": doc.filename,
+            "doc_type": doc.doc_type.value if doc.doc_type else "unknown",
+            "status": doc.status.value if doc.status else "unknown",
+            "title": doc.title or "",
+            "summary": doc.summary or "",
+            "uploaded_at": doc.uploaded_at.isoformat() if doc.uploaded_at else "",
+            "analyzed_at": doc.analyzed_at.isoformat() if doc.analyzed_at else "",
+            "confidence": doc.confidence or 0,
+        }
+        
+        # Add extracted data if available
+        if hasattr(doc, 'key_dates') and doc.key_dates:
+            metadata["key_dates"] = doc.key_dates
+        if hasattr(doc, 'key_parties') and doc.key_parties:
+            metadata["key_parties"] = doc.key_parties
+        if hasattr(doc, 'key_amounts') and doc.key_amounts:
+            metadata["key_amounts"] = doc.key_amounts
+            
+        doc_metadata.append(metadata)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    if format == "json":
+        # Export as JSON
+        json_content = json.dumps({
+            "export_date": datetime.now().isoformat(),
+            "user_id": user.user_id,
+            "document_count": len(doc_metadata),
+            "documents": doc_metadata
+        }, indent=2)
+        
+        return StreamingResponse(
+            io.BytesIO(json_content.encode('utf-8')),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=semptify_documents_{timestamp}.json"}
+        )
+    
+    elif format == "csv":
+        # Export as CSV
+        output = io.StringIO()
+        fieldnames = ["id", "filename", "doc_type", "status", "title", "summary", "uploaded_at", "analyzed_at", "confidence"]
+        writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(doc_metadata)
+        
+        return StreamingResponse(
+            io.BytesIO(output.getvalue().encode('utf-8')),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=semptify_documents_{timestamp}.csv"}
+        )
+    
+    else:  # ZIP format (default)
+        # Create ZIP in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Add metadata file
+            metadata_json = json.dumps({
+                "export_date": datetime.now().isoformat(),
+                "user_id": user.user_id,
+                "document_count": len(doc_metadata),
+                "documents": doc_metadata
+            }, indent=2)
+            zip_file.writestr("_metadata.json", metadata_json)
+            
+            # Add each document file
+            for doc in docs:
+                if hasattr(doc, 'file_path') and doc.file_path and os.path.exists(doc.file_path):
+                    # Create folder structure by doc type
+                    doc_type_folder = doc.doc_type.value if doc.doc_type else "other"
+                    file_path_in_zip = f"{doc_type_folder}/{doc.filename}"
+                    
+                    try:
+                        with open(doc.file_path, 'rb') as f:
+                            zip_file.writestr(file_path_in_zip, f.read())
+                    except Exception as e:
+                        # Log error but continue with other files
+                        print(f"Error adding {doc.filename} to ZIP: {e}")
+        
+        zip_buffer.seek(0)
+        
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename=semptify_documents_{timestamp}.zip"}
+        )
+
+
 @router.get("/timeline/", response_model=list[TimelineEvent])
 async def get_timeline(user: StorageUser = Depends(require_user)):
     """Get chronological timeline of all documents and events."""
@@ -928,3 +1052,120 @@ async def auto_timeline_all_documents(
         "total_events_created": total_created,
         "events_skipped": total_skipped
     }
+
+
+# =============================================================================
+# Document Recognition Training Endpoints
+# =============================================================================
+
+class CorrectionRequest(BaseModel):
+    """Request to correct a document classification."""
+    document_id: str
+    correct_type: str
+    user_notes: Optional[str] = ""
+
+
+class ConfirmationRequest(BaseModel):
+    """Request to confirm a correct classification."""
+    document_id: str
+
+
+@router.post("/train/correct")
+async def correct_classification(
+    correction: CorrectionRequest,
+    user: StorageUser = Depends(require_user)
+):
+    """
+    Submit a correction when the system misclassified a document.
+    
+    This helps train the recognition engine to be more accurate.
+    """
+    from app.services.document_training import get_training_service
+    
+    pipeline = get_document_pipeline()
+    doc = await pipeline.get_document(correction.document_id, user.user_id)
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    training = get_training_service()
+    example = training.record_correction(
+        document_text=doc.content or "",
+        document_filename=doc.filename,
+        predicted_type=doc.doc_type.value if doc.doc_type else "unknown",
+        predicted_confidence=doc.confidence or 0.0,
+        correct_type=correction.correct_type,
+        user_notes=correction.user_notes or "",
+        user_id=user.user_id,
+    )
+    
+    return {
+        "message": "Thank you! Your correction helps improve document recognition.",
+        "training_id": example.id,
+        "previous_type": doc.doc_type.value if doc.doc_type else "unknown",
+        "corrected_type": correction.correct_type,
+    }
+
+
+@router.post("/train/confirm")
+async def confirm_classification(
+    confirmation: ConfirmationRequest,
+    user: StorageUser = Depends(require_user)
+):
+    """
+    Confirm that the system correctly classified a document.
+    
+    This reinforces correct patterns in the recognition engine.
+    """
+    from app.services.document_training import get_training_service
+    
+    pipeline = get_document_pipeline()
+    doc = await pipeline.get_document(confirmation.document_id, user.user_id)
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    training = get_training_service()
+    training.record_confirmation(
+        document_text=doc.content or "",
+        document_filename=doc.filename,
+        predicted_type=doc.doc_type.value if doc.doc_type else "unknown",
+        predicted_confidence=doc.confidence or 0.0,
+        user_id=user.user_id,
+    )
+    
+    return {
+        "message": "Classification confirmed! This helps reinforce accurate recognition.",
+        "document_type": doc.doc_type.value if doc.doc_type else "unknown",
+    }
+
+
+@router.get("/train/stats")
+async def get_training_stats():
+    """
+    Get statistics about document recognition training.
+    
+    Shows accuracy rate, common mistakes, and learned patterns.
+    """
+    from app.services.document_training import get_training_service
+    
+    training = get_training_service()
+    return training.get_training_stats()
+
+
+@router.get("/train/patterns")
+async def get_learned_patterns():
+    """
+    Get the learned patterns from user corrections.
+    
+    These patterns are used to adjust keyword weights and improve recognition.
+    """
+    from app.services.document_training import get_training_service
+    
+    training = get_training_service()
+    return {
+        "adjustments": training.get_weight_adjustments(),
+        "boosted_count": len(training.learned_patterns.get("boosted_keywords", {})),
+        "suppressed_count": len(training.learned_patterns.get("suppressed_patterns", {})),
+    }
+

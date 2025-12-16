@@ -63,7 +63,26 @@ Your data lives in YOUR cloud storage - we never store your files.
     # Security Mode: open (dev/testing) or enforced (production)
     # ==========================================================================
     security_mode: Literal["open", "enforced"] = "enforced"
-    secret_key: str = "change-me-in-production-use-secrets"
+    secret_key: str = ""  # Will be auto-generated if not set
+    
+    @field_validator("secret_key", mode="before")
+    @classmethod
+    def generate_secret_key_if_empty(cls, v: str) -> str:
+        """Generate a secure secret key if not provided."""
+        import secrets
+        import os
+        if not v or v == "change-me-in-production-use-secrets":
+            # Check environment variable directly
+            env_key = os.getenv("SECRET_KEY", "")
+            if env_key and env_key != "change-me-in-production-use-secrets":
+                return env_key
+            # Generate a secure random key
+            generated = secrets.token_urlsafe(64)
+            print(f"⚠️  WARNING: No SECRET_KEY set. Generated temporary key for this session.")
+            print(f"   For production, set SECRET_KEY in your .env file:")
+            print(f"   SECRET_KEY={generated}")
+            return generated
+        return v
     
     # Token settings
     access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
@@ -74,6 +93,14 @@ Your data lives in YOUR cloud storage - we never store your files.
     rate_limit_max_requests: int = 100
     admin_rate_limit_window: int = 60
     admin_rate_limit_max_requests: int = 20
+    
+    # ==========================================================================
+    # Session Storage
+    # ==========================================================================
+    # Redis URL for session storage (production). Leave empty for in-memory.
+    # Example: redis://localhost:6379 or redis://:password@host:6379/0
+    redis_url: str = ""
+    session_ttl_hours: int = 24  # Session expiry time
     
     # ==========================================================================
     # Database
@@ -114,13 +141,13 @@ Your data lives in YOUR cloud storage - we never store your files.
     # ==========================================================================
     # AI Provider Configuration
     # ==========================================================================
-    ai_provider: Literal["openai", "azure", "ollama", "groq", "anthropic", "none"] = "anthropic"
+    ai_provider: Literal["openai", "azure", "ollama", "groq", "anthropic", "gemini", "none"] = "anthropic"
 
     # OpenAI
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
 
-    # Groq (fast & affordable)
+    # Groq (fast & affordable - FREE tier available)
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
@@ -128,13 +155,18 @@ Your data lives in YOUR cloud storage - we never store your files.
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-20250514"
 
+    # Google Gemini (FREE tier: 1,500 requests/day)
+    gemini_api_key: str = ""
+    google_ai_api_key: str = ""  # Alias for gemini_api_key
+    gemini_model: str = "gemini-1.5-flash"
+
     # Azure OpenAI
     azure_openai_api_key: str = ""
     azure_openai_endpoint: str = ""
     azure_openai_deployment: str = ""
     azure_openai_api_version: str = "2024-02-15-preview"
     
-    # Ollama (local)
+    # Ollama (local - 100% FREE)
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2:0.5b"
     
@@ -191,14 +223,33 @@ Your data lives in YOUR cloud storage - we never store your files.
     # ==========================================================================
     # Deployment
     # ==========================================================================
-    cors_origins: str = "*"  # Comma-separated list or "*"
+    cors_origins: str = ""  # Comma-separated list of allowed origins. Leave empty for secure defaults.
     
     @property
     def cors_origins_list(self) -> list[str]:
-        """Parse CORS origins into a list."""
-        if self.cors_origins == "*":
+        """
+        Parse CORS origins into a list with secure defaults.
+        - If explicit origins set: use those
+        - If empty and security_mode=enforced: restrict to localhost only
+        - If empty and security_mode=open: allow all (for development)
+        """
+        if self.cors_origins:
+            if self.cors_origins == "*":
+                return ["*"]
+            return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+        
+        # Secure defaults based on security mode
+        if self.security_mode == "enforced":
+            # Production: only localhost by default (user must configure explicit origins)
+            return [
+                "http://localhost:8000",
+                "http://127.0.0.1:8000",
+                "http://localhost:3000",  # Common frontend dev port
+                "http://127.0.0.1:3000",
+            ]
+        else:
+            # Development: allow all origins
             return ["*"]
-        return [origin.strip() for origin in self.cors_origins.split(",")]
 
     @property
     def allowed_extensions_set(self) -> set[str]:

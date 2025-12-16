@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Semptify Settings - Configure your account and preferences">
+  <meta name="theme-color" content="#3b82f6">
+  <link rel="manifest" href="/static/manifest.json">
+  <!-- <link rel="apple-touch-icon" href="/static/icons/icon-192.png"> -->
   <title>Settings - Semptify</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,6 +56,12 @@
               <a href="/static/timeline-v2.html" class="sidebar-link">
                 <i class="fas fa-stream sidebar-icon"></i>
                 <span class="sidebar-text">Timeline</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/timeline-builder.html" class="sidebar-link">
+                <i class="fas fa-bolt sidebar-icon"></i>
+                <span class="sidebar-text">Timeline Builder</span>
               </a>
             </li>
             <li class="sidebar-item">
@@ -905,5 +914,6 @@
   <script src="/static/js/help-system.js"></script>
   <script src="/static/js/help-content.js"></script>
   <script>SemptifyHelp.init('settings');</script>
+  <script src="/static/js/pwa-init.js"></script>
 </body>
 </html>

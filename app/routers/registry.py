@@ -10,11 +10,12 @@ Provides endpoints for:
 - Chain of custody tracking
 """
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Query, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query, Request
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
+from app.core.security import get_optional_user_id
 from app.services.document_registry import (
     get_document_registry,
     DocumentStatus,
@@ -241,7 +242,7 @@ async def get_document(doc_id: str, request: Request):
 
 @router.get("/documents", response_model=list[RegisteredDocumentResponse])
 async def list_documents(
-    user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     case_number: Optional[str] = Query(None, description="Filter by case number"),
     status: Optional[str] = Query(None, description="Filter by status"),
 ):

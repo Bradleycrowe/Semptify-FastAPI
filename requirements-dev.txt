@@ -1,0 +1,72 @@
+# Development Dependencies for Semptify
+# Install with: pip install -r requirements-dev.txt
+
+# Include base requirements
+-r requirements.txt
+
+# =============================================================================
+# Testing
+# =============================================================================
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.5.0          # Parallel test execution
+pytest-timeout>=2.2.0         # Test timeouts
+pytest-mock>=3.12.0           # Mocking utilities
+coverage>=7.3.0
+hypothesis>=6.92.0            # Property-based testing
+faker>=22.0.0                 # Fake data generation
+
+# =============================================================================
+# Code Quality
+# =============================================================================
+ruff>=0.3.0                   # Fast Python linter
+black>=24.1.0                 # Code formatter (backup)
+isort>=5.13.0                 # Import sorter (backup)
+mypy>=1.8.0                   # Static type checker
+pylint>=3.0.0                 # Additional linting
+
+# =============================================================================
+# Security
+# =============================================================================
+bandit>=1.7.7                 # Security linter
+pip-audit>=2.7.0              # Dependency vulnerability scanner
+safety>=2.3.5                 # Dependency safety checker
+
+# =============================================================================
+# Documentation
+# =============================================================================
+mkdocs>=1.5.0                 # Documentation generator
+mkdocs-material>=9.5.0        # Material theme
+mkdocstrings>=0.24.0          # Auto-generate from docstrings
+mkdocstrings-python>=1.8.0    # Python handler
+
+# =============================================================================
+# Development Utilities
+# =============================================================================
+pre-commit>=3.6.0             # Git hooks
+watchfiles>=0.21.0            # Fast file watcher
+rich>=13.7.0                  # Beautiful terminal output
+ipython>=8.20.0               # Enhanced Python shell
+httpie>=3.2.0                 # HTTP client for testing
+
+# =============================================================================
+# Debugging & Profiling
+# =============================================================================
+debugpy>=1.8.0                # VS Code debugger
+py-spy>=0.3.0                 # Sampling profiler
+memory-profiler>=0.61.0       # Memory profiler
+line-profiler>=4.1.0          # Line-by-line profiler
+
+# =============================================================================
+# Database Tools
+# =============================================================================
+alembic>=1.13.0               # Database migrations
+sqlalchemy-utils>=0.41.0      # SQLAlchemy utilities
+
+# =============================================================================
+# API Development
+# =============================================================================
+httpx>=0.26.0                 # Async HTTP client (for tests)
+respx>=0.20.0                 # HTTPX mock library
+fastapi-profiler>=1.2.0       # Request profiling

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Semptify - My Tenancy Timeline</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
     <style>
         * {
             margin: 0;
@@ -34,7 +35,7 @@
             min-height: 100vh;
         }
 
-        #navbar {
+        #semptify-nav {
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -624,9 +625,10 @@
         }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <div id="navbar"></div>
+<body class="has-nav">
+    <!-- Shared Navigation Component -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
 
     <!-- Header -->
     <header class="page-header">
@@ -1179,11 +1181,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Load navbar
-        fetch('/static/components/navbar.html')
-            .then(response => response.text())
-            .then(html => document.getElementById('navbar').innerHTML = html);
-
         // State
         let currentItem = null;
         let extractedDocData = null;

@@ -1,0 +1,70 @@
+# =============================================================================
+# Docker Ignore - Exclude from Docker build context
+# =============================================================================
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+ENV
+env
+.eggs
+*.egg-info
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+coverage.xml
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Local development
+.env
+.env.local
+*.db
+*.sqlite
+*.sqlite3
+
+# Backups
+backups/
+
+# Logs
+logs/
+*.log
+
+# Uploads (mount as volume instead)
+uploads/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+pytest.ini
+
+# Build artifacts
+dist/
+build/
+*.spec
+
+# Misc
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp

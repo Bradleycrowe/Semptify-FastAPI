@@ -6,15 +6,23 @@ API endpoints for tracking user progress through
 their legal defense journey.
 """
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
 
+from app.core.security import get_optional_user_id
 from ..services.progress_tracker import progress_tracker, MilestoneCategory
 from ..services.emotion_engine import emotion_engine
 
 
 router = APIRouter(prefix="/progress", tags=["Progress Tracker"])
+
+
+def resolve_user_id(
+    session_user_id: Optional[str] = Depends(get_optional_user_id),
+) -> str:
+    """Resolve user_id from session, fallback to default."""
+    return session_user_id or "default"
 
 
 class MilestoneCompletion(BaseModel):
@@ -31,7 +39,7 @@ class CaseSetup(BaseModel):
 
 
 @router.get("/")
-async def get_progress(user_id: str = Query("default")):
+async def get_progress(user_id: str = Depends(resolve_user_id)):
     """
     Get full progress state for a user.
     """
@@ -40,7 +48,7 @@ async def get_progress(user_id: str = Query("default")):
 
 
 @router.get("/readiness")
-async def get_case_readiness(user_id: str = Query("default")):
+async def get_case_readiness(user_id: str = Depends(resolve_user_id)):
     """
     Get overall case readiness assessment.
     """
@@ -48,7 +56,7 @@ async def get_case_readiness(user_id: str = Query("default")):
 
 
 @router.get("/milestones")
-async def get_all_milestones(user_id: str = Query("default")):
+async def get_all_milestones(user_id: str = Depends(resolve_user_id)):
     """
     Get all milestones with their status for a user.
     """
@@ -57,7 +65,7 @@ async def get_all_milestones(user_id: str = Query("default")):
 
 @router.get("/milestones/next")
 async def get_next_milestones(
-    user_id: str = Query("default"),
+    user_id: str = Depends(resolve_user_id),
     limit: int = Query(3, ge=1, le=10)
 ):
     """
@@ -71,7 +79,7 @@ async def get_next_milestones(
 
 
 @router.post("/milestones/complete")
-async def complete_milestone(completion: MilestoneCompletion, user_id: str = Query("default")):
+async def complete_milestone(completion: MilestoneCompletion, user_id: str = Depends(resolve_user_id)):
     """
     Mark a milestone as completed.
     """
@@ -94,7 +102,7 @@ async def complete_milestone(completion: MilestoneCompletion, user_id: str = Que
 
 
 @router.post("/milestones/skip/{milestone_id}")
-async def skip_milestone(milestone_id: str, user_id: str = Query("default")):
+async def skip_milestone(milestone_id: str, user_id: str = Depends(resolve_user_id)):
     """
     Skip a milestone (mark as not applicable).
     """
@@ -113,7 +121,7 @@ async def skip_milestone(milestone_id: str, user_id: str = Query("default")):
 
 
 @router.get("/points")
-async def get_points(user_id: str = Query("default")):
+async def get_points(user_id: str = Depends(resolve_user_id)):
     """
     Get total points earned.
     """
@@ -128,7 +136,7 @@ async def get_points(user_id: str = Query("default")):
 
 
 @router.get("/stats")
-async def get_stats(user_id: str = Query("default")):
+async def get_stats(user_id: str = Depends(resolve_user_id)):
     """
     Get progress statistics.
     """
@@ -155,7 +163,7 @@ async def get_stats(user_id: str = Query("default")):
 async def increment_stat(
     stat: str,
     amount: int = Query(1),
-    user_id: str = Query("default")
+    user_id: str = Depends(resolve_user_id)
 ):
     """
     Increment a progress stat (documents_uploaded, violations_found, forms_generated).
@@ -172,7 +180,7 @@ async def increment_stat(
 
 
 @router.post("/setup")
-async def setup_case(setup: CaseSetup, user_id: str = Query("default")):
+async def setup_case(setup: CaseSetup, user_id: str = Depends(resolve_user_id)):
     """
     Initialize or update case setup information.
     """
@@ -198,7 +206,7 @@ async def setup_case(setup: CaseSetup, user_id: str = Query("default")):
 
 
 @router.get("/journey")
-async def get_journey_overview(user_id: str = Query("default")):
+async def get_journey_overview(user_id: str = Depends(resolve_user_id)):
     """
     Get a high-level journey overview for display.
     """
@@ -237,7 +245,7 @@ async def get_journey_overview(user_id: str = Query("default")):
 
 
 @router.get("/achievements")
-async def get_achievements(user_id: str = Query("default")):
+async def get_achievements(user_id: str = Depends(resolve_user_id)):
     """
     Get earned achievements/completed milestones.
     """

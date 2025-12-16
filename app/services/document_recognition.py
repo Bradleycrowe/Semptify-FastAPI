@@ -306,12 +306,34 @@ DOCUMENT_PATTERNS = {
             ("defendant moves", 0.9),
             ("plaintiff moves", 0.9),
             ("hereby moves", 0.9),
+            # Added from MCRO documents
+            ("notice of motion", 1.0),
+            ("motion to dismiss", 1.0),
+            ("motion and motion to dismiss", 1.0),
+            ("respectfully move this court", 0.95),
+            ("based on their memorandum", 0.8),
+            ("motion to dismiss without prejudice", 1.0),
+            ("motion to dismiss and expunge", 1.0),
+            ("motion to stay", 0.95),
+            ("motion to continue", 0.9),
+            ("motion to vacate", 0.95),
+            ("motion for continuance", 0.9),
+            ("please take notice", 0.7),
         ],
         "supporting_keywords": [
             ("motion", 0.5),
             ("court", 0.3),
             ("grant", 0.3),
             ("request", 0.2),
+            # Added
+            ("memorandum of law", 0.6),
+            ("argument of counsel", 0.5),
+            ("dismissal", 0.5),
+            ("expunge", 0.6),
+            ("expungement", 0.6),
+            ("without prejudice", 0.5),
+            ("presiding judge", 0.4),
+            ("sanctions", 0.3),
         ],
         "context_requirements": ["court", "motion"],
         "category": DocumentCategory.COURT,
@@ -604,6 +626,196 @@ MN_LEGAL_TERMS = {
     },
 }
 
+# =============================================================================
+# DAKOTA COUNTY SPECIFIC FORMS - First Judicial District
+# =============================================================================
+
+DAKOTA_COUNTY_FORMS = {
+    # Dakota County Housing Court Forms
+    "HOU301": {
+        "name": "Summons - Unlawful Detainer",
+        "doc_type": DocumentType.SUMMONS,
+        "patterns": [
+            r"HOU301",
+            r"summons.*unlawful\s+detainer",
+            r"first\s+judicial\s+district.*dakota",
+            r"19HA-CV-\d{2}-\d+",  # Dakota County case number format
+        ],
+        "deadlines": {"respond": 7},
+    },
+    "HOU302": {
+        "name": "Complaint - Unlawful Detainer (Non-Payment)",
+        "doc_type": DocumentType.EVICTION_FILING,
+        "patterns": [
+            r"HOU302",
+            r"complaint.*non-?payment",
+            r"unlawful\s+detainer.*rent",
+        ],
+        "deadlines": {},
+    },
+    "HOU303": {
+        "name": "Complaint - Unlawful Detainer (Lease Violation)",
+        "doc_type": DocumentType.EVICTION_FILING,
+        "patterns": [
+            r"HOU303",
+            r"complaint.*lease\s+violation",
+            r"breach\s+of\s+covenant",
+        ],
+        "deadlines": {},
+    },
+    "HOU304": {
+        "name": "Answer - Unlawful Detainer",
+        "doc_type": DocumentType.ANSWER,
+        "patterns": [
+            r"HOU304",
+            r"answer.*unlawful\s+detainer",
+            r"defendant.*answers",
+        ],
+        "deadlines": {"file": 7},
+    },
+    "HOU305": {
+        "name": "Affirmative Defenses - Unlawful Detainer",
+        "doc_type": DocumentType.ANSWER,
+        "patterns": [
+            r"HOU305",
+            r"affirmative\s+defense",
+            r"habitability\s+defense",
+            r"retaliation\s+defense",
+        ],
+        "deadlines": {},
+    },
+    "HOU306": {
+        "name": "Motion to Stay Writ of Recovery",
+        "doc_type": DocumentType.MOTION,
+        "patterns": [
+            r"HOU306",
+            r"motion\s+to\s+stay",
+            r"stay.*writ\s+of\s+recovery",
+        ],
+        "deadlines": {},
+    },
+    "HOU307": {
+        "name": "Writ of Recovery of Premises",
+        "doc_type": DocumentType.WRIT,
+        "patterns": [
+            r"HOU307",
+            r"writ\s+of\s+recovery",
+            r"writ\s+of\s+restitution",
+            r"commanded\s+to\s+remove",
+        ],
+        "deadlines": {"execute": 7},
+    },
+    "HOU308": {
+        "name": "Satisfaction of Judgment",
+        "doc_type": DocumentType.JUDGMENT,
+        "patterns": [
+            r"HOU308",
+            r"satisfaction\s+of\s+judgment",
+            r"judgment\s+satisfied",
+        ],
+        "deadlines": {},
+    },
+}
+
+# Dakota County Court Locations
+DAKOTA_COUNTY_COURTS = {
+    "hastings": {
+        "name": "Dakota County Judicial Center - Hastings",
+        "address": "1560 Highway 55, Hastings, MN 55033",
+        "phone": "(651) 438-4325",
+        "housing_court_day": "Tuesday",
+    },
+    "burnsville": {
+        "name": "Dakota County Northern Service Center",
+        "address": "1 Mendota Road W, West St. Paul, MN 55118",
+        "phone": "(651) 438-4325",
+        "housing_court_day": "Thursday",
+    },
+}
+
+# Dakota County case number patterns (expanded for MCRO)
+DAKOTA_COUNTY_CASE_PATTERNS = [
+    r"19HA-CV-\d{2}-\d{4,}",  # Standard Housing: 19HA-CV-24-5678
+    r"19AV-CV-\d{2}-\d{4,}",  # Alt Housing/Eviction: 19AV-CV-25-3477
+    r"19-CV-\d{2}-\d{4,}",    # General Civil: 19-CV-24-5678  
+    r"Court\s*File\s*No\.?\s*:?\s*(19[A-Z]{0,2}-CV-\d{2}-\d+)",  # Court File No. format
+    r"Dakota\s+County.*Case\s*(?:No\.?|#)?\s*:?\s*([\w\-]+)",
+]
+
+# MCRO (Minnesota Court Records Online) Document Patterns
+MCRO_PATTERNS = {
+    "file_naming": [
+        r"MCRO_\d+[A-Z]{0,2}-CV-\d{2}-\d+",  # MCRO_19AV-CV-25-3477
+        r"Filed\s+in\s+District\s+Court",
+        r"State\s+of\s+Minnesota",
+    ],
+    "document_types": {
+        "notice_of_motion": {
+            "patterns": [
+                r"notice\s+of.*motion",
+                r"notice\s+of\s+defendant[s']?\s+.*motion",
+            ],
+            "doc_type": DocumentType.MOTION,
+        },
+        "motion_to_dismiss": {
+            "patterns": [
+                r"motion\s+to\s+dismiss",
+                r"dismiss\s+without\s+prejudice",
+                r"motion.*dismiss.*expunge",
+            ],
+            "doc_type": DocumentType.MOTION,
+        },
+        "memorandum_of_law": {
+            "patterns": [
+                r"memorandum\s+of\s+law",
+                r"memorandum\s+in\s+support",
+                r"brief\s+in\s+support",
+            ],
+            "doc_type": DocumentType.MOTION,  # Associated with motions
+        },
+        "order": {
+            "patterns": [
+                r"order\s+(?:granting|denying)",
+                r"court\s+order",
+            ],
+            "doc_type": DocumentType.COURT_ORDER,
+        },
+        "judgment": {
+            "patterns": [
+                r"judgment\s+(?:for|against)",
+                r"default\s+judgment",
+            ],
+            "doc_type": DocumentType.JUDGMENT,
+        },
+    },
+    "legal_services": {
+        "smrls": {
+            "name": "Southern Minnesota Regional Legal Services",
+            "patterns": [r"SMRLS", r"Southern\s+Minnesota\s+Regional\s+Legal"],
+            "phone": "651-222-5863",
+        },
+        "mid_minnesota": {
+            "name": "Mid-Minnesota Legal Aid",
+            "patterns": [r"Mid-Minnesota\s+Legal", r"MMLA"],
+        },
+        "volunteer_lawyers": {
+            "name": "Volunteer Lawyers Network",
+            "patterns": [r"Volunteer\s+Lawyers", r"VLN"],
+        },
+    },
+}
+
+# Minnesota Judicial Branch standard forms
+MN_JUDICIAL_FORMS = {
+    "HOU101": {"name": "Tenant Rights Brochure", "doc_type": DocumentType.LETTER},
+    "HOU201": {"name": "Notice to Quit - Non-Payment", "doc_type": DocumentType.NOTICE_TO_QUIT},
+    "HOU202": {"name": "Notice to Quit - Lease Violation", "doc_type": DocumentType.LEASE_VIOLATION},
+    "HOU203": {"name": "Notice of Termination", "doc_type": DocumentType.EVICTION_NOTICE},
+    "CIV301": {"name": "Answer Form - General", "doc_type": DocumentType.ANSWER},
+    "CIV302": {"name": "Motion Form - General", "doc_type": DocumentType.MOTION},
+    "CIV401": {"name": "Affidavit Form", "doc_type": DocumentType.AFFIDAVIT},
+}
+
 
 # =============================================================================
 # DOCUMENT RECOGNITION ENGINE
@@ -655,6 +867,60 @@ class DocumentRecognitionEngine:
             summary="",
         )
         
+        # === LAYER 0: Dakota County Form Detection (Fast Path) ===
+        dakota_type, form_code, dakota_confidence = self._detect_dakota_county_form(text, filename)
+        if dakota_type and dakota_confidence > 0.90:
+            # High-confidence Dakota County form - use fast path
+            result.doc_type = dakota_type
+            result.category = self._get_category(dakota_type)
+            result.confidence = dakota_confidence
+            result.reasoning_chain.append(f"Dakota County form detected: {form_code}")
+            result.signals.append(RecognitionSignal(
+                source="dakota_county",
+                indicator=f"form_{form_code}",
+                weight=dakota_confidence,
+                evidence=form_code,
+                reasoning=f"Matched Dakota County form {form_code}"
+            ))
+            # Still extract entities for completeness
+            result.dates = self._extract_dates(text)
+            result.parties = self._extract_parties(text)
+            result.amounts = self._extract_amounts(text)
+            result.case_numbers = self._extract_case_numbers(text)
+            result.addresses = self._extract_addresses(text)
+            result.title, result.summary = self._generate_title_summary(result, text)
+            result.key_terms = self._extract_key_terms(text_lower)
+            self._analyze_urgency(result)
+            return result
+        
+        # === LAYER 0.5: MCRO Document Detection (Minnesota Courts) ===
+        mcro_result = self._detect_mcro_document(text, filename)
+        if mcro_result:
+            mcro_type, mcro_confidence, mcro_evidence = mcro_result
+            if mcro_confidence > 0.85:
+                # High-confidence MCRO detection
+                result.doc_type = mcro_type
+                result.category = self._get_category(mcro_type)
+                result.confidence = mcro_confidence
+                result.reasoning_chain.append(f"MCRO document detected: {mcro_type.value}")
+                result.signals.append(RecognitionSignal(
+                    source="mcro",
+                    indicator=f"mcro_{mcro_type.value}",
+                    weight=mcro_confidence,
+                    evidence=mcro_evidence,
+                    reasoning=f"Matched MCRO document pattern: {mcro_evidence}"
+                ))
+                # Extract entities
+                result.dates = self._extract_dates(text)
+                result.parties = self._extract_parties(text)
+                result.amounts = self._extract_amounts(text)
+                result.case_numbers = self._extract_case_numbers(text)
+                result.addresses = self._extract_addresses(text)
+                result.title, result.summary = self._generate_title_summary(result, text)
+                result.key_terms = self._extract_key_terms(text_lower)
+                self._analyze_urgency(result)
+                return result
+        
         # === LAYER 1: Structural Analysis ===
         structural_signals = self._analyze_structure(text)
         result.signals.extend(structural_signals)
@@ -662,6 +928,20 @@ class DocumentRecognitionEngine:
         # === LAYER 2: Keyword Analysis ===
         keyword_signals, type_scores = self._analyze_keywords(text_lower)
         result.signals.extend(keyword_signals)
+        
+        # Boost scores if Dakota County form was partially detected
+        if dakota_type and dakota_confidence > 0.5:
+            if dakota_type in type_scores:
+                type_scores[dakota_type] += dakota_confidence
+            else:
+                type_scores[dakota_type] = dakota_confidence
+            result.signals.append(RecognitionSignal(
+                source="dakota_county",
+                indicator=f"form_hint_{form_code}",
+                weight=dakota_confidence,
+                evidence=form_code,
+                reasoning=f"Partial match for Dakota County form {form_code}"
+            ))
         
         # === LAYER 3: Context Analysis ===
         context_signals = self._analyze_context(text_lower, type_scores)
@@ -698,6 +978,124 @@ class DocumentRecognitionEngine:
         self._analyze_urgency(result)
         
         return result
+    
+    def _detect_dakota_county_form(self, text: str, filename: str = "") -> tuple[DocumentType | None, str, float]:
+        """
+        Detect if document is a Dakota County court form.
+        
+        Returns:
+            Tuple of (doc_type, form_code, confidence) or (None, "", 0.0)
+        """
+        text_upper = text.upper()
+        
+        # Check for Dakota County case numbers first
+        for pattern in DAKOTA_COUNTY_CASE_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                # Found Dakota County case - now check for specific forms
+                for form_code, form_info in DAKOTA_COUNTY_FORMS.items():
+                    for form_pattern in form_info["patterns"]:
+                        if re.search(form_pattern, text, re.IGNORECASE):
+                            return (
+                                form_info["doc_type"],
+                                form_code,
+                                0.95  # High confidence for explicit form match
+                            )
+        
+        # Check for explicit form codes in text or filename
+        combined = f"{text_upper} {filename.upper()}"
+        for form_code, form_info in DAKOTA_COUNTY_FORMS.items():
+            if form_code in combined:
+                return (form_info["doc_type"], form_code, 0.98)
+        
+        # Check MN Judicial Branch forms
+        for form_code, form_info in MN_JUDICIAL_FORMS.items():
+            if form_code in combined:
+                return (form_info["doc_type"], form_code, 0.95)
+        
+        # Check for First Judicial District / Dakota County indicators
+        if re.search(r"first\s+judicial\s+district", text, re.IGNORECASE):
+            if re.search(r"dakota\s+county", text, re.IGNORECASE):
+                # Dakota County court document - try to infer type
+                for form_code, form_info in DAKOTA_COUNTY_FORMS.items():
+                    for pattern in form_info["patterns"]:
+                        if re.search(pattern, text, re.IGNORECASE):
+                            return (form_info["doc_type"], form_code, 0.85)
+        
+        return (None, "", 0.0)
+    
+    def _detect_mcro_document(self, text: str, filename: str = "") -> tuple | None:
+        """
+        Detect MCRO (Minnesota Court Records Online) documents.
+        
+        These documents have specific patterns from the MN court system.
+        
+        Returns:
+            Tuple of (DocumentType, confidence, evidence) or None
+        """
+        text_lower = text.lower()
+        filename_lower = filename.lower()
+        
+        # Check for MCRO filename pattern
+        mcro_filename = bool(re.search(r"mcro_\d+[a-z]{0,2}-cv-\d{2}-\d+", filename_lower))
+        
+        # Check for Minnesota court markers
+        mn_court_markers = [
+            (r"state\s+of\s+minnesota", 0.3),
+            (r"court\s+file\s+no\.?", 0.4),
+            (r"district\s+court", 0.3),
+            (r"first\s+judicial\s+district", 0.4),
+            (r"second\s+judicial\s+district", 0.4),
+            (r"fourth\s+judicial\s+district", 0.4),  # Hennepin
+            (r"dakota\s+county", 0.3),
+            (r"hennepin\s+county", 0.3),
+            (r"ramsey\s+county", 0.3),
+            (r"filed\s+in\s+district\s+court", 0.5),
+        ]
+        
+        mn_score = 0.0
+        mn_evidence = []
+        for pattern, weight in mn_court_markers:
+            if re.search(pattern, text_lower):
+                mn_score += weight
+                mn_evidence.append(pattern)
+        
+        # Need some MN court context to proceed
+        if mn_score < 0.5 and not mcro_filename:
+            return None
+        
+        # Now check MCRO document types
+        for doc_type_name, doc_info in MCRO_PATTERNS.get("document_types", {}).items():
+            for pattern in doc_info["patterns"]:
+                match = re.search(pattern, text_lower)
+                if match:
+                    base_confidence = 0.75
+                    # Boost for MCRO filename
+                    if mcro_filename:
+                        base_confidence += 0.15
+                    # Boost for MN court markers
+                    base_confidence += min(mn_score * 0.1, 0.10)
+                    
+                    return (
+                        doc_info["doc_type"],
+                        min(base_confidence, 0.98),
+                        f"{doc_type_name}: {match.group(0)[:50]}"
+                    )
+        
+        # If we have MCRO filename but couldn't detect type, try generic detection
+        if mcro_filename:
+            # Look at filename for hints
+            if "motion" in filename_lower:
+                return (DocumentType.MOTION, 0.85, "MCRO filename contains 'motion'")
+            if "order" in filename_lower:
+                return (DocumentType.COURT_ORDER, 0.85, "MCRO filename contains 'order'")
+            if "judgment" in filename_lower:
+                return (DocumentType.JUDGMENT, 0.85, "MCRO filename contains 'judgment'")
+            if "summons" in filename_lower:
+                return (DocumentType.SUMMONS, 0.85, "MCRO filename contains 'summons'")
+            if "complaint" in filename_lower:
+                return (DocumentType.COMPLAINT, 0.85, "MCRO filename contains 'complaint'")
+        
+        return None
     
     def _analyze_structure(self, text: str) -> list[RecognitionSignal]:
         """Layer 1: Analyze document structure."""

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Semptify</title>
+    <title>Semptify - The Tenant's Journal</title>
     <style>
         * {
             margin: 0;
@@ -15,6 +15,7 @@
             --primary: #1e3a5f;
             --primary-light: #2d5a87;
             --accent: #3b82f6;
+            --warm: #f59e0b;
             --text: #1e293b;
             --text-light: #475569;
             --bg: #fdfcfa;
@@ -25,81 +26,114 @@
             font-family: 'Georgia', 'Times New Roman', serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.5;
+            line-height: 1.6;
             font-size: 17px;
-        }
-
-        .article p {
-            margin-bottom: 0.75rem;
         }
 
         /* Header */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 400;
             letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .header .tagline {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.9;
+            font-style: italic;
         }
 
         .header .subtitle {
-            font-size: 1rem;
-            font-weight: 300;
-            color: white;
-            opacity: 0.85;
-            font-style: italic;
-            text-align: center;
-            display: block;
-            margin: 0 auto;
+            font-size: 0.95rem;
+            opacity: 0.75;
+            margin-top: 0.5rem;
         }
 
         /* Article Container */
         .article {
             max-width: 720px;
             margin: 0 auto;
-            padding: 1.5rem 2rem;
+            padding: 2rem;
             background: var(--paper);
-            min-height: 100vh;
         }
 
         /* Section styling */
         .section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
         }
 
         .section-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             color: var(--primary);
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             font-weight: 400;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 0.5rem;
         }
 
         p {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             color: var(--text-light);
             text-align: justify;
         }
 
-        /* Highlight box */
-        .highlight {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-left: 4px solid var(--accent);
+        /* Philosophy box */
+        .philosophy {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--warm);
             padding: 1.5rem 2rem;
             margin: 2rem 0;
-            font-style: italic;
         }
 
-        .highlight p {
+        .philosophy p {
             margin: 0;
+            color: #78350f;
+            font-style: italic;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Two-way street */
+        .two-way {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .two-way { grid-template-columns: 1fr; }
+        }
+
+        .two-way-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .two-way-card h4 {
             color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .two-way-card ul {
+            margin-left: 1.25rem;
+            color: var(--text-light);
+        }
+
+        .two-way-card li {
+            margin-bottom: 0.5rem;
         }
 
         /* Motto */
@@ -107,14 +141,17 @@
             background: var(--primary);
             color: white;
             text-align: center;
-            padding: 2.5rem;
-            margin: 3rem -2rem;
-            font-size: 1.5rem;
-            font-weight: 400;
+            padding: 2rem;
+            margin: 2rem -2rem;
+        }
+
+        .motto .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
         }
 
         .motto .main {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             margin-bottom: 0.5rem;
         }
 
@@ -122,129 +159,91 @@
             font-size: 1rem;
             opacity: 0.85;
             font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
-        /* Stats inline */
-        .stat {
-            display: inline;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .source {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            font-style: italic;
-        }
-
-        /* Warning/Important boxes */
-        .important {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            padding: 1.5rem 2rem;
-            margin: 2rem 0;
-            border-radius: 8px;
-        }
-
-        .important-title {
-            color: #92400e;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        .important p {
-            margin: 0;
-            color: #78350f;
-        }
-
-        /* Legal disclaimer */
-        .legal {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 2.5rem;
-            margin: 3rem -2rem;
-            text-align: center;
-        }
-
-        .legal h3 {
-            color: #fbbf24;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 400;
-        }
-
-        .legal p {
-            color: rgba(255,255,255,0.9);
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .legal .advice {
-            background: rgba(255,255,255,0.1);
-            padding: 1.25rem;
-            margin-top: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        /* No ads section */
-        .no-ads {
-            background: #fee2e2;
-            border: 2px solid #ef4444;
-            padding: 1.5rem 2rem;
-            margin: 2rem 0;
-            border-radius: 8px;
-        }
-
-        .no-ads-title {
-            color: #991b1b;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-size: 1.1rem;
-        }
-
-        .no-ads p {
-            margin: 0;
-            color: #7f1d1d;
-        }
-
-        /* Cost section */
-        .cost-highlight {
-            text-align: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            margin: 2rem 0;
+        /* What we believe */
+        .beliefs {
+            background: #f0f9ff;
             border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
         }
 
-        .cost-highlight .price {
-            font-size: 4rem;
+        .beliefs h3 {
             color: var(--primary);
-            font-weight: 600;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
         }
 
-        .cost-highlight .label {
-            font-size: 1.25rem;
+        .belief-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .belief-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .belief-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .belief-text {
             color: var(--text-light);
+        }
+
+        .belief-text strong {
+            color: var(--text);
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--accent);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight p {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* Legal note */
+        .legal-note {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .legal-note p {
+            margin: 0;
+            color: #92400e;
+            font-size: 0.95rem;
+            text-align: center;
         }
 
         /* CTA */
         .cta {
             text-align: center;
-            padding: 3rem 0;
+            padding: 2.5rem 0;
             border-top: 1px solid #e2e8f0;
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
 
         .cta-button {
             display: inline-block;
             background: var(--primary);
             color: white;
-            padding: 1.25rem 3rem;
-            font-size: 1.25rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
             text-decoration: none;
             border-radius: 8px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -259,17 +258,18 @@
 
         .cta p {
             margin-top: 1rem;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             text-align: center;
+            color: var(--text-light);
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            padding: 2rem;
+            padding: 1.5rem;
             background: #f1f5f9;
             color: var(--text-light);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
@@ -279,441 +279,302 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .article {
-                padding: 1rem 1.25rem;
-            }
-            
-            .motto, .legal {
-                margin-left: -1.25rem;
-                margin-right: -1.25rem;
-            }
-            
-            body {
-                font-size: 16px;
-            }
+            .header h1 { font-size: 2rem; }
+            .header .tagline { font-size: 1.1rem; }
+            .article { padding: 1.5rem 1.25rem; }
+            .motto { margin-left: -1.25rem; margin-right: -1.25rem; }
+            body { font-size: 16px; }
         }
     </style>
 </head>
 <body>
     
     <header class="header">
-        <h1>👋 Welcome to Semptify</h1>
-        <p class="subtitle">Always Faithful to Tenants, And Community</p>
+        <h1>📓 Semptify</h1>
+        <p class="tagline">The Tenant's Journal</p>
+        <p class="subtitle">Your proactive guide to a peaceful tenancy</p>
     </header>
 
     <article class="article">
 
-        <!-- The Story, The Name -->
+        <!-- What is Semptify -->
         <section class="section">
-            <h2 class="section-title">🌟 The Story, The Name</h2>
+            <h2 class="section-title">What is Semptify?</h2>
 
             <p>
-                Semptify was born from a feeling — the promise of loyalty, resilience, and "no one left behind."
+                Semptify is your personal tenant journal — a place to document your rental life, understand 
+                your rights <em>and</em> responsibilities, and stay organized. Think of it as a diary for 
+                your tenancy: recording what happens, when it happens, and keeping everything in one place.
             </p>
 
             <p>
-                The name is inspired by the U.S. Marine Corps motto <em>Semper Fi</em> (Semper Fidelis), which 
-                means "Always Faithful." While we honor and deeply respect the Marines' service and sacrifice, 
-                Semptify adapts that spirit for a different mission: tenant justice and community empowerment.
+                We believe that most problems between tenants and landlords can be avoided with knowledge 
+                and preparation. By understanding what's expected of you — and what you can expect from 
+                your landlord — you can navigate your tenancy with confidence and hopefully avoid 
+                conflicts before they start.
             </p>
 
-            <div class="highlight">
-                <p style="text-align: center; font-size: 1.25rem; margin-bottom: 1rem;">
-                    <strong>Semper Fi → Semptify</strong>
-                </p>
+            <div class="philosophy">
                 <p>
-                    <em>Semper Fi</em> represents faithfulness to country, Corps, and comrades.<br>
-                    <em>Semptify</em> represents faithfulness to tenants, organizers, and communities.
+                    "Everyone deserves a safe, clean place to live.<br>
+                    Knowledge and documentation go further than confrontation."
                 </p>
+            </div>
+        </section>
+
+        <!-- A Two-Way Street -->
+        <section class="section">
+            <h2 class="section-title">🚦 It's a Two-Way Street</h2>
+
+            <p>
+                Here's something important: being a good tenant isn't just about knowing your rights — 
+                it's also about knowing your responsibilities. A successful tenancy requires effort from 
+                both sides. We're not here to help anyone be difficult or find loopholes. We're here 
+                to help people be <em>good</em> tenants.
+            </p>
+
+            <div class="two-way">
+                <div class="two-way-card">
+                    <h4>✅ Your Rights</h4>
+                    <ul>
+                        <li>Safe, habitable living conditions</li>
+                        <li>Privacy and proper notice before entry</li>
+                        <li>Fair treatment without discrimination</li>
+                        <li>Return of security deposit (with itemization)</li>
+                        <li>Protection from retaliation</li>
+                    </ul>
+                </div>
+                <div class="two-way-card">
+                    <h4>✅ Your Responsibilities</h4>
+                    <ul>
+                        <li>Pay rent on time</li>
+                        <li>Keep the property clean and undamaged</li>
+                        <li>Respect neighbors and quiet hours</li>
+                        <li>Report maintenance issues promptly</li>
+                        <li>Follow lease terms you agreed to</li>
+                    </ul>
+                </div>
             </div>
 
             <p>
-                Semptify was created to carry forward the spirit of loyalty and resilience — always faithful 
-                to tenants, always faithful to community. It is a platform built to reassure: <em>it will be okay</em>. 
-                We are here to help you with practical tools, clear suggestions, and organized flows that make 
-                your situation easier to manage. Whether you are facing eviction, dealing with fraud, or simply 
-                confused about your rights, Semptify gives you a way to take control, organize your case, and 
-                move forward with dignity and support.
+                The world has enough conflict. Be respectful. Don't be the problem. If everyone — tenants 
+                and landlords alike — did what they're supposed to do, most housing disputes would never happen.
             </p>
         </section>
 
-        <!-- What It Means -->
-        <section class="section">
-            <h2 class="section-title">🛡️ What It Means for Us</h2>
-
-            <p>
-                <strong>Always Faithful to Tenants.</strong> No one faces eviction or fraud alone. When you are 
-                overwhelmed by legal documents, confusing deadlines, and powerful adversaries, Semptify stands 
-                with you. We provide the tools to organize your case, understand your options, and take action. 
-                You are not abandoned. You are not forgotten. You matter.
-            </p>
-
-            <p>
-                <strong>Always Faithful to Justice.</strong> Every feature in Semptify is built to protect rights 
-                and expose wrongdoing. From documenting habitability violations to tracking illegal fees, from 
-                understanding your legal defenses to organizing evidence of discrimination — these tools exist 
-                because justice should not depend on whether you can afford a lawyer.
-            </p>
-
-            <p>
-                <strong>Always Faithful to Community.</strong> Housing is not just an individual issue — it is 
-                a community issue. Semptify is designed for collective action, accessible to everyone regardless 
-                of technical skill, and built to support not just tenants but also the organizers, advocates, 
-                and neighbors who stand beside them.
-            </p>
-        </section>
-
-        <!-- Our Commitment -->
+        <!-- Motto -->
         <div class="motto">
-            <div class="main">✨ No Tenant Left Behind</div>
-            <div class="sub">Just as Semper Fi embodies "no one left behind," Semptify ensures no tenant is left behind in the fight for housing security and dignity.</div>
+            <div class="icon">📝</div>
+            <div class="main">Document Everything. Avoid the Pitfalls.</div>
+            <div class="sub">The best outcome is a peaceful tenancy where your documentation is never needed. But if something goes wrong, you'll be prepared.</div>
         </div>
 
-        <!-- What Semptify Actually Does -->
+        <!-- What We Believe -->
         <section class="section">
-            <h2 class="section-title">📓 What Semptify Actually Does</h2>
+            <h2 class="section-title">What We Believe</h2>
 
-            <p>
-                At its core, Semptify is a tenant's digital logbook — a place to store your lease, log your 
-                rent payments, document maintenance issues, save communications with your landlord, and learn 
-                about your rights as a tenant. Think of it as a personal filing cabinet for your rental life.
-            </p>
-
-            <p>
-                But it is more than storage. Semptify helps you make sense of your situation. It builds timelines 
-                from your documents. It suggests what steps to take next. It explains legal concepts in plain 
-                language. It generates template letters when you need to communicate formally with your landlord 
-                or respond to legal notices.
-            </p>
-
-            <p>
-                We believe that <strong>knowledge and preparation</strong> can prevent many tenant-landlord disputes 
-                before they ever escalate. And if issues do arise, you will have everything organized and ready. 
-                The best outcome is a peaceful tenancy where your documentation sits quietly in your cloud storage, 
-                never needed. But if something goes wrong, you will not be starting from zero.
-            </p>
+            <div class="beliefs">
+                <div class="belief-item">
+                    <span class="belief-icon">🧠</span>
+                    <span class="belief-text">
+                        <strong>Knowledge prevents problems.</strong> Understanding your rights AND 
+                        responsibilities means fewer misunderstandings and fewer conflicts.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">📋</span>
+                    <span class="belief-text">
+                        <strong>Documentation protects everyone.</strong> When there's a record, there's 
+                        less room for "he said, she said." Good records protect good tenants AND good landlords.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">🕊️</span>
+                    <span class="belief-text">
+                        <strong>Prevention beats confrontation.</strong> The goal is to avoid fights, 
+                        not win them. But if a fight comes to you, you'll be ready.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">⚖️</span>
+                    <span class="belief-text">
+                        <strong>Right is right.</strong> We stand for what's fair — whether that means 
+                        calling out a bad landlord OR a bad tenant. The truth is the truth.
+                    </span>
+                </div>
+            </div>
         </section>
 
-        <section class="section">
-            <h2 class="section-title">📊 Why Documentation Matters</h2>            <p>
-                According to research from Princeton University's Eviction Lab, approximately 
-                <span class="stat">3.6 million eviction cases</span> are filed each year in the United States. 
-                That is roughly one eviction filing for every ten renter households annually. Behind each of 
-                those numbers is a person or family facing one of the most stressful experiences of their lives.
-            </p>
-            
-            <p>
-                Studies consistently show that the vast majority of tenants — often cited as 
-                <span class="stat">90% or more</span> — appear in eviction court without legal representation. 
-                Meanwhile, most landlords have attorneys. This imbalance means that many tenants lose cases not 
-                because they were wrong, but because they did not know how to present their case, could not 
-                find their documents, or simply did not understand the process.
-                <span class="source">(Source: National Coalition for a Civil Right to Counsel)</span>
-            </p>
-
-            <p>
-                Here is something important to understand: in legal disputes, documentation often matters more 
-                than being "right." A tenant who can produce dated photographs of mold, copies of maintenance 
-                requests, and records of rent payments has a fundamentally different case than one who says 
-                "I know I paid" or "I told them about the problem." Courts deal in evidence, and evidence 
-                requires documentation.
-            </p>
-
-            <p>
-                Our hope — our sincere hope — is that you never need any of this. The ideal outcome is a 
-                peaceful tenancy where your organized documents sit quietly in your cloud storage, never 
-                needed for anything more than your own reference. But if something does go wrong, you will 
-                be prepared. You will have records. You will have a timeline. You will have evidence.
-            </p>
-        </section>
-
+        <!-- What Semptify Does -->
         <section class="section">
             <h2 class="section-title">What Semptify Does</h2>
-            
+
             <p>
-                Semptify helps you organize and store documents related to your rental — your lease agreement, 
-                move-in inspection reports, rent receipts, maintenance requests, photographs of the property, 
-                and communications with your landlord. It helps you build a timeline of your tenancy so you 
-                can see events in chronological order. It provides educational information about tenant rights, 
-                though this varies significantly by state and locality.
-            </p>
-            
-            <p>
-                The application can help you generate template letters — things like maintenance demand letters 
-                or security deposit dispute letters — but these are templates, not legal documents. They are 
-                starting points that you should review, customize, and ideally have checked by someone with 
-                legal knowledge before sending.
+                <strong>📓 Your Tenant Journal</strong> — Log rent payments, maintenance requests, 
+                communications with your landlord, and anything important that happens during your tenancy. 
+                Build a timeline of your rental life.
             </p>
 
             <p>
-                Semptify also provides reminders and organizational tools to help you stay on top of important 
-                dates: when rent is due, when your lease expires, when deadlines are approaching. Small things, 
-                but small things matter when life gets busy and stressful.
-            </p>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">What Semptify Does Not Do</h2>
-            
-            <p>
-                Semptify does not provide legal advice. We cannot tell you what to do in your specific situation. 
-                We cannot represent you in court. We cannot guarantee any outcome. The information provided in 
-                this application is educational and general — it may not be current, complete, or applicable 
-                to your specific circumstances. Laws vary dramatically between states, counties, and even cities. 
-                What is true in Minnesota may not be true in Texas or California.
+                <strong>📚 Know Your Rights & Responsibilities</strong> — Access plain-language guides 
+                to tenant law in your state. Understand what your landlord must do, and what you must do. 
+                Both matter equally.
             </p>
 
             <p>
-                Semptify does not store your documents on our servers. This is intentional and important, which 
-                we will explain in a moment. Semptify does not sell your data, does not analyze your documents 
-                for advertising purposes, and does not share your information with third parties. Your rental 
-                situation is your business, not ours.
-            </p>
-        </section>
-
-        <!-- Legal Disclaimer -->
-        <div class="legal">
-            <h3>⚠️ Important Legal Notice</h3>
-            <p>
-                Nothing in Semptify constitutes legal advice. The information provided is educational only. 
-                Your situation is unique, and laws vary by location. What you read here may not apply to you.
-            </p>
-            <p>
-                We give only one piece of legal advice, and we give it freely:
-            </p>
-            <div class="advice">
-                📞 Talk to an Attorney
-            </div>
-            <p style="margin-top: 1rem; font-size: 0.9rem;">
-                Many areas have free legal aid services for tenants facing housing issues. 
-                Contact your local bar association or legal aid society.
-            </p>
-        </div>
-
-        <section class="section">
-            <h2 class="section-title">Security, Privacy & Confidentiality</h2>
-            
-            <p>
-                We understand that the documents you store in Semptify are deeply personal. Lease agreements, 
-                financial records, photographs of your living space, communications about disputes — this is 
-                sensitive information. According to the Identity Theft Resource Center, 
-                <span class="stat">over 1,800 data breaches</span> exposed more than 422 million records in 
-                2022 alone. We designed Semptify with privacy as a core principle, not an afterthought.
+                <strong>📁 Document Storage</strong> — Keep your lease, move-in photos, receipts, and 
+                communications organized in your own cloud storage. We never store your documents on 
+                our servers — they stay in your control.
             </p>
 
             <p>
-                Your OAuth tokens — the credentials that allow Semptify to save files to your cloud storage — 
-                are encrypted using <span class="stat">AES-GCM encryption</span>, the same authenticated 
-                encryption standard used by financial institutions. These tokens are encrypted with a key 
-                derived from your unique user identifier, meaning even if our database were compromised, 
-                your credentials would be unreadable without your specific key.
-            </p>
-
-            <p>
-                But encryption is only part of the story. The more fundamental protection is architectural: 
-                your documents never touch our servers. They go directly from your device to your personal 
-                cloud storage. We do not have a database of user files. We do not have backup copies of your 
-                lease or your photos. There is simply nothing for hackers to steal from us because we do not 
-                have your data.
+                <strong>🛠️ Be Prepared (Just in Case)</strong> — If something does go wrong, Semptify 
+                has tools to help you respond: template letters, deadline trackers, and educational 
+                resources about court procedures. We hope you never need them.
             </p>
 
             <div class="highlight">
                 <p>
-                    "The most secure data is data we never have. Your documents live in your cloud storage, 
-                    under your control, in your account."
-                </p>
-            </div>
-
-            <h3 style="color: var(--primary); margin: 2rem 0 1rem 0; font-size: 1.25rem;">AI That Can Run Locally</h3>
-
-            <p>
-                Semptify includes AI-powered features to help answer questions about tenant rights and assist 
-                with understanding legal documents. Unlike many applications that only work with cloud-based 
-                AI services, Semptify supports <span class="stat">Ollama</span> — which means the AI can run 
-                entirely on your own computer if you choose. Your questions and documents never leave your 
-                machine.
-            </p>
-
-            <p>
-                For users who prefer cloud AI providers, Semptify also supports OpenAI, Azure OpenAI, and Groq. 
-                The choice is yours. But having the option for fully local AI processing means that 
-                privacy-conscious users are never forced to send sensitive information to external services.
-            </p>
-
-            <h3 style="color: var(--primary); margin: 2rem 0 1rem 0; font-size: 1.25rem;">Court Document Preparation</h3>
-
-            <p>
-                Semptify can help you prepare documents for court — answers to complaints, motions, and 
-                written responses. These documents are generated locally in your browser and saved directly 
-                to your cloud storage as PDFs. According to the National Center for State Courts, 
-                <span class="stat">76% of civil cases</span> involve at least one self-represented party, 
-                and having properly formatted documents can make a meaningful difference.
-            </p>
-
-            <p>
-                To be clear: Semptify does not file documents with courts on your behalf. It helps you prepare 
-                them. You will still need to file documents yourself, either electronically through your 
-                court's e-filing system or in person at the courthouse. What Semptify provides is help 
-                creating those documents with the correct format and relevant information included.
-            </p>
-
-            <div class="important">
-                <div class="important-title">🔒 Confidentiality Commitment</div>
-                <p>
-                    Everything you do in Semptify is confidential. We do not track which documents you upload, 
-                    what you search for, or what letters you generate. We do not sell analytics about user 
-                    behavior. We do not share information with landlords, property management companies, 
-                    tenant screening services, or any third party. Your use of Semptify is your business alone.
+                    Our goal is that your Semptify journal sits quietly, never needed for anything 
+                    more than your own peace of mind. But if the day comes when you need it, 
+                    everything will be there.
                 </p>
             </div>
         </section>
 
+        <!-- Not a Law Firm -->
         <section class="section">
-            <h2 class="section-title">Why You Provide Your Own Storage</h2>
-            
+            <h2 class="section-title">We're Not Lawyers</h2>
+
             <p>
-                When you use Semptify, you connect your own cloud storage — Google Drive, Microsoft OneDrive, 
-                or Dropbox. Your documents are saved directly to your account, not to our servers. This might 
-                seem unusual, but it is a deliberate choice rooted in our core principles.
-            </p>
-            
-            <p>
-                First, it means your documents truly belong to you. If Semptify disappeared tomorrow, you would 
-                still have every file, every photo, every document safely in your own cloud storage. You are 
-                not dependent on us. You are not locked in. Your data is yours.
+                Semptify is an organizational tool and educational resource — not a law firm. We can't 
+                give you legal advice or tell you what to do in your specific situation. The information 
+                here is general and may not apply to you.
             </p>
 
             <p>
-                Second, it means we cannot see your files. We do not have access to read your lease, look at 
-                your photos, or browse your communications. The connection between Semptify and your cloud 
-                storage allows you to save and retrieve files — it does not give us access to snoop through 
-                your personal documents.
+                If you're facing a serious legal situation, please talk to an actual attorney. Many areas 
+                have free legal aid services for tenants. That's not us passing the buck — it's us being 
+                honest about what we are and aren't.
             </p>
 
-            <p>
-                Third, and practically speaking, it is how Semptify can remain free. Storing documents for 
-                thousands of users would require expensive servers and infrastructure. By using storage you 
-                already have, we avoid those costs entirely. There are no server bills to pass on to you.
-            </p>
-
-            <p>
-                This approach also means there is no traditional "sign up" process. No username to create, 
-                no password to remember, no email verification to complete. Your cloud storage login is your 
-                login. Simple, secure, and private.
-            </p>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">The Cost of Semptify</h2>
-            
-            <div class="cost-highlight">
-                <div class="price">$0</div>
-                <div class="label">Free. Forever. No exceptions.</div>
-            </div>
-            
-            <p>
-                Semptify is completely free. There are no premium tiers, no subscriptions, no "freemium" 
-                limitations where the useful features are locked behind a paywall. Every feature is available 
-                to everyone, always.
-            </p>
-
-            <p>
-                This is not a marketing strategy. This is not "free for now until we build a user base." 
-                This is a fundamental principle. The people who need a tool like Semptify the most are often 
-                those who can least afford to pay for it. Housing instability and financial stress frequently 
-                go hand in hand. Charging money for this tool would mean excluding the very people it is 
-                designed to help.
-            </p>
-
-            <p>
-                Semptify exists to help people, not to make money. That is not a slogan — it is the honest 
-                truth about why this project exists. If you find it useful, that is the only payment we need.
-            </p>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">A Promise About Advertising</h2>
-            
-            <div class="no-ads">
-                <div class="no-ads-title">🚫 Semptify Will Never Display Advertisements</div>
-                <p>
-                    This is an absolute commitment. There will never be banner ads, sponsored content, 
-                    "promoted" suggestions, or any form of advertising in Semptify. Ever. If you see 
-                    ads on something claiming to be Semptify, it is not the real application — it is 
-                    a fake or a scam. Report it and do not trust it with your information.
+            <div class="legal-note">
+                <p style="margin-bottom: 1rem;">
+                    ⚖️ <strong>Minnesota Legal Help Resources:</strong>
+                </p>
+                <p style="margin-bottom: 0.5rem; text-align: left;">
+                    <a href="https://homelinemn.org" target="_blank" style="color: #1e3a5f; font-weight: 600;">📞 HOME Line</a> — Free tenant hotline: <strong>612-728-5767</strong>
+                </p>
+                <p style="margin-bottom: 0.5rem; text-align: left;">
+                    <a href="https://www.smrls.org" target="_blank" style="color: #1e3a5f; font-weight: 600;">⚖️ SMRLS</a> — Southern Minnesota Regional Legal Services
+                </p>
+                <p style="margin-bottom: 0.5rem; text-align: left;">
+                    <a href="https://www.lawhelpmn.org" target="_blank" style="color: #1e3a5f; font-weight: 600;">📚 LawHelpMN.org</a> — Free legal information & referrals
+                </p>
+                <p style="margin-bottom: 0.5rem; text-align: left;">
+                    <a href="https://mylegalaid.org" target="_blank" style="color: #1e3a5f; font-weight: 600;">🏠 Legal Aid</a> — Mid-Minnesota Legal Aid
+                </p>
+                <p style="margin-bottom: 0; text-align: left;">
+                    <a href="https://www.volunteerlawyersnetwork.org" target="_blank" style="color: #1e3a5f; font-weight: 600;">👥 VLN</a> — Volunteer Lawyers Network
                 </p>
             </div>
-            
+        </section>
+
+        <!-- About Bad Landlords -->
+        <section class="section">
+            <h2 class="section-title">A Word About Bad Landlords</h2>
+
             <p>
-                We will never sell your attention. We will never monetize your stress. Advertising in an 
-                application used by people facing housing crises would be, frankly, disgusting. Someone 
-                worried about losing their home does not need to see ads for moving companies or payday loans. 
-                We refuse to participate in that economy.
+                Yes, bad landlords exist. Landlords who ignore repairs, who illegally enter your home, 
+                who retaliate when you complain, who try to keep security deposits they have no right to. 
+                When that happens, tenants deserve to know their options and have the documentation to 
+                prove what happened.
+            </p>
+
+            <p>
+                But we're not interested in fighting for the sake of fighting. We're not trying to "get" 
+                anyone. We're trying to help good people document the truth and understand their options. 
+                If that documentation exposes wrongdoing, so be it. The truth should speak for itself.
+            </p>
+
+            <p>
+                Semptify doesn't draw attention to itself. We draw attention to what's right. If you're 
+                a tenant doing what you're supposed to do and your landlord isn't, your journal will 
+                reflect that. If it's the other way around... well, that will be clear too.
             </p>
         </section>
 
+        <!-- How It Works -->
         <section class="section">
-            <h2 class="section-title">Being Prepared</h2>
-            
-            <p>
-                The philosophy behind Semptify is simple: preparation and knowledge can prevent many problems, 
-                and when problems cannot be prevented, preparation makes them easier to handle.
-            </p>
+            <h2 class="section-title">🔧 How It Works</h2>
 
             <p>
-                Most tenant-landlord disputes do not start as emergencies. They start as small issues — a 
-                repair request that gets ignored, a misunderstanding about lease terms, a disagreement about 
-                what was said in a conversation. These small issues become big problems when they are not 
-                documented, when agreements are not in writing, when one party's word is pitted against another's.
+                Before you can start using Semptify, you'll need to connect your own cloud storage — 
+                like Google Drive, OneDrive, or Dropbox. Here's why:
             </p>
 
-            <p>
-                By documenting your tenancy from the beginning — your move-in condition, your maintenance 
-                requests, your payments, your communications — you create a record. That record protects you. 
-                It turns "he said, she said" into "here is the email I sent on March 15th." It turns "I think 
-                I paid" into "here is the receipt and the bank statement."
-            </p>
+            <div class="beliefs">
+                <div class="belief-item">
+                    <span class="belief-icon">🔒</span>
+                    <span class="belief-text">
+                        <strong>Your documents are YOUR documents.</strong> We don't store your files 
+                        on our servers. Your lease, photos, receipts, and records go directly to your 
+                        personal cloud storage — where only you have access.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">🛡️</span>
+                    <span class="belief-text">
+                        <strong>We can't lose what we don't have.</strong> If our server gets hacked, 
+                        your documents aren't there to steal. If we shut down tomorrow, your files 
+                        are still safe in your Google Drive or OneDrive.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">👁️</span>
+                    <span class="belief-text">
+                        <strong>Privacy by design.</strong> We can't see your documents, we can't read 
+                        your lease, we can't browse your photos. That's not a limitation — that's the point.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">💪</span>
+                    <span class="belief-text">
+                        <strong>You stay in control.</strong> You can disconnect Semptify at any time. 
+                        Your files stay right where they are — in your cloud storage, under your account.
+                    </span>
+                </div>
+            </div>
 
-            <p>
-                We genuinely hope you never face an eviction, never have a security deposit dispute, never 
-                deal with an unresponsive landlord or uninhabitable conditions. But if you do, you will not 
-                be starting from zero. You will have your records. You will know your rights. You will be 
-                prepared.
-            </p>
-
-            <div class="important">
-                <div class="important-title">📝 Start Today</div>
-                <p>
-                    Do not wait until there is a problem. Upload your lease. Log your move-in condition. 
-                    Start keeping records now, while everything is fine. Future you will be grateful.
+            <div class="highlight">
+                <p style="text-align: center;">
+                    <strong>Getting Started:</strong><br>
+                    1. Click "Start Your Tenant Journal" below<br>
+                    2. Connect your Google Drive, OneDrive, or Dropbox<br>
+                    3. Start documenting your tenancy
                 </p>
             </div>
+
+            <p>
+                Don't have cloud storage? Google Drive gives you 15GB free. OneDrive gives you 5GB free. 
+                That's more than enough for years of tenant documentation.
+            </p>
         </section>
 
         <!-- CTA -->
         <div class="cta">
-            <a href="/static/documents_simple.html" class="cta-button">
-                📄 Get Started — Connect Your Storage
-            </a>
-            <p>
-                Connect your Google Drive, OneDrive, or Dropbox to begin organizing your rental documents.
-            </p>
+            <a href="/dashboard" class="cta-button">Start Your Tenant Journal</a>
+            <p>Free to use. Your documents stay in your control.</p>
         </div>
 
     </article>
 
     <footer class="footer">
         <p>
-            Semptify is built for tenants, by people who believe housing stability should not depend on 
-            whether you can afford a lawyer.
-        </p>
-        <p style="margin-top: 0.5rem;">
-            <a href="/static/privacy.html">Privacy Policy</a>
+            Semptify — The Tenant's Journal<br>
+            <a href="/static/about.html">About</a> · <a href="/static/privacy.html">Privacy</a> · <a href="#">Terms</a>
         </p>
     </footer>
+
 </body>
 </html>

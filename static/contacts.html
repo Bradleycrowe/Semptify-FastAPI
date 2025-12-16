@@ -803,6 +803,82 @@
         </div>
     </div>
 
+    <!-- Log Interaction Modal -->
+    <div class="modal-overlay" id="interaction-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-comment-dots"></i> Log Interaction</h2>
+                <button class="modal-close" onclick="closeInteractionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="interaction-form">
+                    <input type="hidden" id="interaction-contact-id">
+                    <p id="interaction-contact-name" style="color: var(--primary); font-weight: 600; margin-bottom: 1rem;"></p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="interaction-type">Type *</label>
+                            <select id="interaction-type" required>
+                                <option value="">Select type...</option>
+                                <option value="phone_call">📞 Phone Call</option>
+                                <option value="email">📧 Email</option>
+                                <option value="letter">✉️ Letter/Mail</option>
+                                <option value="in_person">👤 In Person</option>
+                                <option value="court_appearance">⚖️ Court Appearance</option>
+                                <option value="voicemail">📱 Voicemail</option>
+                                <option value="text_message">💬 Text Message</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="interaction-direction">Direction *</label>
+                            <select id="interaction-direction" required>
+                                <option value="">Select direction...</option>
+                                <option value="outgoing">⬆️ Outgoing (You contacted them)</option>
+                                <option value="incoming">⬇️ Incoming (They contacted you)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="interaction-date">Date & Time *</label>
+                            <input type="datetime-local" id="interaction-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interaction-duration">Duration (minutes)</label>
+                            <input type="number" id="interaction-duration" min="0" placeholder="e.g., 15">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="interaction-subject">Subject</label>
+                            <input type="text" id="interaction-subject" placeholder="Brief subject or topic">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="interaction-summary">Summary / Notes</label>
+                            <textarea id="interaction-summary" rows="4" placeholder="What was discussed? Any important details to remember..."></textarea>
+                        </div>
+                        <div class="form-group full-width" style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="interaction-followup" style="width: auto;">
+                                <span>Follow-up needed</span>
+                            </label>
+                        </div>
+                        <div class="form-group" id="followup-date-group" style="display: none;">
+                            <label for="interaction-followup-date">Follow-up Date</label>
+                            <input type="date" id="interaction-followup-date">
+                        </div>
+                        <div class="form-group full-width" id="followup-notes-group" style="display: none;">
+                            <label for="interaction-followup-notes">Follow-up Notes</label>
+                            <textarea id="interaction-followup-notes" rows="2" placeholder="What needs to be done?"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeInteractionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveInteraction()">
+                    <i class="fas fa-save"></i> Log Interaction
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
@@ -1081,9 +1157,95 @@
             }
         }
 
+        // =========================================================================
+        // Interaction Logging
+        // =========================================================================
+        
         function logInteraction(id) {
-            // TODO: Implement interaction logging modal
-            showToast('Interaction logging coming soon!');
+            const contact = contacts.find(c => c.id === id);
+            if (!contact) {
+                showToast('Contact not found', true);
+                return;
+            }
+            
+            // Set contact info
+            document.getElementById('interaction-contact-id').value = id;
+            document.getElementById('interaction-contact-name').textContent = 
+                `Logging interaction with: ${contact.name}` + (contact.organization ? ` (${contact.organization})` : '');
+            
+            // Reset form
+            document.getElementById('interaction-form').reset();
+            
+            // Set default date/time to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('interaction-date').value = now.toISOString().slice(0, 16);
+            
+            // Hide follow-up fields initially
+            document.getElementById('followup-date-group').style.display = 'none';
+            document.getElementById('followup-notes-group').style.display = 'none';
+            
+            // Show modal
+            document.getElementById('interaction-modal').classList.add('active');
+        }
+
+        function closeInteractionModal() {
+            document.getElementById('interaction-modal').classList.remove('active');
+        }
+
+        // Toggle follow-up fields visibility
+        document.getElementById('interaction-followup').addEventListener('change', function() {
+            const show = this.checked;
+            document.getElementById('followup-date-group').style.display = show ? 'block' : 'none';
+            document.getElementById('followup-notes-group').style.display = show ? 'block' : 'none';
+        });
+
+        async function saveInteraction() {
+            const contactId = document.getElementById('interaction-contact-id').value;
+            const interactionType = document.getElementById('interaction-type').value;
+            const direction = document.getElementById('interaction-direction').value;
+            const interactionDate = document.getElementById('interaction-date').value;
+            
+            // Validate required fields
+            if (!interactionType || !direction || !interactionDate) {
+                showToast('Please fill in all required fields', true);
+                return;
+            }
+            
+            const data = {
+                interaction_type: interactionType,
+                direction: direction,
+                interaction_date: new Date(interactionDate).toISOString(),
+                subject: document.getElementById('interaction-subject').value || null,
+                summary: document.getElementById('interaction-summary').value || null,
+                duration_minutes: parseInt(document.getElementById('interaction-duration').value) || null,
+                follow_up_needed: document.getElementById('interaction-followup').checked,
+                follow_up_date: document.getElementById('interaction-followup-date').value 
+                    ? new Date(document.getElementById('interaction-followup-date').value).toISOString() 
+                    : null,
+                follow_up_notes: document.getElementById('interaction-followup-notes').value || null
+            };
+            
+            try {
+                const response = await fetch(`/api/contacts/${contactId}/interactions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to log interaction');
+                }
+                
+                closeInteractionModal();
+                showToast('Interaction logged successfully!');
+                fetchContacts(); // Refresh to update interaction count
+                
+            } catch (err) {
+                console.error('Error logging interaction:', err);
+                showToast(err.message || 'Failed to log interaction', true);
+            }
         }
 
         function showToast(message, isError = false) {

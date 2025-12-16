@@ -1,0 +1,94 @@
+{
+  "crawl_date": "2025-12-14T17:47:48.879899",
+  "focus": "eviction_defense_tenant_claims",
+  "total_downloaded": 8,
+  "total_errors": 1,
+  "documents": [
+    {
+      "filename": "answer_template.txt",
+      "doc_type": "template",
+      "category": "training_sample",
+      "path": "c:\\Semptify\\Semptify-FastAPI\\data\\eviction_training\\sample_templates\\answer_template.txt"
+    },
+    {
+      "filename": "counterclaim_template.txt",
+      "doc_type": "template",
+      "category": "training_sample",
+      "path": "c:\\Semptify\\Semptify-FastAPI\\data\\eviction_training\\sample_templates\\counterclaim_template.txt"
+    },
+    {
+      "filename": "motion_dismiss_template.txt",
+      "doc_type": "template",
+      "category": "training_sample",
+      "path": "c:\\Semptify\\Semptify-FastAPI\\data\\eviction_training\\sample_templates\\motion_dismiss_template.txt"
+    },
+    {
+      "filename": "fee114_current.pdf",
+      "url": "https://mncourts.gov/_media/migration/courtforms/fee-waiver/fee114_current.pdf",
+      "doc_type": "form",
+      "size": 232186,
+      "downloaded": "2025-12-14T17:47:10.137699"
+    },
+    {
+      "filename": "The-MN-Renters-Guide-to-Tenant-Organizing-BETA.pdf",
+      "url": "https://homelinemn.org/wp-content/uploads/2024/09/The-MN-Renters-Guide-to-Tenant-Organizing-BETA.pdf",
+      "doc_type": "guide",
+      "size": 1189656,
+      "downloaded": "2025-12-14T17:47:13.534414"
+    },
+    {
+      "filename": "Minnesota-Tenant-Bill-of-Rights_2024_11-08.pdf",
+      "url": "https://homelinemn.org/wp-content/uploads/2024/11/Minnesota-Tenant-Bill-of-Rights_2024_11-08.pdf",
+      "doc_type": "guide",
+      "size": 1009238,
+      "downloaded": "2025-12-14T17:47:14.108795"
+    },
+    {
+      "filename": "Minnesota-Landlord-Tenant-Law-Training-Manual-for-the-Police-June-2016.pdf",
+      "url": "https://homelinemn.org/wp-content/uploads/2010/03/Minnesota-Landlord-Tenant-Law-Training-Manual-for-the-Police-June-2016.pdf",
+      "doc_type": "guide",
+      "size": 2621201,
+      "downloaded": "2025-12-14T17:47:14.451765"
+    },
+    {
+      "filename": "State-v-Hoyt.pdf",
+      "url": "https://homelinemn.org/wp-content/uploads/2020/06/State-v-Hoyt.pdf",
+      "doc_type": "guide",
+      "size": 146588,
+      "downloaded": "2025-12-14T17:47:14.550256"
+    },
+    {
+      "filename": "krier.pdf",
+      "url": "http://www.homelinemn.org/wp-content/uploads/krier.pdf",
+      "doc_type": "guide",
+      "size": 4682,
+      "downloaded": "2025-12-14T17:47:15.038329"
+    },
+    {
+      "filename": "order-form.pdf",
+      "url": "http://www.homelinemn.org/wp-content/uploads/order-form.pdf",
+      "doc_type": "guide",
+      "size": 122150,
+      "downloaded": "2025-12-14T17:47:36.816628"
+    },
+    {
+      "filename": "Identification_of_Marijuana__1972_.pdf",
+      "url": "http://www.homelinemn.org/wp-content/uploads/Identification_of_Marijuana_(1972).pdf",
+      "doc_type": "guide",
+      "size": 28078907,
+      "downloaded": "2025-12-14T17:47:47.641913"
+    }
+  ],
+  "document_types": [
+    "answer",
+    "motion_dismiss",
+    "counterclaim",
+    "stay_writ",
+    "expungement",
+    "tenant_remedies",
+    "rent_escrow",
+    "security_deposit",
+    "retaliation",
+    "illegal_lockout"
+  ]
+}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Tenant Rights Protection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-4px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-desc {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .cta-button {
+            background: #fff;
+            color: #1e3a8a;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚖️ Semptify</h1>
+            <p>Complete Tenant Rights Protection Platform</p>
+            <div class="status-badge">✅ All Systems Ready</div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card" onclick="navigate('/documents')">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">Document Manager</div>
+                <div class="feature-desc">
+                    Upload and organize your lease, notices, photos, and evidence. AI-powered document analysis and classification.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/timeline')">
+                <div class="feature-icon">📅</div>
+                <div class="feature-title">Timeline Tracker</div>
+                <div class="feature-desc">
+                    Build a chronological record of events. Track repairs, complaints, and interactions with your landlord.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/law-library')">
+                <div class="feature-icon">📚</div>
+                <div class="feature-title">Law Library</div>
+                <div class="feature-desc">
+                    Search Minnesota tenant rights statutes and case law. AI legal librarian answers your questions.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/eviction-defense')">
+                <div class="feature-icon">⚖️</div>
+                <div class="feature-title">Eviction Defense</div>
+                <div class="feature-desc">
+                    Complete toolkit with motions, forms, defenses, and counterclaims. Dakota County specialized support.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/zoom-court')">
+                <div class="feature-icon">💻</div>
+                <div class="feature-title">Zoom Court Prep</div>
+                <div class="feature-desc">
+                    Prepare for virtual hearings. Tech checklist, etiquette guide, and what to say in court.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/static/complaints.html')">
+                <div class="feature-icon">📝</div>
+                <div class="feature-title">File Complaints</div>
+                <div class="feature-desc">
+                    File official complaints with regulatory agencies. Track landlord violations and enforcement actions.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/static/research.html')">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-title">Research Landlord</div>
+                <div class="feature-desc">
+                    Build comprehensive dossiers. Find funding sources, tax credits, violations, and ownership records.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/static/calendar.html')">
+                <div class="feature-icon">🗓️</div>
+                <div class="feature-title">Court Calendar</div>
+                <div class="feature-desc">
+                    Track deadlines, hearings, and important dates. Never miss a filing deadline or court appearance.
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="navigate('/static/court_packet.html')">
+                <div class="feature-icon">📦</div>
+                <div class="feature-title">Court Packets</div>
+                <div class="feature-desc">
+                    Generate court-ready document packets. Organized, certified, and ready to file.
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h2 style="margin-bottom: 1rem;">Ready to Get Started?</h2>
+            <p style="opacity: 0.9; margin-bottom: 1.5rem;">
+                Choose where you'd like to begin your tenant rights journey
+            </p>
+            <button class="cta-button" onclick="navigate('/documents')">
+                📄 Upload Documents
+            </button>
+            <button class="cta-button" onclick="navigate('/static/enterprise-dashboard.html')">
+                🎯 Open Dashboard
+            </button>
+            <button class="cta-button" onclick="navigate('/api/docs')">
+                📖 View API Docs
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function navigate(url) {
+            window.location.href = url;
+        }
+        
+        // Check server health on load
+        async function checkHealth() {
+            try {
+                const response = await fetch('/healthz');
+                if (response.ok) {
+                    console.log('✅ Server is healthy');
+                }
+            } catch (e) {
+                console.error('❌ Server health check failed:', e);
+                document.querySelector('.status-badge').textContent = '⚠️ Connection Issues';
+                document.querySelector('.status-badge').style.background = '#ef4444';
+            }
+        }
+        
+        checkHealth();
+    </script>
+</body>
+</html>

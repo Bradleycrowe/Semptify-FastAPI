@@ -2578,7 +2578,7 @@
                 const status = doc.integrity_status || doc.status || 'unknown';
                 const forgeryScore = doc.forgery_score || 0;
                 const isDuplicate = doc.is_duplicate || false;
-                const registeredAt = doc.registered_at ? new Date(doc.registered_at).toLocaleDateString() : 'N/A';
+                const registeredAt = doc.registered_at ? formatDate(doc.registered_at) : 'N/A';
                 
                 return `
                 <div class="queue-item" onclick="viewRegisteredDoc('${doc.document_id}')" style="cursor: pointer;">
@@ -2640,7 +2640,7 @@
                     </div>
                     <div class="detail-row">
                         <span class="label">Registered:</span>
-                        <span class="value">${new Date(doc.registered_at).toLocaleString()}</span>
+                        <span class="value">${formatDate(doc.registered_at) || 'N/A'}</span>
                     </div>
                     <div class="detail-row">
                         <span class="label">Forgery Score:</span>
@@ -2710,7 +2710,7 @@
                             <div class="custody-record" style="padding: 12px; background: ${i % 2 === 0 ? '#f9fafb' : '#fff'}; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #2563eb;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                                     <strong>${record.action}</strong>
-                                    <span style="font-size: 12px; color: #666;">${new Date(record.timestamp).toLocaleString()}</span>
+                                    <span style="font-size: 12px; color: #666;">${formatDate(record.timestamp) || 'N/A'}</span>
                                 </div>
                                 <div style="font-size: 13px; color: #444;">${record.details || 'No details'}</div>
                                 <div style="font-size: 11px; color: #888; margin-top: 4px;">
@@ -2934,7 +2934,7 @@
                         ${dates?.length ? dates.map(d => `
                             <div class="extracted-item">
                                 <div class="main">
-                                    <div class="title">${d.date}</div>
+                                    <div class="title">${formatDate(d.date)}</div>
                                     <div class="subtitle">${d.label} ${d.is_deadline ? '⏰ Deadline' : ''}</div>
                                 </div>
                                 <div style="text-align: right;">
@@ -3483,8 +3483,8 @@
                             <p style="color: #065f46; font-weight: 600;">Form data applied successfully!</p>
                             <p style="color: #047857; font-size: 14px;">Your extracted data is now ready to be used in court form filling.</p>
                             <div class="button-group" style="margin-top: 16px;">
-                                <button class="btn btn-primary" onclick="window.location.href='/static/form_filler.html'">
-                                    📝 Go to Form Filler
+                                <button class="btn btn-primary" onclick="window.location.href='/static/legal_analysis.html'">
+                                    📝 Go to Legal Analysis
                                 </button>
                                 <button class="btn btn-outline" onclick="extractFormFields()">
                                     🔄 Extract Again
@@ -3929,7 +3929,30 @@
         }
         
         function formatDateTime(isoString) {
-            return new Date(isoString).toLocaleString();
+            if (!isoString) return 'N/A';
+            try {
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString;
+                return date.toLocaleString();
+            } catch (e) {
+                return isoString;
+            }
+        }
+        
+        function formatDate(isoString) {
+            // Handle various date formats including ISO strings
+            if (!isoString) return 'N/A';
+            try {
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString; // Return original if invalid
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return isoString; // Return original on error
+            }
         }
         
         function formatAction(action) {

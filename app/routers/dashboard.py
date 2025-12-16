@@ -10,17 +10,25 @@ Single endpoint that combines data from:
 This provides everything the frontend needs in one call.
 """
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.core.security import get_optional_user_id
 from ..services.emotion_engine import emotion_engine
 from ..services.progress_tracker import progress_tracker
 from ..services.action_router import action_router
 
 
-router = APIRouter(prefix="/dashboard", tags=["Unified Dashboard"])
+router = APIRouter(prefix="/api/dashboard", tags=["Unified Dashboard"])
+
+
+def resolve_user_id(
+    session_user_id: Optional[str] = Depends(get_optional_user_id),
+) -> str:
+    """Resolve user_id from session, fallback to default."""
+    return session_user_id or "default"
 
 
 class DashboardContext(BaseModel):
@@ -33,7 +41,7 @@ class DashboardContext(BaseModel):
 
 
 @router.get("/")
-async def get_unified_dashboard(user_id: str = Query("default")):
+async def get_unified_dashboard(user_id: str = Depends(resolve_user_id)):
     """
     Get complete dashboard data in a single call.
     
@@ -142,7 +150,7 @@ async def get_unified_dashboard(user_id: str = Query("default")):
 
 
 @router.post("/refresh")
-async def refresh_dashboard(context: DashboardContext, user_id: str = Query("default")):
+async def refresh_dashboard(context: DashboardContext, user_id: str = Depends(resolve_user_id)):
     """
     Refresh dashboard with specific context (e.g., after document upload).
     """
@@ -180,7 +188,7 @@ async def refresh_dashboard(context: DashboardContext, user_id: str = Query("def
 
 
 @router.get("/status-bar")
-async def get_status_bar(user_id: str = Query("default")):
+async def get_status_bar(user_id: str = Depends(resolve_user_id)):
     """
     Get minimal status bar data for quick updates.
     """
@@ -201,8 +209,12 @@ async def get_status_bar(user_id: str = Query("default")):
     mode = action_router.get_dashboard_mode(emotional_dict)
     
     days_to_court = None
+    urgent_count = 0
     if progress.court_date:
         days_to_court = (progress.court_date - datetime.now()).days
+        # Count as urgent if court date is within 14 days
+        if days_to_court is not None and 0 < days_to_court <= 14:
+            urgent_count = 1
     
     return {
         "mode": mode,
@@ -213,12 +225,12 @@ async def get_status_bar(user_id: str = Query("default")):
         "documents": progress.documents_uploaded,
         "violations": progress.violations_found,
         "streak": progress.streak_days,
-        "urgent_count": 0  # TODO: Calculate from deadlines
+        "urgent_count": urgent_count
     }
 
 
 @router.get("/greeting")
-async def get_personalized_greeting(user_id: str = Query("default")):
+async def get_personalized_greeting(user_id: str = Depends(resolve_user_id)):
     """
     Get personalized greeting based on time and emotional state.
     """
@@ -281,7 +293,7 @@ async def get_personalized_greeting(user_id: str = Query("default")):
 
 
 @router.get("/quick-stats")
-async def get_quick_stats(user_id: str = Query("default")):
+async def get_quick_stats(user_id: str = Depends(resolve_user_id)):
     """
     Get quick stats for display widgets.
     """

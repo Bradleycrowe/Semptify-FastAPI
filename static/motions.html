@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File a Motion - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-dark: #2563eb; --success: #22c55e;
+            --warning: #f59e0b; --danger: #ef4444; --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f; --text: #ffffff; --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text); min-height: 100vh;
+        }
+        .main-content { margin-left: 280px; padding: 2rem; max-width: 1000px; }
+        @media (max-width: 768px) { .main-content { margin-left: 0; padding: 1rem; } }
+        
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
+        .page-subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        
+        /* Motion Cards */
+        .motion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .motion-card {
+            background: var(--bg-card); border: 2px solid var(--border);
+            border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: all 0.3s;
+        }
+        .motion-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3); }
+        .motion-card.selected { border-color: var(--success); background: rgba(34, 197, 94, 0.1); }
+        .motion-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .motion-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .motion-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+        .motion-when { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.85rem; }
+        .motion-when strong { color: var(--primary); }
+        
+        /* Form Panel */
+        .form-panel {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 1rem; padding: 2rem; margin-top: 2rem;
+        }
+        .form-panel.hidden { display: none; }
+        .form-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .form-desc { color: var(--text-muted); margin-bottom: 1.5rem; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border);
+            border-radius: 0.5rem; background: rgba(255,255,255,0.05);
+            color: var(--text); font-size: 1rem;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; border: none; display: inline-flex; align-items: center;
+            gap: 0.5rem; font-size: 1rem; transition: all 0.2s; text-decoration: none;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+        
+        /* Alerts */
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .alert-info { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary); }
+        .alert-warning { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); color: var(--warning); }
+        .alert-success { background: rgba(34, 197, 94, 0.2); border: 1px solid var(--success); }
+        
+        /* Result Panel */
+        .result-panel { background: var(--bg-card); border: 1px solid var(--success); border-radius: 1rem; padding: 2rem; margin-top: 2rem; }
+        .result-panel.hidden { display: none; }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem; z-index: 1000;
+        }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">📋 File a Motion</h1>
+            <p class="page-subtitle">Request specific actions from the court to help your case</p>
+        </div>
+        
+        <div class="alert alert-info">
+            💡 <strong>What is a Motion?</strong> A formal request asking the court to do something. Motions can dismiss your case, delay your hearing, stop an eviction, or waive court fees.
+        </div>
+        
+        <!-- Motion Type Selection -->
+        <h2 style="margin-bottom: 1rem;">Select the Motion You Need</h2>
+        
+        <div class="motion-grid">
+            <!-- Motion to Dismiss -->
+            <div class="motion-card" onclick="selectMotion('dismiss', this)">
+                <div class="motion-icon">🚫</div>
+                <div class="motion-title">Motion to Dismiss</div>
+                <div class="motion-desc">Ask the court to throw out the eviction case entirely because the landlord's complaint has fatal flaws.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> Improper service, wrong defendant, landlord lacks standing, expired notice, or complaint doesn't state a valid claim.
+                </div>
+            </div>
+            
+            <!-- Motion for Continuance -->
+            <div class="motion-card" onclick="selectMotion('continuance', this)">
+                <div class="motion-icon">📅</div>
+                <div class="motion-title">Motion for Continuance</div>
+                <div class="motion-desc">Request more time before your hearing. Courts often grant these for good reasons.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> Need more time to gather evidence, hire attorney, personal emergency, scheduling conflict, or recently served.
+                </div>
+            </div>
+            
+            <!-- Motion to Stay -->
+            <div class="motion-card" onclick="selectMotion('stay', this)">
+                <div class="motion-icon">⏸️</div>
+                <div class="motion-title">Motion to Stay Execution</div>
+                <div class="motion-desc">If you lost, request time before you must move out. Gives you breathing room to arrange housing.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> After adverse judgment, need time to find housing, have minor children, medical issues, or waiting for rental assistance.
+                </div>
+            </div>
+            
+            <!-- Fee Waiver -->
+            <div class="motion-card" onclick="selectMotion('fee_waiver', this)">
+                <div class="motion-icon">💵</div>
+                <div class="motion-title">Fee Waiver (IFP)</div>
+                <div class="motion-desc">Can't afford court fees? Request In Forma Pauperis status to waive filing and service fees.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> Income below poverty guidelines, receiving public assistance, or paying fees would cause hardship.
+                </div>
+            </div>
+            
+            <!-- Motion for Default -->
+            <div class="motion-card" onclick="selectMotion('default', this)">
+                <div class="motion-icon">⚡</div>
+                <div class="motion-title">Motion to Vacate Default</div>
+                <div class="motion-desc">If landlord got a default judgment because you missed court, ask to have it set aside.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> Never received notice, emergency prevented attendance, valid defenses exist, or excusable neglect.
+                </div>
+            </div>
+            
+            <!-- Discovery Motion -->
+            <div class="motion-card" onclick="selectMotion('discovery', this)">
+                <div class="motion-icon">🔍</div>
+                <div class="motion-title">Motion to Compel Discovery</div>
+                <div class="motion-desc">Force the landlord to provide documents or answer questions you've requested.</div>
+                <div class="motion-when">
+                    <strong>Use when:</strong> Landlord ignores your document requests, refuses to answer interrogatories, or won't produce evidence.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Motion Form Panel -->
+        <div id="motionForm" class="form-panel hidden">
+            <h2 class="form-title" id="formTitle">Motion to Dismiss</h2>
+            <p class="form-desc" id="formDesc">Fill out the information below to generate your motion.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tenantName">Your Full Name *</label>
+                    <input type="text" id="tenantName" required placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <label for="landlordName">Landlord Name *</label>
+                    <input type="text" id="landlordName" required placeholder="Landlord/Company">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="caseNumber">Case Number</label>
+                    <input type="text" id="caseNumber" placeholder="27-CV-XX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="hearingDate">Current Hearing Date</label>
+                    <input type="date" id="hearingDate">
+                </div>
+            </div>
+            
+            <!-- Motion-specific fields -->
+            <div id="specificFields"></div>
+            
+            <div class="form-group">
+                <label for="grounds">Grounds for Motion *</label>
+                <textarea id="grounds" rows="5" placeholder="Explain why the court should grant your motion. Be specific with dates and facts."></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-outline" onclick="closeForm()">← Back</button>
+                <button class="btn btn-success" onclick="generateMotion()">✅ Generate Motion</button>
+            </div>
+        </div>
+        
+        <!-- Result Panel -->
+        <div id="resultPanel" class="result-panel hidden">
+            <h2>🎉 Motion Generated!</h2>
+            <div class="alert alert-success" style="margin: 1rem 0;">✅ Your motion document is ready.</div>
+            
+            <div style="background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; margin: 1rem 0;">
+                <h4 style="color: var(--primary); margin-bottom: 0.5rem;">📋 Filing Instructions</h4>
+                <ol style="padding-left: 1.5rem; line-height: 1.8;">
+                    <li>Print two copies of your motion</li>
+                    <li>Sign both copies where indicated</li>
+                    <li>File at Dakota County Courthouse (1560 Highway 55, Hastings)</li>
+                    <li>Serve a copy on the opposing party</li>
+                    <li>Request a hearing date from the clerk</li>
+                </ol>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="downloadMotion()">📥 Download Motion</button>
+                <button class="btn btn-outline" onclick="printMotion()">🖨️ Print</button>
+                <a href="/static/eviction_answer.html" class="btn btn-outline">📝 File Answer</a>
+                <a href="/static/dakota_defense.html" class="btn btn-outline">← Defense Center</a>
+            </div>
+        </div>
+    </main>
+    
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Generating your motion...</p>
+    </div>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        let selectedMotion = null;
+        let formData = {};
+        let generatedBlob = null;
+        
+        const motionConfig = {
+            dismiss: {
+                title: 'Motion to Dismiss',
+                desc: 'Request the court to dismiss the eviction case due to procedural or legal defects.',
+                fields: `
+                    <div class="form-group">
+                        <label for="dismissReason">Primary Reason for Dismissal *</label>
+                        <select id="dismissReason">
+                            <option value="">Select a reason...</option>
+                            <option value="improper_service">Improper service of process</option>
+                            <option value="no_standing">Plaintiff lacks standing</option>
+                            <option value="invalid_notice">Notice was invalid or untimely</option>
+                            <option value="no_cause">Complaint fails to state a cause of action</option>
+                            <option value="wrong_party">Wrong defendant named</option>
+                            <option value="other">Other legal defect</option>
+                        </select>
+                    </div>
+                `
+            },
+            continuance: {
+                title: 'Motion for Continuance',
+                desc: 'Request the court to postpone your hearing to a later date.',
+                fields: `
+                    <div class="form-group">
+                        <label for="contReason">Reason for Continuance *</label>
+                        <select id="contReason">
+                            <option value="">Select a reason...</option>
+                            <option value="evidence">Need time to gather evidence</option>
+                            <option value="attorney">Need time to obtain legal counsel</option>
+                            <option value="emergency">Personal/medical emergency</option>
+                            <option value="schedule">Scheduling conflict</option>
+                            <option value="recently_served">Recently served, insufficient preparation time</option>
+                            <option value="other">Other good cause</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="requestedDate">Requested New Date (if known)</label>
+                        <input type="date" id="requestedDate">
+                    </div>
+                `
+            },
+            stay: {
+                title: 'Motion to Stay Execution',
+                desc: 'Request time to move out after an adverse judgment.',
+                fields: `
+                    <div class="form-group">
+                        <label for="stayDays">Days Requested *</label>
+                        <select id="stayDays">
+                            <option value="7">7 days</option>
+                            <option value="14">14 days</option>
+                            <option value="30">30 days</option>
+                            <option value="other">Other (specify in grounds)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stayReason">Reason for Stay</label>
+                        <select id="stayReason">
+                            <option value="">Select a reason...</option>
+                            <option value="housing">Searching for alternative housing</option>
+                            <option value="children">Have school-age children</option>
+                            <option value="medical">Medical condition</option>
+                            <option value="assistance">Waiting for rental assistance</option>
+                            <option value="hardship">Severe financial hardship</option>
+                        </select>
+                    </div>
+                `
+            },
+            fee_waiver: {
+                title: 'Application for Fee Waiver (IFP)',
+                desc: 'Request waiver of court fees due to financial hardship.',
+                fields: `
+                    <div class="alert alert-warning">
+                        <strong>Eligibility:</strong> Generally available if household income is below 125% of federal poverty guidelines or you receive public assistance.
+                    </div>
+                    <div class="form-group">
+                        <label for="monthlyIncome">Monthly Household Income</label>
+                        <input type="text" id="monthlyIncome" placeholder="$1,500">
+                    </div>
+                    <div class="form-group">
+                        <label for="householdSize">Household Size</label>
+                        <select id="householdSize">
+                            <option value="1">1 person</option>
+                            <option value="2">2 people</option>
+                            <option value="3">3 people</option>
+                            <option value="4">4 people</option>
+                            <option value="5">5+ people</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Public Assistance (check all that apply)</label>
+                        <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
+                            <label><input type="checkbox" id="snap"> SNAP (Food Stamps)</label>
+                            <label><input type="checkbox" id="mfip"> MFIP / TANF</label>
+                            <label><input type="checkbox" id="ssi"> SSI</label>
+                            <label><input type="checkbox" id="medicaid"> Medical Assistance / Medicaid</label>
+                            <label><input type="checkbox" id="ga"> General Assistance</label>
+                        </div>
+                    </div>
+                `
+            },
+            default: {
+                title: 'Motion to Vacate Default Judgment',
+                desc: 'Request to set aside a default judgment entered against you.',
+                fields: `
+                    <div class="form-group">
+                        <label for="defaultDate">Date of Default Judgment</label>
+                        <input type="date" id="defaultDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="defaultReason">Reason for Missing Court *</label>
+                        <select id="defaultReason">
+                            <option value="">Select a reason...</option>
+                            <option value="no_notice">Never received notice of hearing</option>
+                            <option value="medical">Medical emergency</option>
+                            <option value="wrong_address">Notice sent to wrong address</option>
+                            <option value="confusion">Confusion about date/time/location</option>
+                            <option value="emergency">Family emergency</option>
+                            <option value="other">Other excusable neglect</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Do you have valid defenses to the eviction?</label>
+                        <select id="hasDefenses">
+                            <option value="yes">Yes - I have valid defenses</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                `
+            },
+            discovery: {
+                title: 'Motion to Compel Discovery',
+                desc: 'Force the other party to respond to discovery requests.',
+                fields: `
+                    <div class="form-group">
+                        <label for="discoveryType">Type of Discovery *</label>
+                        <select id="discoveryType">
+                            <option value="">Select type...</option>
+                            <option value="documents">Document production</option>
+                            <option value="interrogatories">Interrogatories (written questions)</option>
+                            <option value="admissions">Requests for admission</option>
+                            <option value="inspection">Inspection request</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="requestDate">Date of Original Request</label>
+                        <input type="date" id="requestDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemsRequested">Items Requested</label>
+                        <textarea id="itemsRequested" rows="3" placeholder="List the documents or information you requested"></textarea>
+                    </div>
+                `
+            }
+        };
+        
+        function selectMotion(type, element) {
+            selectedMotion = type;
+            document.querySelectorAll('.motion-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            const config = motionConfig[type];
+            document.getElementById('formTitle').textContent = config.title;
+            document.getElementById('formDesc').textContent = config.desc;
+            document.getElementById('specificFields').innerHTML = config.fields;
+            
+            document.getElementById('motionForm').classList.remove('hidden');
+            document.getElementById('resultPanel').classList.add('hidden');
+            document.getElementById('motionForm').scrollIntoView({ behavior: 'smooth' });
+            
+            // Pre-fill from saved data
+            const saved = localStorage.getItem('semptify_case_data');
+            if (saved) {
+                try {
+                    const d = JSON.parse(saved);
+                    if (d.tenant_name) document.getElementById('tenantName').value = d.tenant_name;
+                    if (d.landlord_name) document.getElementById('landlordName').value = d.landlord_name;
+                    if (d.case_number) document.getElementById('caseNumber').value = d.case_number;
+                } catch (e) {}
+            }
+        }
+        
+        function closeForm() {
+            document.getElementById('motionForm').classList.add('hidden');
+            document.querySelectorAll('.motion-card').forEach(c => c.classList.remove('selected'));
+            selectedMotion = null;
+        }
+        
+        async function generateMotion() {
+            const tenant = document.getElementById('tenantName').value.trim();
+            const landlord = document.getElementById('landlordName').value.trim();
+            const grounds = document.getElementById('grounds').value.trim();
+            
+            if (!tenant || !landlord || !grounds) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            formData = {
+                motion_type: selectedMotion,
+                tenant_name: tenant,
+                landlord_name: landlord,
+                case_number: document.getElementById('caseNumber').value.trim(),
+                hearing_date: document.getElementById('hearingDate').value,
+                grounds: grounds
+            };
+            
+            // Save for other forms
+            localStorage.setItem('semptify_case_data', JSON.stringify(formData));
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/eviction/motions/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    generatedBlob = await response.blob();
+                } else {
+                    generateClientSide();
+                }
+            } catch (e) {
+                generateClientSide();
+            }
+            
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('motionForm').classList.add('hidden');
+            document.getElementById('resultPanel').classList.remove('hidden');
+            document.getElementById('resultPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateClientSide() {
+            const title = motionConfig[selectedMotion].title.toUpperCase();
+            const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${title}</title>
+<style>body{font-family:Times New Roman,serif;font-size:12pt;margin:1in;line-height:1.6}
+.header{text-align:center;font-weight:bold;text-transform:uppercase}
+.title{text-align:center;text-decoration:underline;font-weight:bold;margin:20px 0}
+.section{margin:15px 0}.section h3{text-decoration:underline}</style></head>
+<body>
+<div class="header">STATE OF MINNESOTA<br>COUNTY OF DAKOTA<br>DISTRICT COURT</div>
+<p style="text-align:right">Case No: ${formData.case_number || '___________'}</p>
+<p><strong>${formData.landlord_name}</strong>, Plaintiff<br>vs.<br><strong>${formData.tenant_name}</strong>, Defendant</p>
+<div class="title">${title}</div>
+<div class="section"><p>COMES NOW Defendant ${formData.tenant_name} and respectfully moves this Court as follows:</p></div>
+<div class="section"><h3>MOTION</h3><p>Defendant moves the Court to ${getMotionRequest(selectedMotion)}.</p></div>
+<div class="section"><h3>GROUNDS</h3><p>${formData.grounds}</p></div>
+<div class="section"><h3>CONCLUSION</h3><p>WHEREFORE, Defendant respectfully requests that this Court grant this motion and provide such other relief as the Court deems just and proper.</p></div>
+<div style="margin-top:40px"><p>Date: ${new Date().toLocaleDateString()}</p><br><p>_______________________</p><p>${formData.tenant_name}, Defendant Pro Se</p></div>
+</body></html>`;
+            localStorage.setItem('semptify_motion_html', html);
+            generatedBlob = new Blob([html], { type: 'text/html' });
+        }
+        
+        function getMotionRequest(type) {
+            const requests = {
+                dismiss: 'dismiss the Plaintiff\'s complaint with prejudice',
+                continuance: 'continue the hearing to a later date',
+                stay: 'stay execution of any judgment and grant Defendant additional time to vacate',
+                fee_waiver: 'waive filing fees and court costs pursuant to Minn. Stat. § 563.01',
+                default: 'vacate the default judgment entered against Defendant',
+                discovery: 'compel Plaintiff to respond to Defendant\'s discovery requests'
+            };
+            return requests[type] || 'grant appropriate relief';
+        }
+        
+        function downloadMotion() {
+            if (generatedBlob) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(generatedBlob);
+                a.download = `Motion_${selectedMotion}_${formData.tenant_name.replace(/\s+/g, '_')}.${generatedBlob.type.includes('pdf') ? 'pdf' : 'html'}`;
+                a.click();
+            }
+        }
+        
+        function printMotion() {
+            const html = localStorage.getItem('semptify_motion_html');
+            if (html) {
+                const w = window.open('', '_blank');
+                w.document.write(html);
+                w.document.close();
+                setTimeout(() => w.print(), 500);
+            }
+        }
+    </script>
+</body>
+</html>

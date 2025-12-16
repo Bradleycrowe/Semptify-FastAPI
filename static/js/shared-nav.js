@@ -22,11 +22,14 @@ const SemptifyNav = {
             id: 'journey',
             title: '🏠 Tenant Journey',
             items: [
-                { icon: '📝', label: '1. Lease & Move-In', href: '/static/journey.html' },
+                { icon: '�', label: 'My Tenancy', href: '/static/my_tenancy.html' },
+                { icon: '�📝', label: '1. Lease & Move-In', href: '/static/journey.html' },
                 { icon: '💰', label: '2. Rent Payments', href: '/static/document_intake.html?type=payment' },
                 { icon: '🔧', label: '3. Maintenance', href: '/static/document_intake.html?type=maintenance' },
                 { icon: '⚠️', label: '4. Notices', href: '/static/document_intake.html?type=notice' },
                 { icon: '📅', label: '5. Timeline', href: '/static/timeline.html', badge: 'timelineCount' },
+                { icon: '⚡', label: 'Auto-Build Timeline', href: '/static/timeline_auto_build.html' },
+                { icon: '🔨', label: 'Timeline Builder', href: '/static/timeline-builder.html' },
             ]
         },
         {
@@ -34,9 +37,21 @@ const SemptifyNav = {
             title: '⚖️ Legal Defense',
             items: [
                 { icon: '📖', label: '6. Know Rights', href: '/static/law_library.html' },
-                { icon: '📝', label: '7. Answer Summons', href: '/static/eviction_answer.html' },
-                { icon: '⚔️', label: '8. Fight Back', href: '/static/eviction_defense.html' },
-                { icon: '💻', label: '9. Court Prep', href: '/static/zoom_court.html' },
+                { icon: '📝', label: '7. Answer Summons', href: '/static/legal_analysis.html' },
+                { icon: '⚔️', label: '8. Fight Back', href: '/static/legal_trails.html' },
+                { icon: '💻', label: '9. Court Prep', href: '/static/court_learning.html' },
+            ]
+        },
+        {
+            id: 'dakota',
+            title: '🏛️ Dakota County Eviction',
+            items: [
+                { icon: '🛡️', label: 'Defense Center', href: '/static/dakota_defense.html' },
+                { icon: '📝', label: 'File Answer', href: '/static/eviction_answer.html' },
+                { icon: '⚔️', label: 'Counterclaim', href: '/static/counterclaim.html' },
+                { icon: '📋', label: 'File Motion', href: '/static/motions.html' },
+                { icon: '🎯', label: 'Hearing Prep', href: '/static/hearing_prep.html' },
+                { icon: '💻', label: 'Zoom Court', href: '/static/zoom_court.html' },
             ]
         },
         {
@@ -55,20 +70,24 @@ const SemptifyNav = {
             title: '🔧 Tools',
             items: [
                 { icon: '🧠', label: 'AI Assistant', href: '/static/brain.html' },
-                { icon: '🗓️', label: 'Calendar', href: '/static/calendar.html' },
+                { icon: '📝', label: 'Complaint Builder', href: '/static/complaints.html' },
+                { icon: '📅', label: 'Calendar', href: '/static/calendar.html' },
                 { icon: '📇', label: 'Contacts', href: '/static/contacts.html' },
                 { icon: '🔬', label: 'Research', href: '/static/research.html' },
+                { icon: '🔍', label: 'Public Data Crawler', href: '/static/crawler.html' },
                 { icon: '⚖️', label: 'Legal Analysis', href: '/static/legal_analysis.html' },
                 { icon: '💰', label: 'Funding Search', href: '/static/funding_search.html' },
+                { icon: '🏠', label: 'HUD Funding Guide', href: '/static/hud_funding.html' },
+                { icon: '📢', label: 'Campaign', href: '/static/campaign.html' },
             ]
         },
         {
             id: 'court',
-            title: '💻 Zoom Court',
+            title: '💻 Court Prep',
             items: [
-                { icon: '📹', label: 'Zoom Helper', href: '/static/zoom_court.html' },
                 { icon: '🎯', label: 'Hearing Prep', href: '/static/court_learning.html' },
-                { icon: '👔', label: 'Court Etiquette', href: '/static/court_etiquette.html' },
+                { icon: '📦', label: 'Court Packet', href: '/static/court_packet.html' },
+                { icon: '❓', label: 'Help & Resources', href: '/static/help.html' },
             ]
         },
         {
@@ -76,6 +95,7 @@ const SemptifyNav = {
             title: '⚙️ System',
             collapsed: true,
             items: [
+                { icon: '⚙️', label: 'Settings', href: '/static/settings-v2.html' },
                 { icon: '🌐', label: 'Mesh Network', href: '/static/mesh_network.html' },
                 { icon: '☁️', label: 'Cloud Storage', href: '/static/storage_setup.html' },
                 { icon: '🔌', label: 'API Docs', href: '/api/docs', external: true },
@@ -195,6 +215,27 @@ const SemptifyNav = {
         document.body.classList.remove('nav-open');
     },
 
+    // Toggle pinned/expanded state (desktop)
+    togglePin() {
+        const isPinned = document.body.classList.toggle('nav-pinned');
+        const pinIcon = document.getElementById('pinIcon');
+        if (pinIcon) {
+            pinIcon.textContent = isPinned ? '◀' : '📌';
+        }
+        // Save preference
+        localStorage.setItem('semptify_nav_pinned', isPinned ? 'true' : 'false');
+    },
+
+    // Restore pinned state from localStorage
+    restorePinnedState() {
+        const isPinned = localStorage.getItem('semptify_nav_pinned') === 'true';
+        if (isPinned) {
+            document.body.classList.add('nav-pinned');
+            const pinIcon = document.getElementById('pinIcon');
+            if (pinIcon) pinIcon.textContent = '◀';
+        }
+    },
+
     // Render the complete navigation
     render() {
         const sectionsHtml = this.sections.map(section => this.renderSection(section)).join('');
@@ -212,6 +253,10 @@ const SemptifyNav = {
             
             <!-- Sidebar -->
             <nav class="semptify-sidebar">
+                <!-- Pin/Expand Toggle Button -->
+                <button class="sidebar-toggle" onclick="SemptifyNav.togglePin()" title="Pin sidebar open">
+                    <span id="pinIcon">📌</span>
+                </button>
                 <div class="sidebar-header">
                     <a href="/static/dashboard.html" class="sidebar-logo">
                         <span class="logo-icon">⚖️</span>
@@ -372,74 +417,82 @@ const SemptifyNav = {
     },
     
     async loadUserInfo() {
-        const userId = this.getCookie('semptify_uid');
-        const parsed = this.parseUserId(userId);
-        
-        // Update panel elements
-        document.getElementById('panelUserId').textContent = userId || 'Not set';
-        
-        if (parsed) {
-            document.getElementById('panelUserRole').textContent = parsed.roleName;
-            document.getElementById('panelStorageIcon').textContent = parsed.providerIcon;
-            document.getElementById('panelStorageName').textContent = parsed.providerName;
+        // Fetch from API since cookie is httponly
+        try {
+            const response = await fetch('/storage/status');
+            const data = await response.json();
+            console.log('📋 loadUserInfo - API response:', data);
             
-            const dot = document.getElementById('panelStorageDot');
-            const hint = document.getElementById('panelStorageHint');
-            const reconnectBtn = document.getElementById('btnReconnect');
+            const userId = data.user_id;
+            const parsed = this.parseUserId(userId);
             
-            if (parsed.isConnected) {
+            // Update panel elements
+            document.getElementById('panelUserId').textContent = userId || 'Not set';
+            
+            if (parsed && data.authenticated) {
+                document.getElementById('panelUserRole').textContent = parsed.roleName;
+                document.getElementById('panelStorageIcon').textContent = parsed.providerIcon;
+                document.getElementById('panelStorageName').textContent = parsed.providerName;
+                
+                const dot = document.getElementById('panelStorageDot');
+                const hint = document.getElementById('panelStorageHint');
+                const reconnectBtn = document.getElementById('btnReconnect');
+                
                 dot.classList.remove('disconnected');
                 dot.classList.add('connected');
                 hint.textContent = 'Your data is synced to the cloud';
                 reconnectBtn.style.display = 'block';
-            } else {
-                dot.classList.remove('connected');
-                dot.classList.add('disconnected');
-                hint.textContent = 'Connect cloud storage to sync your data across devices';
-                reconnectBtn.style.display = 'none';
-            }
-            
-            this.userInfo = parsed;
-        }
-        
-        // Try to get more info from storage status API
-        try {
-            const response = await fetch('/storage/status');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.connected && data.provider) {
-                    document.getElementById('panelStorageName').textContent = 
-                        data.provider.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    document.getElementById('panelStorageDot').classList.remove('disconnected');
-                    document.getElementById('panelStorageDot').classList.add('connected');
-                    
-                    if (data.expires_at) {
-                        const expires = new Date(data.expires_at);
-                        document.getElementById('panelSessionExpires').textContent = 
-                            expires.toLocaleString();
-                    }
+                
+                if (data.expires_at) {
+                    const expires = new Date(data.expires_at);
+                    document.getElementById('panelSessionExpires').textContent = expires.toLocaleString();
                 }
+                
+                this.userInfo = { ...parsed, userId };
+            } else {
+                document.getElementById('panelStorageDot')?.classList.add('disconnected');
+                document.getElementById('panelStorageHint').textContent = 'Connect cloud storage to sync your data';
+                document.getElementById('btnReconnect').style.display = 'none';
             }
         } catch (e) {
-            console.log('Could not fetch storage status');
+            console.error('❌ loadUserInfo failed:', e);
+            document.getElementById('panelUserId').textContent = 'Error loading';
         }
     },
     
-    updateNavUserButton() {
-        const userId = this.getCookie('semptify_uid');
-        const parsed = this.parseUserId(userId);
-        
-        if (parsed) {
-            const avatar = document.getElementById('navUserAvatar');
-            const role = document.getElementById('navUserRole');
-            const storage = document.getElementById('navUserStorage');
+    async updateNavUserButton() {
+        // Cookie is httponly so we must fetch from API
+        try {
+            const response = await fetch('/storage/status');
+            const data = await response.json();
+            console.log('🔍 updateNavUserButton - API response:', data);
             
-            if (avatar) avatar.textContent = parsed.providerIcon;
-            if (role) role.textContent = parsed.roleName;
-            if (storage) {
-                storage.textContent = parsed.isConnected ? parsed.providerName : 'Session';
-                storage.className = 'user-storage ' + (parsed.isConnected ? 'connected' : 'session');
+            if (data.authenticated && data.user_id) {
+                const parsed = this.parseUserId(data.user_id);
+                console.log('🔍 Parsed user ID:', parsed);
+                
+                if (parsed) {
+                    const avatar = document.getElementById('navUserAvatar');
+                    const role = document.getElementById('navUserRole');
+                    const storage = document.getElementById('navUserStorage');
+                    
+                    if (avatar) avatar.textContent = parsed.providerIcon;
+                    if (role) role.textContent = parsed.roleName;
+                    if (storage) {
+                        storage.textContent = parsed.providerName;
+                        storage.className = 'user-storage connected';
+                    }
+                    console.log('✅ User button updated:', parsed.providerName, parsed.roleName);
+                }
+            } else {
+                console.log('⚠️ Not authenticated - showing defaults');
+                const storage = document.getElementById('navUserStorage');
+                if (storage) storage.textContent = 'Not Connected';
             }
+        } catch (e) {
+            console.error('❌ Failed to fetch user status:', e);
+            const storage = document.getElementById('navUserStorage');
+            if (storage) storage.textContent = 'Error';
         }
     },
     
@@ -496,7 +549,7 @@ const SemptifyNav = {
     },
 
     // Initialize the navigation
-    init(containerId = 'semptify-nav') {
+    async init(containerId = 'semptify-nav') {
         const container = document.getElementById(containerId);
         if (!container) {
             console.warn('SemptifyNav: Container not found:', containerId);
@@ -518,8 +571,12 @@ const SemptifyNav = {
         // Restore collapsed state
         this.restoreCollapsedState();
         
-        // Update user button
-        this.updateNavUserButton();
+        // Restore pinned state (desktop)
+        this.restorePinnedState();
+        
+        // Update user button from API (async)
+        console.log('🔄 Calling updateNavUserButton...');
+        await this.updateNavUserButton();
 
         // Close mobile nav on link click
         container.querySelectorAll('.nav-item').forEach(item => {
@@ -543,8 +600,8 @@ const SemptifyNav = {
 };
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('semptify-nav')) {
-        SemptifyNav.init();
+        await SemptifyNav.init();
     }
 });

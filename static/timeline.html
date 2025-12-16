@@ -21,6 +21,7 @@
         /* Navigation */
         .nav {
             background: rgba(26, 32, 44, 0.95);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px 30px;
@@ -225,6 +226,7 @@
         /* Timeline Item */
         .timeline-item {
             background: rgba(45, 55, 72, 0.6);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -592,6 +594,9 @@
                 <span class="page-title-icon">📅</span>
                 Timeline
             </h1>
+            <a href="/static/timeline-builder.html" class="filter-btn" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                ⚡ Timeline Builder
+            </a>
         </div>
 
         <!-- Filters -->
@@ -664,7 +669,8 @@
         const PROVIDERS = {
             'G': { id: 'google_drive', name: 'Google Drive', icon: '📁' },
             'D': { id: 'dropbox', name: 'Dropbox', icon: '📦' },
-            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' }
+            'O': { id: 'onedrive', name: 'OneDrive', icon: '☁️' },
+            'S': { id: 'session', name: 'Session', icon: '🔐' }
         };
 
         const ROLES = {
@@ -683,7 +689,7 @@
         }
 
         function parseUserId(userId) {
-            if (!userId || userId.length !== 10) return null;
+            if (!userId || userId.length < 3) return null;
             const providerChar = userId[0];
             const roleChar = userId[1];
             const provider = PROVIDERS[providerChar];
@@ -963,7 +969,7 @@
                         <div class="detail-section">
                             <div class="detail-label">Key Dates</div>
                             <div class="detail-value">
-                                ${doc.extraction.dates.map(d => `${d.date}: ${d.description}`).join('<br>')}
+                                ${doc.extraction.dates.map(d => `${new Date(d.date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}: ${d.description || d.label || ''}`).join('<br>')}
                             </div>
                         </div>
                     `;

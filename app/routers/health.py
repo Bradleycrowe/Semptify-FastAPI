@@ -1,9 +1,17 @@
 """
 Health & Metrics Router
 Observability endpoints for monitoring and system dashboard.
+
+Endpoints:
+- /healthz - Basic liveness check (is the process running?)
+- /livez - Kubernetes liveness probe (same as healthz)
+- /readyz - Readiness check (is the app ready to serve traffic?)
+- /metrics - Prometheus metrics
+- /metrics/json - JSON metrics
 """
 
 import time
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 import json
@@ -23,7 +31,20 @@ _start_time = time.time()
 
 @router.get("/healthz")
 async def health_check():
-    """Basic health check - is the app running?"""
+    """
+    Liveness probe - is the app process running?
+    Returns 200 if the process is alive.
+    Use for Kubernetes livenessProbe.
+    """
+    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+@router.get("/livez")
+async def liveness_check():
+    """
+    Kubernetes liveness probe alias.
+    Returns 200 if the process is alive.
+    """
     return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
@@ -37,10 +58,12 @@ async def health_alias():
 async def readiness_check(settings: Settings = Depends(get_settings)):
     """
     Readiness check - is the app ready to serve traffic?
-    Checks: database connectivity, required directories, security files.
+    Checks: database connectivity, required directories, AI provider.
+    Use for Kubernetes readinessProbe.
     """
     checks = {}
     details = {}
+    start = time.perf_counter()
 
     # Check runtime directories are writable
     for dir_name in ["uploads", "uploads/vault", "logs", "security", "data"]:
@@ -76,27 +99,65 @@ async def readiness_check(settings: Settings = Depends(get_settings)):
         else:
             checks[f"security_{filename.replace('.', '_')}"] = "not_created"
 
-    # Check database connectivity
+    # Check database connectivity with timeout
     try:
         from app.core.database import get_db_session
+        from sqlalchemy import text
+        db_start = time.perf_counter()
         async with get_db_session() as session:
-            # Simple connectivity test
-            await session.execute("SELECT 1")
+            await asyncio.wait_for(
+                session.execute(text("SELECT 1")),
+                timeout=5.0
+            )
         checks["database"] = True
+        details["database_latency_ms"] = round((time.perf_counter() - db_start) * 1000, 2)
+    except asyncio.TimeoutError:
+        checks["database"] = False
+        details["database_error"] = "Connection timeout (5s)"
     except Exception as e:
         checks["database"] = False
         details["database_error"] = str(e)
 
+    # Check AI provider availability
+    ai_provider = settings.ai_provider
+    if ai_provider and ai_provider != "none":
+        checks["ai_provider"] = ai_provider
+        # Check if API key is configured
+        if ai_provider == "anthropic" and settings.anthropic_api_key:
+            details["ai_configured"] = True
+        elif ai_provider == "openai" and settings.openai_api_key:
+            details["ai_configured"] = True
+        elif ai_provider == "azure" and settings.azure_openai_api_key:
+            details["ai_configured"] = True
+        elif ai_provider == "groq" and settings.groq_api_key:
+            details["ai_configured"] = True
+        elif ai_provider == "ollama":
+            details["ai_configured"] = True  # Ollama doesn't need API key
+        else:
+            details["ai_configured"] = False
+
+    # Calculate total check time
+    details["check_duration_ms"] = round((time.perf_counter() - start) * 1000, 2)
+    
     # Overall status
     critical_checks = ["dir_uploads", "dir_uploads_vault", "dir_security", "database"]
     all_critical_ok = all(checks.get(k, False) is True for k in critical_checks)
 
-    return {
-        "status": "ready" if all_critical_ok else "degraded",
-        "checks": checks,
-        "details": details,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    # Return 503 if not ready (for load balancer integration)
+    status_code = 200 if all_critical_ok else 503
+    
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "ready" if all_critical_ok else "degraded",
+            "checks": checks,
+            "details": details,
+            "uptime_seconds": round(time.time() - _start_time, 2),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+
+
 @router.get("/metrics", response_class=PlainTextResponse)
 async def metrics(settings: Settings = Depends(get_settings)):
     """
@@ -175,11 +236,9 @@ async def metrics_json(settings: Settings = Depends(get_settings)):
     return all_metrics
 
 
-@router.get("/dashboard", response_class=HTMLResponse)
+@router.get("/system-dashboard", response_class=HTMLResponse)
 async def system_dashboard():
-    """
-    Visual system dashboard showing all capabilities.
-    """
+    """Visual system dashboard showing all capabilities."""
     html = """
 <!DOCTYPE html>
 <html lang="en">
@@ -505,8 +564,7 @@ async def system_dashboard():
     </div>
 
     <div style="text-align: center; margin-top: 2rem; color: var(--text-muted);">
-        <p>📚 <a href="/api/docs" style="color: var(--primary);">Full API Documentation</a> | 
-           <a href="/api/redoc" style="color: var(--primary);">ReDoc</a></p>
+        <p>📚 <a href="/api/docs" style="color: var(--primary);">Full API Documentation</a></p>
         <p style="margin-top: 0.5rem; font-size: 0.8rem;">
             Semptify v1.0 - Making Justice Accessible
         </p>
@@ -612,9 +670,10 @@ async def api_summary():
             }
         },
         "documentation": {
-            "openapi": "/api/docs",
-            "redoc": "/api/redoc",
-            "dashboard": "/dashboard"
+            "swagger_ui": "/api/docs",
+            "openapi": "/api/openapi.json",
+            "tenant_dashboard": "/dashboard",
+            "system_dashboard": "/system-dashboard"
         },
         "timestamp": datetime.now(timezone.utc).isoformat()
     }

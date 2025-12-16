@@ -874,8 +874,13 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return 'Unknown date';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown date';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return 'Unknown date';
+            }
         }
 
         function getStatusClass(status) {
@@ -1128,7 +1133,31 @@
         }
 
         function exportDocuments() {
-            showToast('Export feature coming soon!', 'success');
+            // Show export options modal
+            const format = prompt('Export format:\n\n1. ZIP (includes all files + metadata)\n2. JSON (metadata only)\n3. CSV (spreadsheet format)\n\nEnter: zip, json, or csv', 'zip');
+            
+            if (!format) return;
+            
+            const validFormats = ['zip', 'json', 'csv'];
+            const selectedFormat = format.toLowerCase().trim();
+            
+            if (!validFormats.includes(selectedFormat)) {
+                showToast('Invalid format. Use: zip, json, or csv', 'error');
+                return;
+            }
+            
+            showToast(`Preparing ${selectedFormat.toUpperCase()} export...`, 'success');
+            
+            // Trigger download
+            const url = `/api/documents/export/download?format=${selectedFormat}`;
+            
+            // Create hidden link and click it
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // File Upload

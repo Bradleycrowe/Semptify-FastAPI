@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - The Tenant's Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #3b82f6;
+            --warm: #f59e0b;
+            --text: #1e293b;
+            --text-light: #475569;
+            --bg: #fdfcfa;
+            --paper: #ffffff;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .header .tagline {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.75;
+            margin-top: 0.5rem;
+        }
+
+        /* Article Container */
+        .article {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--paper);
+        }
+
+        /* Section styling */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 400;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--text-light);
+            text-align: justify;
+        }
+
+        /* Philosophy box */
+        .philosophy {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--warm);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .philosophy p {
+            margin: 0;
+            color: #78350f;
+            font-style: italic;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Two-way street */
+        .two-way {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .two-way { grid-template-columns: 1fr; }
+        }
+
+        .two-way-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .two-way-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .two-way-card ul {
+            margin-left: 1.25rem;
+            color: var(--text-light);
+        }
+
+        .two-way-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Motto */
+        .motto {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin: 2rem -2rem;
+        }
+
+        .motto .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .motto .main {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .motto .sub {
+            font-size: 1rem;
+            opacity: 0.85;
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* What we believe */
+        .beliefs {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .beliefs h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .belief-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .belief-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .belief-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .belief-text {
+            color: var(--text-light);
+        }
+
+        .belief-text strong {
+            color: var(--text);
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--accent);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight p {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* Legal note */
+        .legal-note {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .legal-note p {
+            margin: 0;
+            color: #92400e;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 2.5rem 0;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .cta p {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .footer a {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .header .tagline { font-size: 1.1rem; }
+            .article { padding: 1.5rem 1.25rem; }
+            .motto { margin-left: -1.25rem; margin-right: -1.25rem; }
+            body { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <header class="header">
+        <h1>📓 Semptify</h1>
+        <p class="tagline">The Tenant's Journal</p>
+        <p class="subtitle">Your proactive guide to a peaceful tenancy</p>
+    </header>
+
+    <article class="article">
+
+        <!-- What is Semptify -->
+        <section class="section">
+            <h2 class="section-title">What is Semptify?</h2>
+
+            <p>
+                Semptify is your personal tenant journal — a place to document your rental life, understand 
+                your rights <em>and</em> responsibilities, and stay organized. Think of it as a diary for 
+                your tenancy: recording what happens, when it happens, and keeping everything in one place.
+            </p>
+
+            <p>
+                We believe that most problems between tenants and landlords can be avoided with knowledge 
+                and preparation. By understanding what's expected of you — and what you can expect from 
+                your landlord — you can navigate your tenancy with confidence and hopefully avoid 
+                conflicts before they start.
+            </p>
+
+            <div class="philosophy">
+                <p>
+                    "Everyone deserves a safe, clean place to live.<br>
+                    Knowledge and documentation go further than confrontation."
+                </p>
+            </div>
+        </section>
+
+        <!-- A Two-Way Street -->
+        <section class="section">
+            <h2 class="section-title">🚦 It's a Two-Way Street</h2>
+
+            <p>
+                Here's something important: being a good tenant isn't just about knowing your rights — 
+                it's also about knowing your responsibilities. A successful tenancy requires effort from 
+                both sides. We're not here to help anyone be difficult or find loopholes. We're here 
+                to help people be <em>good</em> tenants.
+            </p>
+
+            <div class="two-way">
+                <div class="two-way-card">
+                    <h4>✅ Your Rights</h4>
+                    <ul>
+                        <li>Safe, habitable living conditions</li>
+                        <li>Privacy and proper notice before entry</li>
+                        <li>Fair treatment without discrimination</li>
+                        <li>Return of security deposit (with itemization)</li>
+                        <li>Protection from retaliation</li>
+                    </ul>
+                </div>
+                <div class="two-way-card">
+                    <h4>✅ Your Responsibilities</h4>
+                    <ul>
+                        <li>Pay rent on time</li>
+                        <li>Keep the property clean and undamaged</li>
+                        <li>Respect neighbors and quiet hours</li>
+                        <li>Report maintenance issues promptly</li>
+                        <li>Follow lease terms you agreed to</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p>
+                The world has enough conflict. Be respectful. Don't be the problem. If everyone — tenants 
+                and landlords alike — did what they're supposed to do, most housing disputes would never happen.
+            </p>
+        </section>
+
+        <!-- Motto -->
+        <div class="motto">
+            <div class="icon">📝</div>
+            <div class="main">Document Everything. Avoid the Pitfalls.</div>
+            <div class="sub">The best outcome is a peaceful tenancy where your documentation is never needed. But if something goes wrong, you'll be prepared.</div>
+        </div>
+
+        <!-- What We Believe -->
+        <section class="section">
+            <h2 class="section-title">What We Believe</h2>
+
+            <div class="beliefs">
+                <div class="belief-item">
+                    <span class="belief-icon">🧠</span>
+                    <span class="belief-text">
+                        <strong>Knowledge prevents problems.</strong> Understanding your rights AND 
+                        responsibilities means fewer misunderstandings and fewer conflicts.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">📋</span>
+                    <span class="belief-text">
+                        <strong>Documentation protects everyone.</strong> When there's a record, there's 
+                        less room for "he said, she said." Good records protect good tenants AND good landlords.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">🕊️</span>
+                    <span class="belief-text">
+                        <strong>Prevention beats confrontation.</strong> The goal is to avoid fights, 
+                        not win them. But if a fight comes to you, you'll be ready.
+                    </span>
+                </div>
+                <div class="belief-item">
+                    <span class="belief-icon">⚖️</span>
+                    <span class="belief-text">
+                        <strong>Right is right.</strong> We stand for what's fair — whether that means 
+                        calling out a bad landlord OR a bad tenant. The truth is the truth.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- What Semptify Does -->
+        <section class="section">
+            <h2 class="section-title">What Semptify Does</h2>
+
+            <p>
+                <strong>📓 Your Tenant Journal</strong> — Log rent payments, maintenance requests, 
+                communications with your landlord, and anything important that happens during your tenancy. 
+                Build a timeline of your rental life.
+            </p>
+
+            <p>
+                <strong>📚 Know Your Rights & Responsibilities</strong> — Access plain-language guides 
+                to tenant law in your state. Understand what your landlord must do, and what you must do. 
+                Both matter equally.
+            </p>
+
+            <p>
+                <strong>📁 Document Storage</strong> — Keep your lease, move-in photos, receipts, and 
+                communications organized in your own cloud storage. We never store your documents on 
+                our servers — they stay in your control.
+            </p>
+
+            <p>
+                <strong>🛠️ Be Prepared (Just in Case)</strong> — If something does go wrong, Semptify 
+                has tools to help you respond: template letters, deadline trackers, and educational 
+                resources about court procedures. We hope you never need them.
+            </p>
+
+            <div class="highlight">
+                <p>
+                    Our goal is that your Semptify journal sits quietly, never needed for anything 
+                    more than your own peace of mind. But if the day comes when you need it, 
+                    everything will be there.
+                </p>
+            </div>
+        </section>
+
+        <!-- Not a Law Firm -->
+        <section class="section">
+            <h2 class="section-title">We're Not Lawyers</h2>
+
+            <p>
+                Semptify is an organizational tool and educational resource — not a law firm. We can't 
+                give you legal advice or tell you what to do in your specific situation. The information 
+                here is general and may not apply to you.
+            </p>
+
+            <p>
+                If you're facing a serious legal situation, please talk to an actual attorney. Many areas 
+                have free legal aid services for tenants. That's not us passing the buck — it's us being 
+                honest about what we are and aren't.
+            </p>
+
+            <div class="legal-note">
+                <p>
+                    ⚖️ For legal advice about your specific situation, contact a licensed attorney 
+                    or your local legal aid society.
+                </p>
+            </div>
+        </section>
+
+        <!-- About Bad Landlords -->
+        <section class="section">
+            <h2 class="section-title">A Word About Bad Landlords</h2>
+
+            <p>
+                Yes, bad landlords exist. Landlords who ignore repairs, who illegally enter your home, 
+                who retaliate when you complain, who try to keep security deposits they have no right to. 
+                When that happens, tenants deserve to know their options and have the documentation to 
+                prove what happened.
+            </p>
+
+            <p>
+                But we're not interested in fighting for the sake of fighting. We're not trying to "get" 
+                anyone. We're trying to help good people document the truth and understand their options. 
+                If that documentation exposes wrongdoing, so be it. The truth should speak for itself.
+            </p>
+
+            <p>
+                Semptify doesn't draw attention to itself. We draw attention to what's right. If you're 
+                a tenant doing what you're supposed to do and your landlord isn't, your journal will 
+                reflect that. If it's the other way around... well, that will be clear too.
+            </p>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta">
+            <a href="/dashboard" class="cta-button">Start Your Tenant Journal</a>
+            <p>Free to use. Your documents stay in your control.</p>
+        </div>
+
+    </article>
+
+    <footer class="footer">
+        <p>
+            Semptify — The Tenant's Journal<br>
+            <a href="/static/about.html">About</a> · <a href="/static/privacy.html">Privacy</a> · <a href="#">Terms</a>
+        </p>
+    </footer>
+
+</body>
+</html>

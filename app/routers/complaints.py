@@ -12,6 +12,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.security import get_optional_user_id, sanitize_user_input
 
 from app.services.complaint_wizard import (
     complaint_wizard,
@@ -84,27 +85,33 @@ class AgencyResponse(BaseModel):
 # Helper: Get User ID from Request
 # =============================================================================
 
-def get_user_id_from_request(request: Request) -> str:
-    """Get user ID from request (session, cookie, or temp)."""
-    user_id = None
+def get_user_id_from_request(request: Request, user_id: Optional[str] = None) -> str:
+    """
+    Get user ID from request (session, cookie, or temp).
+    
+    Now accepts an optional authenticated user_id from the secure dependency.
+    """
+    # Use authenticated user_id if provided
+    if user_id:
+        return user_id
     
     # Try session first (if SessionMiddleware is installed)
     try:
         if "session" in request.scope:
-            user_id = request.session.get("user_id")
+            uid = request.session.get("user_id")
+            if uid:
+                return uid
     except (AssertionError, KeyError):
         pass  # SessionMiddleware not installed
     
     # Try cookie
-    if not user_id:
-        user_id = request.cookies.get("semptify_user_id")
+    uid = request.cookies.get("semptify_user_id")
+    if uid:
+        return uid
     
     # Fall back to IP-based temp ID
-    if not user_id:
-        client_ip = request.client.host if request.client else "unknown"
-        user_id = f"temp_{hash(client_ip) % 100000:05d}"
-    
-    return user_id
+    client_ip = request.client.host if request.client else "unknown"
+    return f"temp_{hash(client_ip) % 100000:05d}"
 
 
 # =============================================================================
@@ -218,32 +225,38 @@ async def get_agency_checklist(agency_id: str) -> dict:
 
 @router.post("/drafts")
 async def create_draft(
-    request: CreateDraftRequest,
-    user_id: str = Query(..., description="User ID"),
+    request_body: CreateDraftRequest,
+    request: Request,
+    user_id: Optional[str] = Depends(get_optional_user_id),
     db: AsyncSession = Depends(get_db)
 ) -> ComplaintDraft:
     """Create a new complaint draft (persisted to database)."""
+    # Get user_id from session or fallback
+    uid = get_user_id_from_request(request, user_id)
+    
     # Verify agency exists
-    agency = complaint_wizard.get_agency(request.agency_id)
+    agency = complaint_wizard.get_agency(request_body.agency_id)
     if not agency:
         raise HTTPException(status_code=404, detail="Agency not found")
 
     draft = await complaint_wizard.create_draft_db(
         db=db,
-        user_id=user_id,
-        agency_id=request.agency_id,
-        subject=request.subject
+        user_id=uid,
+        agency_id=request_body.agency_id,
+        subject=sanitize_user_input(request_body.subject)
     )
     return draft
 
 
 @router.get("/drafts")
 async def list_drafts(
-    user_id: str = Query(..., description="User ID"),
+    request: Request,
+    user_id: Optional[str] = Depends(get_optional_user_id),
     db: AsyncSession = Depends(get_db)
 ) -> list[ComplaintDraft]:
     """List all drafts for a user (from database)."""
-    return await complaint_wizard.get_user_drafts_db(db, user_id)
+    uid = get_user_id_from_request(request, user_id)
+    return await complaint_wizard.get_user_drafts_db(db, uid)
 
 
 @router.get("/drafts/{draft_id}")
@@ -270,6 +283,18 @@ async def update_draft(
     if not draft:
         raise HTTPException(status_code=404, detail="Draft not found")
     return draft
+
+
+@router.delete("/drafts/{draft_id}")
+async def delete_draft(
+    draft_id: str,
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Delete a complaint draft (from database)."""
+    success = await complaint_wizard.delete_draft_db(db, draft_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Draft not found")
+    return {"status": "deleted", "draft_id": draft_id}
 
 
 @router.post("/drafts/{draft_id}/documents")
@@ -310,6 +335,49 @@ async def preview_complaint(
             draft.respondent_name
         )
     }
+
+
+@router.get("/drafts/{draft_id}/export")
+async def export_complaint(
+    draft_id: str,
+    format: str = Query("text", description="Export format: text, html, or pdf"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Export complaint as text, HTML, or attempt PDF."""
+    from fastapi.responses import PlainTextResponse, HTMLResponse
+    
+    draft = await complaint_wizard.get_draft_db(db, draft_id)
+    if not draft:
+        raise HTTPException(status_code=404, detail="Draft not found")
+
+    text = complaint_wizard.generate_complaint_text(draft)
+    agency = complaint_wizard.get_agency(draft.agency_id)
+    
+    if format == "html":
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complaint - {draft.subject or 'Draft'}</title>
+    <style>
+        body {{ font-family: Georgia, serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.8; }}
+        h1 {{ text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }}
+        .section {{ margin: 20px 0; }}
+        .section-title {{ font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 10px; }}
+        pre {{ white-space: pre-wrap; font-family: inherit; }}
+    </style>
+</head>
+<body>
+    <h1>FORMAL COMPLAINT</h1>
+    <p style="text-align: center;">To: {agency.name if agency else 'Agency'}</p>
+    <pre>{text}</pre>
+</body>
+</html>
+"""
+        return HTMLResponse(content=html_content)
+    
+    # Default: plain text
+    return PlainTextResponse(content=text, media_type="text/plain")
 
 
 @router.post("/drafts/{draft_id}/file")

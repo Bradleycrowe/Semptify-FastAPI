@@ -4,334 +4,529 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Law Library - Semptify</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #64748b;
-            --success: #10b981;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #60a5fa;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --purple: #8b5cf6;
             --bg-dark: #0f172a;
             --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: #334155;
+            --bg-hover: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--bg-dark);
-            color: var(--text-primary);
+            color: var(--text);
             min-height: 100vh;
         }
-        
-        .header {
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
-            padding: 2rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .header p {
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+
+        /* Main Content - Account for sidebar */
+        .page-content {
+            margin-left: 260px;
             padding: 2rem;
         }
-        
-        /* Search Section */
-        .search-section {
-            background: var(--bg-card);
-            border-radius: 16px;
+
+        @media (max-width: 768px) {
+            .page-content { margin-left: 0; padding: 1rem; }
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            border-radius: 1.5rem;
             padding: 2rem;
             margin-bottom: 2rem;
             border: 1px solid var(--border);
         }
-        
-        .search-box {
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
             display: flex;
-            gap: 1rem;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hero p {
+            color: var(--text-muted);
             margin-bottom: 1.5rem;
         }
-        
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
         .search-input {
             flex: 1;
             padding: 1rem 1.5rem;
             font-size: 1.1rem;
             background: var(--bg-dark);
             border: 2px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            transition: all 0.3s;
+            border-radius: 0.75rem;
+            color: var(--text);
+            transition: all 0.2s;
         }
-        
+
         .search-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
-        
+
+        .voice-btn {
+            padding: 1rem;
+            background: var(--bg-hover);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 52px;
+        }
+
+        .voice-btn:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .voice-btn.listening {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         .search-btn {
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 0.75rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.2s;
         }
-        
+
         .search-btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
         }
-        
-        .search-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        /* Category Filters */
-        .category-filters {
+
+        /* Quick Questions */
+        .quick-questions {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
-        
-        .category-chip {
+
+        .quick-q {
             padding: 0.5rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.9rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 2rem;
+            color: var(--primary);
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
+        }
+
+        .quick-q:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Topic Cards Grid */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .topic-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .topic-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .topic-card.emergency {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), var(--bg-card));
+        }
+
+        .topic-card.emergency:hover {
+            border-color: var(--danger);
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2);
+        }
+
+        .topic-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .topic-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .topic-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .topic-link {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-hover);
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .topic-link:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
-        .category-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.5rem 0.5rem 0.5rem 0;
+
+        .see-all-btn {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .see-all-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Law Cards */
+        .law-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .law-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .law-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .law-card:hover .law-card-popout {
+            display: block;
+        }
+
+        .law-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .law-title {
+            font-size: 1rem;
             font-weight: 600;
         }
 
-        .category-chip:hover, .category-chip.active {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        .category-chip.federal {
-            border-color: #dc2626;
-        }
-        
-        .category-chip.federal:hover, .category-chip.federal.active {
-            background: #dc2626;
-            border-color: #dc2626;
-        }
-        
-        .category-chip.ada {
-            border-color: #7c3aed;
+        .law-citation {
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-top: 0.25rem;
         }
 
-        .category-chip.ada:hover, .category-chip.ada.active {
-            background: #7c3aed;
-            border-color: #7c3aed;
-        }
-
-        .category-chip.tax {
-            border-color: #059669;
-        }
-
-        .category-chip.tax:hover, .category-chip.tax.active {
-            background: #059669;
-            border-color: #059669;
-        }
-
-        .category-chip.realestate {
-            border-color: #d97706;
-        }
-
-        .category-chip.realestate:hover, .category-chip.realestate.active {
-            background: #d97706;
-            border-color: #d97706;
-        }
-
-        .category-chip.business {
-            border-color: #0284c7;
-        }
-
-        .category-chip.business:hover, .category-chip.business.active {
-            background: #0284c7;
-            border-color: #0284c7;
-        }
-
-        /* Main Content */
-        .main-content {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 2rem;
-        }
-        
-        @media (max-width: 968px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            height: fit-content;
-            position: sticky;
-            top: 2rem;
-        }
-        
-        .sidebar h3 {
-            font-size: 1rem;
-            color: var(--text-secondary);
+        .law-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
         }
 
-        .sidebar h3:not(:first-of-type) {
-            margin-top: 2rem;
+        .law-badge.mn { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
+        .law-badge.federal { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .law-badge.case { background: rgba(139, 92, 246, 0.2); color: var(--purple); }
+
+        .law-summary {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .nav-item {
+        .law-tags {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.875rem 1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .law-tag {
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Law Card Popout - shows on hover */
+        .law-card-popout {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 0 0 0.75rem 0.75rem;
+            border-top: none;
+            padding: 1rem;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .popout-header {
+            color: var(--primary);
+            font-size: 0.95rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
         }
-        
-        .nav-item:hover {
-            background: var(--bg-card-hover);
+
+        .popout-list {
+            margin-left: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding-left: 0;
         }
-        
-        .nav-item.active {
-            background: var(--primary);
+
+        .popout-list li {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            list-style-type: "✓ ";
         }
-        
-        .nav-item .icon {
-            font-size: 1.25rem;
-        }
-        
-        .nav-item .count {
-            margin-left: auto;
-            background: var(--bg-dark);
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-        
-        /* Results Area */
-        .results-area {
+
+        .law-card-popout .popout-actions {
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
         }
-        
-        /* AI Librarian Card */
-        .librarian-card {
+
+        .popout-btn {
+            flex: 1;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .popout-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .popout-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .popout-btn.secondary {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .popout-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        /* Mobile: tap to expand cards */
+        .law-card.expanded .law-card-popout {
+            display: block !important;
+        }
+
+        /* Tap indicator for mobile */
+        .law-card::after {
+            content: "Tap for more";
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--primary);
+            opacity: 0.7;
+        }
+
+        @media (min-width: 769px) {
+            .law-card::after {
+                content: "Hover for more";
+            }
+        }
+
+        /* AI Librarian Panel - STICKY at top */
+        .ai-panel {
             background: linear-gradient(135deg, #1e3a5f 0%, var(--bg-card) 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+            position: sticky;
+            top: 1rem;
+            z-index: 50;
         }
-        
-        .librarian-header {
+
+        .ai-panel.minimized {
+            padding: 0.75rem 1.5rem;
+        }
+
+        .ai-panel.minimized .ai-response,
+        .ai-panel.minimized .ai-sources {
+            display: none;
+        }
+
+        .ai-panel.minimized .ai-header {
+            margin-bottom: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-header {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
         }
-        
-        .librarian-avatar {
-            width: 60px;
-            height: 60px;
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
             background: var(--primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.5rem;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
         }
-        
-        .librarian-info h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        .librarian-info p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        .librarian-response {
+
+        .ai-title h3 { font-size: 1rem; }
+        .ai-title p { font-size: 0.85rem; color: var(--text-muted); }
+
+        .ai-close {
+            margin-left: auto;
             background: var(--bg-dark);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .ai-close:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .ai-response {
+            background: var(--bg-dark);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
             line-height: 1.7;
         }
-        
-        .librarian-response h4 {
+
+        .ai-response h4 {
             color: var(--primary);
-            margin-bottom: 0.75rem;
-        }
-        
-        .librarian-response p {
-            margin-bottom: 1rem;
-        }
-        
-        .librarian-response ul {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .librarian-response li {
             margin-bottom: 0.5rem;
         }
-        
-        .sources-list {
+
+        .ai-response p { margin-bottom: 0.75rem; }
+        .ai-response ul { margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .ai-response li { margin-bottom: 0.25rem; }
+
+        .ai-sources {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
@@ -339,1441 +534,859 @@
             padding-top: 1rem;
             border-top: 1px solid var(--border);
         }
-        
-        .source-tag {
-            padding: 0.375rem 0.75rem;
+
+        .ai-source {
+            padding: 0.25rem 0.75rem;
             background: var(--bg-card);
-            border-radius: 6px;
+            border-radius: 0.5rem;
             font-size: 0.8rem;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s;
         }
-        
-        .source-tag:hover {
+
+        .ai-source:hover {
             background: var(--primary);
             color: white;
         }
-        
-        .suggested-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-        
-        .action-btn {
-            padding: 0.875rem 1rem;
+
+        /* Quick Reference Sidebar */
+        .quick-ref {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
-        
-        .action-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        /* Law Cards */
-        .law-card {
-            background: var(--bg-card);
-            border-radius: 16px;
+            border-radius: 1rem;
             padding: 1.5rem;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
+            margin-bottom: 2rem;
         }
-        
-        .law-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .law-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .law-card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .law-card-citation {
-            font-size: 0.85rem;
-            color: var(--primary);
-            margin-top: 0.25rem;
-        }
-        
-        .law-card-badge {
-            padding: 0.375rem 0.75rem;
-            background: var(--primary);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .law-card-summary {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        
-        .key-points {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .key-point {
-            padding: 0.375rem 0.75rem;
-            background: var(--bg-dark);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        
-        .law-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-        
-        .related-forms {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .form-link {
-            padding: 0.375rem 0.75rem;
-            background: var(--success);
-            color: white;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        
-        .form-link:hover {
-            opacity: 0.8;
-        }
-        
-        .view-full-btn {
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .view-full-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
-        
-        /* Quick Reference Panel */
-        .quick-ref-panel {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-        }
-        
-        .quick-ref-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+
+        .quick-ref h3 {
+            font-size: 1rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .timeline-item {
             display: flex;
             gap: 1rem;
-            padding: 1rem 0;
+            padding: 0.75rem 0;
             border-bottom: 1px solid var(--border);
         }
-        
-        .timeline-item:last-child {
-            border-bottom: none;
-        }
-        
+
+        .timeline-item:last-child { border-bottom: none; }
+
         .timeline-days {
-            min-width: 80px;
+            min-width: 60px;
             font-weight: 700;
             color: var(--warning);
-            font-size: 1.25rem;
+            font-size: 1.1rem;
         }
-        
-        .timeline-content h4 {
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .timeline-content p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        
+
+        .timeline-content h4 { font-size: 0.9rem; margin-bottom: 0.25rem; }
+        .timeline-content p { font-size: 0.8rem; color: var(--text-muted); }
+
         /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
+
+        .modal-overlay.active { display: flex; }
+
         .modal {
             background: var(--bg-card);
-            border-radius: 16px;
+            border-radius: 1rem;
             width: 100%;
             max-width: 800px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
             border: 1px solid var(--border);
         }
-        
+
         .modal-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             position: sticky;
             top: 0;
             background: var(--bg-card);
         }
-        
+
+        .modal-header h2 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+        .modal-header .citation { color: var(--primary); font-size: 0.9rem; }
+
         .modal-close {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: var(--bg-dark);
             border: none;
-            border-radius: 10px;
-            color: var(--text-primary);
+            border-radius: 0.5rem;
+            color: var(--text);
             font-size: 1.25rem;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        
-        .modal-close:hover {
-            background: var(--danger);
-        }
-        
+
+        .modal-close:hover { background: var(--danger); }
+
         .modal-body {
             padding: 1.5rem;
         }
-        
-        .modal-body h3 {
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-section h3 {
             color: var(--primary);
-            margin: 1.5rem 0 0.75rem 0;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        .modal-body h3:first-child {
-            margin-top: 0;
-        }
-        
-        .modal-body p {
+
+        .modal-section p {
             line-height: 1.7;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
-        
-        .modal-body ul {
+
+        .modal-section ul {
             margin-left: 1.5rem;
-            margin-bottom: 1rem;
         }
-        
-        .modal-body li {
+
+        .modal-section li {
             margin-bottom: 0.5rem;
             line-height: 1.6;
         }
-        
-        /* Loading State */
+
+        .key-points-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .key-point {
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .related-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .related-link {
+            padding: 0.5rem 1rem;
+            background: var(--bg-hover);
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .related-link:hover {
+            background: var(--primary);
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: var(--warning);
+            margin-top: 2rem;
+        }
+
+        /* Loading */
         .loading {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 3rem;
+            color: var(--text-muted);
         }
-        
+
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-        
-        .empty-state .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-        
-        .empty-state h3 {
-            font-size: 1.25rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            margin-right: 0.75rem;
         }
 
-        /* Results Header */
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .results-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 0;
-        }
-
-        .results-count {
-            background: var(--primary);
-            color: white;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            background: var(--bg-dark);
-            padding: 0.5rem;
-            border-radius: 12px;
-        }
-        
-        .tab {
-            padding: 0.75rem 1.5rem;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover {
-            color: var(--text-primary);
-        }
-        
-        .tab.active {
-            background: var(--primary);
-            color: white;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <script src="/static/js/law-linker.js"></script>
 </head>
 <body>
-    <!-- Site-wide header -->
-    <script src="/static/js/header.js"></script>
+    <!-- Shared Navigation -->
+    <script src="/static/js/shared-nav.js"></script>
 
-    <div class="header">
-        <div class="container">
-            <h1>📚 Law Library</h1>
-            <p>Minnesota Tenant Rights, Statutes, Case Law & Court Rules</p>
-        </div>
-    </div>
-    
-    <div class="container">
-        <!-- Search Section -->
-        <div class="search-section">
-            <div class="search-box">
+    <div class="page-content">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>📚 Minnesota Law Library</h1>
+            <p>Find the laws that protect your housing rights. Search statutes, case law, and court rules.</p>
+            
+            <div class="search-container">
                 <input type="text" class="search-input" id="searchInput" 
-                       placeholder="Ask a legal question... (e.g., 'What are my rights if my landlord is evicting me?')">
-                <button class="search-btn" id="askLibrarian" onclick="askLibrarian()">
-                    🤖 Ask Librarian
+                       placeholder="Ask a legal question... (e.g., 'How long do I have to answer an eviction?')">
+                <button class="voice-btn" onclick="startVoiceSearch()" title="Voice search - speak your question" aria-label="Voice search">
+                    🎤
+                </button>
+                <button class="search-btn" onclick="askLibrarian()">
+                    🤖 Ask AI Librarian
                 </button>
             </div>
-            <div class="category-filters" id="categoryFilters">
-                <!-- Populated by JS -->
+            
+            <div class="quick-questions">
+                <span class="quick-q" onclick="quickSearch('eviction timeline')">⏱️ Eviction Timeline</span>
+                <span class="quick-q" onclick="quickSearch('security deposit return')">💰 Security Deposits</span>
+                <span class="quick-q" onclick="quickSearch('habitability repairs')">🔧 Repair Rights</span>
+                <span class="quick-q" onclick="quickSearch('retaliation eviction')">🛡️ Retaliation Defense</span>
+                <span class="quick-q" onclick="quickSearch('reasonable accommodation')">♿ Accommodations</span>
             </div>
+        </div>
+
+        <!-- AI Legal Librarian Panel -->
+        <div class="ai-panel active" id="aiPanel">
+            <div class="ai-header" onclick="expandAI()">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-title">
+                    <h3>AI Legal Librarian</h3>
+                    <p>Your guide to Minnesota tenant law</p>
+                </div>
+                <button class="ai-close" onclick="event.stopPropagation(); closeAI()" title="Minimize">−</button>
+            </div>
+            <div class="ai-response" id="aiResponse">
+                <h4>👋 How can I help you today?</h4>
+                <p>I can help you understand Minnesota tenant rights, eviction procedures, and housing laws. Try asking me:</p>
+                <ul>
+                    <li>"How long do I have to respond to an eviction?"</li>
+                    <li>"Can my landlord keep my security deposit?"</li>
+                    <li>"What repairs is my landlord responsible for?"</li>
+                </ul>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">Type your question above or click a quick topic to get started.</p>
+            </div>
+            <div class="ai-sources" id="aiSources">
+            </div>
+        </div>
+
+        <!-- Topic Cards -->
+        <div class="topics-grid">
+            <!-- Emergency: Facing Eviction -->
+            <div class="topic-card emergency" onclick="showTopic('eviction')">
+                <div class="topic-icon">🚨</div>
+                <h3>Facing Eviction?</h3>
+                <p>Know your rights and deadlines. You have 7 days to respond to an eviction complaint.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.321')">Filing Answer</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.335')">Jury Trial</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.285')">Defenses</a>
+                </div>
+            </div>
+
+            <!-- Security Deposits -->
+            <div class="topic-card" onclick="showTopic('deposits')">
+                <div class="topic-icon">💰</div>
+                <h3>Security Deposits</h3>
+                <p>Landlord must return deposit within 21 days or provide itemized deductions.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.178')">Return Rules</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation();">Violations</a>
+                </div>
+            </div>
+
+            <!-- Habitability -->
+            <div class="topic-card" onclick="showTopic('habitability')">
+                <div class="topic-icon">🏠</div>
+                <h3>Habitability & Repairs</h3>
+                <p>Your landlord must maintain safe, habitable conditions. Know your rent escrow rights.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.161')">Warranty</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.385')">Rent Escrow</a>
+                </div>
+            </div>
+
+            <!-- Retaliation -->
+            <div class="topic-card" onclick="showTopic('retaliation')">
+                <div class="topic-icon">🛡️</div>
+                <h3>Retaliation Protection</h3>
+                <p>Landlord can't evict you for complaining about conditions or exercising rights.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.285')">90-Day Rule</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation(); showLaw('504B.441')">Complaints</a>
+                </div>
+            </div>
+
+            <!-- Fair Housing -->
+            <div class="topic-card" onclick="showTopic('fairhousing')">
+                <div class="topic-icon">⚖️</div>
+                <h3>Fair Housing & Discrimination</h3>
+                <p>Federal and state laws protect against housing discrimination.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation();">Protected Classes</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation();">File Complaint</a>
+                </div>
+            </div>
+
+            <!-- Disability & Accommodations -->
+            <div class="topic-card" onclick="showTopic('disability')">
+                <div class="topic-icon">♿</div>
+                <h3>Disability Rights</h3>
+                <p>Request reasonable accommodations or modifications. ESA and service animal rights.</p>
+                <div class="topic-links">
+                    <a href="#" class="topic-link" onclick="event.stopPropagation();">Accommodations</a>
+                    <a href="#" class="topic-link" onclick="event.stopPropagation();">Assistance Animals</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference: Eviction Timeline -->
+        <div class="quick-ref">
+            <h3>⏱️ Minnesota Eviction Timeline</h3>
+            <div class="timeline-item">
+                <div class="timeline-days">14 days</div>
+                <div class="timeline-content">
+                    <h4>Nonpayment Notice</h4>
+                    <p>Landlord must give 14-day written notice before filing eviction for unpaid rent</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-days">7 days</div>
+                <div class="timeline-content">
+                    <h4>File Answer</h4>
+                    <p>After being served, you have 7 days to file your Answer with the court</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-days">10 days</div>
+                <div class="timeline-content">
+                    <h4>Demand Jury Trial</h4>
+                    <p>Must request jury trial within 10 days after filing your Answer</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-days">7-14 days</div>
+                <div class="timeline-content">
+                    <h4>Court Hearing</h4>
+                    <p>Hearing typically scheduled 7-14 days from summons date</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Statutes Section -->
+        <div class="section-header">
+            <h2>📜 Key Minnesota Statutes</h2>
+            <a href="#" class="see-all-btn" onclick="showAllStatutes()">See all statutes →</a>
         </div>
         
-        <div class="main-content">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <h3>Browse Library</h3>
-                <div class="nav-item active" data-section="statutes" onclick="showSection('statutes')">
-                    <span class="icon">📜</span>
-                    <span>Statutes</span>
-                    <span class="count" id="statuteCount">-</span>
-                </div>
-                <div class="nav-item" data-section="court-rules" onclick="showSection('court-rules')">
-                    <span class="icon">⚖️</span>
-                    <span>Court Rules</span>
-                    <span class="count" id="courtRuleCount">-</span>
-                </div>
-                <div class="nav-item" data-section="case-law" onclick="showSection('case-law')">
-                    <span class="icon">📖</span>
-                    <span>Case Law</span>
-                    <span class="count" id="caseLawCount">-</span>
-                </div>
-                
-                <h3>Federal Law</h3>
-                <div class="nav-item" data-section="federal" onclick="showSection('federal')">
-                    <span class="icon">🇺🇸</span>
-                    <span>Fair Housing Act</span>
-                </div>
-                <div class="nav-item" data-section="ada" onclick="showSection('ada')">
-                    <span class="icon">♿</span>
-                    <span>ADA & Disability</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('accommodations')">
-                    <span class="icon">🔧</span>
-                    <span>Accommodations</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('assistance-animals')">
-                    <span class="icon">🐕</span>
-                    <span>Assistance Animals</span>
-                </div>
+        <div class="law-cards" id="statuteCards">
+            <div class="loading"><div class="spinner"></div> Loading statutes...</div>
+        </div>
 
-                <h3>Tax Law</h3>
-                <div class="nav-item" data-section="tax-federal" onclick="showSection('tax-federal')">
-                    <span class="icon">🏛️</span>
-                    <span>Federal Tax</span>
-                </div>
-                <div class="nav-item" data-section="tax-state" onclick="showSection('tax-state')">
-                    <span class="icon">📋</span>
-                    <span>Minnesota Tax</span>
-                </div>
-                <div class="nav-item" data-section="tax-local" onclick="showSection('tax-local')">
-                    <span class="icon">🏘️</span>
-                    <span>Local Tax</span>
-                </div>
+        <!-- Case Law Section -->
+        <div class="section-header">
+            <h2>📖 Important Case Law</h2>
+            <a href="#" class="see-all-btn" onclick="showAllCases()">See all cases →</a>
+        </div>
+        
+        <div class="law-cards" id="caseCards">
+            <div class="loading"><div class="spinner"></div> Loading cases...</div>
+        </div>
 
-                <h3>Real Estate</h3>
-                <div class="nav-item" data-section="realestate-federal" onclick="showSection('realestate-federal')">
-                    <span class="icon">🇺🇸</span>
-                    <span>Federal Real Estate</span>
-                </div>
-                <div class="nav-item" data-section="realestate-state" onclick="showSection('realestate-state')">
-                    <span class="icon">🏠</span>
-                    <span>Minnesota Real Estate</span>
-                </div>
-                <div class="nav-item" data-section="realestate-local" onclick="showSection('realestate-local')">
-                    <span class="icon">🏘️</span>
-                    <span>Local Real Estate</span>
-                </div>
-
-                <h3>Business Law</h3>
-                <div class="nav-item" data-section="business-federal" onclick="showSection('business-federal')">
-                    <span class="icon">🏢</span>
-                    <span>Federal Business</span>
-                </div>
-                <div class="nav-item" data-section="business-state" onclick="showSection('business-state')">
-                    <span class="icon">📊</span>
-                    <span>Minnesota Business</span>
-                </div>
-                <div class="nav-item" data-section="business-local" onclick="showSection('business-local')">
-                    <span class="icon">🏪</span>
-                    <span>Local Business</span>
-                </div>
-
-                <h3>Quick Reference</h3>
-                <div class="nav-item" onclick="showQuickRef('eviction-timeline')">
-                    <span class="icon">⏱️</span>
-                    <span>Eviction Timeline</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('tenant-rights')">
-                    <span class="icon">🛡️</span>
-                    <span>Tenant Rights</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('defenses')">
-                    <span class="icon">🗡️</span>
-                    <span>Eviction Defenses</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('accommodations')">
-                    <span class="icon">♿</span>
-                    <span>Accommodations</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('assistance-animals')">
-                    <span class="icon">🐕</span>
-                    <span>Assistance Animals</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('tax-guide')">
-                    <span class="icon">💰</span>
-                    <span>Tax Guide</span>
-                </div>
-                <div class="nav-item" onclick="showQuickRef('rent-control')">
-                    <span class="icon">🏘️</span>
-                    <span>Rent Control</span>
-                </div>
-            </div>
-
-            <!-- Results Area -->
-            <div class="results-area" id="resultsArea">
-                <!-- Results Header -->
-                <div class="results-header" id="resultsHeader">
-                    <h2 id="resultsTitle">📜 All Statutes</h2>
-                    <span class="results-count" id="resultsCount">Loading...</span>
-                </div>
-
-                <!-- AI Librarian Response (hidden by default) -->
-                <div class="librarian-card" id="librarianCard" style="display: none;">
-                    <div class="librarian-header">
-                        <div class="librarian-avatar">🤖</div>
-                        <div class="librarian-info">
-                            <h3>AI Legal Librarian</h3>
-                            <p>Your question answered with Minnesota law</p>
-                        </div>
-                    </div>
-                    <div class="librarian-response" id="librarianResponse">
-                        <!-- Populated by JS -->
-                    </div>
-                    <div class="sources-list" id="sourcesList">
-                        <!-- Populated by JS -->
-                    </div>
-                    <div class="suggested-actions" id="suggestedActions">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                
-                <!-- Tabs -->
-                <div class="tabs" id="tabs">
-                    <button class="tab active" data-tab="all" onclick="filterResults('all')">All</button>
-                    <button class="tab" data-tab="eviction" onclick="filterResults('eviction')">Eviction</button>
-                    <button class="tab" data-tab="security_deposits" onclick="filterResults('security_deposits')">Security Deposits</button>
-                    <button class="tab" data-tab="habitability" onclick="filterResults('habitability')">Habitability</button>
-                    <button class="tab" data-tab="retaliation" onclick="filterResults('retaliation')">Retaliation</button>
-                </div>
-                
-                <!-- Results Grid -->
-                <div id="resultsGrid">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                    </div>
-                </div>
-            </div>
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            ⚠️ <strong>Not Legal Advice:</strong> This information is for educational purposes only. 
+            Laws change - verify current statutes at <a href="https://www.revisor.mn.gov" target="_blank" style="color: var(--warning);">revisor.mn.gov</a>. 
+            For advice about your specific situation, consult a licensed attorney or contact 
+            <a href="https://www.lawhelpmn.org" target="_blank" style="color: var(--warning);">Legal Aid</a>.
         </div>
     </div>
-    
-    <!-- Modal -->
+
+    <!-- Modal for detailed law view -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div>
-                    <h2 id="modalTitle">-</h2>
-                    <p id="modalCitation" style="color: var(--primary); margin-top: 0.5rem;">-</p>
+                    <h2 id="modalTitle">Loading...</h2>
+                    <div class="citation" id="modalCitation"></div>
                 </div>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Populated by JS -->
+                <div class="loading"><div class="spinner"></div> Loading...</div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        const API_BASE = '/api/law-library';
-        let currentSection = 'statutes';
-        let allStatutes = [];
-        let allCourtRules = [];
-        let allCaseLaw = [];
-        let currentFilter = 'all';
-        
         // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadCategories();
-            await loadAllData();
-            showSection('statutes');
-            
-            // Initialize law linker for automatic statute linking
-            if (typeof LawLinker !== 'undefined') {
-                window.lawLinker = new LawLinker();
-            }
-
-            // Enter key triggers search
-            document.getElementById('searchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') askLibrarian();
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStatutes();
+            loadCases();
         });
-        
-        async function loadCategories() {
-            try {
-                const resp = await fetch(`${API_BASE}/categories`);
-                const data = await resp.json();
-                
-                // Combine all categories with section headers
-                let filtersHtml = '<span class="category-label">State:</span>';
-                filtersHtml += data.statute_categories.map(cat => `
-                    <div class="category-chip" onclick="filterByCategory('${cat.id}')">
-                        <span>${cat.icon}</span>
-                        <span>${cat.name}</span>
-                    </div>
-                `).join('');
-                
-                if (data.federal_categories) {
-                    filtersHtml += '<span class="category-label">Federal:</span>';
-                    filtersHtml += data.federal_categories.map(cat => `
-                        <div class="category-chip federal" onclick="filterByCategory('${cat.id}')">
-                            <span>${cat.icon}</span>
-                            <span>${cat.name}</span>
-                        </div>
-                    `).join('');
-                }
-                
-                if (data.disability_categories) {
-                    filtersHtml += '<span class="category-label">ADA/Disability:</span>';
-                    filtersHtml += data.disability_categories.map(cat => `
-                        <div class="category-chip ada" onclick="filterByCategory('${cat.id}')">
-                            <span>${cat.icon}</span>
-                            <span>${cat.name}</span>
-                        </div>
-                    `).join('');
-                }
 
-                if (data.tax_categories) {
-                    filtersHtml += '<span class="category-label">Tax Laws:</span>';
-                    filtersHtml += data.tax_categories.map(cat => `
-                        <div class="category-chip tax" onclick="filterByCategory('${cat.id}')">
-                            <span>${cat.icon}</span>
-                            <span>${cat.name}</span>
-                        </div>
-                    `).join('');
-                }
+        // Search input enter key
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') askLibrarian();
+        });
 
-                if (data.real_estate_categories) {
-                    filtersHtml += '<span class="category-label">Real Estate:</span>';
-                    filtersHtml += data.real_estate_categories.map(cat => `
-                        <div class="category-chip realestate" onclick="filterByCategory('${cat.id}')">
-                            <span>${cat.icon}</span>
-                            <span>${cat.name}</span>
-                        </div>
-                    `).join('');
-                }
-
-                if (data.business_categories) {
-                    filtersHtml += '<span class="category-label">Business Law:</span>';
-                    filtersHtml += data.business_categories.map(cat => `
-                        <div class="category-chip business" onclick="filterByCategory('${cat.id}')">
-                            <span>${cat.icon}</span>
-                            <span>${cat.name}</span>
-                        </div>
-                    `).join('');
-                }
-
-                document.getElementById('categoryFilters').innerHTML = filtersHtml;
-            } catch (err) {
-                console.error('Failed to load categories:', err);
-            }
-        }
-        
-        async function loadAllData() {
-            try {
-                const [statutes, courtRules, caseLaw] = await Promise.all([
-                    fetch(`${API_BASE}/statutes`).then(r => r.json()),
-                    fetch(`${API_BASE}/court-rules`).then(r => r.json()),
-                    fetch(`${API_BASE}/case-law`).then(r => r.json())
-                ]);
-                
-                allStatutes = statutes;
-                allCourtRules = courtRules;
-                allCaseLaw = caseLaw;
-                
-                document.getElementById('statuteCount').textContent = statutes.length;
-                document.getElementById('courtRuleCount').textContent = courtRules.length;
-                document.getElementById('caseLawCount').textContent = caseLaw.length;
-            } catch (err) {
-                console.error('Failed to load data:', err);
-            }
-        }
-        
-        function showSection(section) {
-            currentSection = section;
-            currentFilter = 'all';
-
-            // Update nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.section === section);
-            });
-
-            // Update tabs visibility - show for main sections, hide for subcategories
-            const tabs = document.getElementById('tabs');
-            const mainSections = ['statutes', 'court-rules', 'case-law'];
-            tabs.style.display = mainSections.includes(section) ? 'flex' : 'none';
-
-            // Reset tab selection
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.tab === 'all');
-            });
-
-            renderResults();
-        }        function filterResults(category) {
-            currentFilter = category;
-            
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.tab === category);
-            });
-            
-            renderResults();
-        }
-        
-        function filterByCategory(categoryId) {
-            currentSection = 'statutes';
-            currentFilter = categoryId;
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.section === 'statutes');
-            });
-            
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.getElementById('tabs').style.display = 'flex';
-            renderResults();
-        }
-        
-        function renderResults() {
-            const grid = document.getElementById('resultsGrid');
-            let items = [];
-
-            switch (currentSection) {
-                case 'statutes':
-                    items = currentFilter === 'all'
-                        ? allStatutes
-                        : allStatutes.filter(s => s.category === currentFilter || s.subcategory === currentFilter);
-                    grid.innerHTML = items.map(renderStatuteCard).join('');
-                    break;
-
-                case 'federal':
-                    // Filter for federal laws
-                    items = allStatutes.filter(s =>
-                        s.jurisdiction === 'federal' ||
-                        s.category === 'discrimination' ||
-                        ['fha_title_viii', 'fha_amendments_1988', 'vawa_housing', 'cfpb_debt_collection', 'title_vi_civil_rights', 'section_504_rehab'].includes(s.id)
-                    );
-                    grid.innerHTML = items.map(renderStatuteCard).join('');
-                    break;
-
-                case 'ada':
-                    // Filter for ADA/disability laws
-                    items = allStatutes.filter(s =>
-                        s.category === 'disability' ||
-                        ['ada_title_ii', 'ada_title_iii', 'assistance_animals', 'reasonable_accommodations', 'reasonable_modifications', 'accessibility_new_construction'].includes(s.id)
-                    );
-                    grid.innerHTML = items.map(renderStatuteCard).join('');
-                    break;
-
-                case 'court-rules':
-                    items = allCourtRules;
-                    grid.innerHTML = items.map(renderCourtRuleCard).join('');
-                    break;
-
-                case 'case-law':
-                    items = allCaseLaw;
-                    grid.innerHTML = items.map(renderCaseLawCard).join('');
-                    break;
-
-                // Tax Law sections
-                case 'tax-federal':
-                    items = allStatutes.filter(s => s.category === 'tax_federal');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Federal Tax Laws');
-                    break;
-
-                case 'tax-state':
-                    items = allStatutes.filter(s => s.category === 'tax_state');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Minnesota Tax Laws');
-                    break;
-
-                case 'tax-local':
-                    items = allStatutes.filter(s => s.category === 'tax_local');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Local Tax Laws');
-                    break;
-
-                // Real Estate sections
-                case 'realestate-federal':
-                    items = allStatutes.filter(s => s.category === 'real_estate_federal');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Federal Real Estate Laws');
-                    break;
-
-                case 'realestate-state':
-                    items = allStatutes.filter(s => s.category === 'real_estate_state');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Minnesota Real Estate Laws');
-                    break;
-
-                case 'realestate-local':
-                    items = allStatutes.filter(s => s.category === 'real_estate_local');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Local Real Estate Laws');
-                    break;
-
-                // Business Law sections
-                case 'business-federal':
-                    items = allStatutes.filter(s => s.category === 'business_federal');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Federal Business Laws');
-                    break;
-
-                case 'business-state':
-                    items = allStatutes.filter(s => s.category === 'business_state');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Minnesota Business Laws');
-                    break;
-
-                case 'business-local':
-                    items = allStatutes.filter(s => s.category === 'business_local');
-                    grid.innerHTML = items.length > 0 ? items.map(renderStatuteCard).join('') : renderEmptyState('Local Business Laws');
-                    break;
-
-                default:
-                    grid.innerHTML = renderEmptyState('this section');
-            }
-
-            // Update result count in header
-            updateResultsHeader(currentSection, items.length);
+        // Quick search
+        function quickSearch(query) {
+            document.getElementById('searchInput').value = query;
+            askLibrarian();
         }
 
-        function renderEmptyState(sectionName) {
-            return `
-                <div class="empty-state">
-                    <div class="icon">📭</div>
-                    <h3>No ${sectionName} Found</h3>
-                    <p>Try browsing a different category or use the search</p>
-                </div>
-            `;
-        }
-
-        function updateResultsHeader(section, count) {
-            const sectionConfig = {
-                'statutes': { icon: '📜', name: 'All Statutes' },
-                'federal': { icon: '🇺🇸', name: 'Federal Housing Laws' },
-                'ada': { icon: '♿', name: 'ADA & Disability Laws' },
-                'court-rules': { icon: '⚖️', name: 'Court Rules' },
-                'case-law': { icon: '📖', name: 'Case Law' },
-                'tax-federal': { icon: '🏛️', name: 'Federal Tax Laws' },
-                'tax-state': { icon: '📋', name: 'Minnesota Tax Laws' },
-                'tax-local': { icon: '🏘️', name: 'Local Tax Laws' },
-                'realestate-federal': { icon: '🇺🇸', name: 'Federal Real Estate Laws' },
-                'realestate-state': { icon: '🏠', name: 'Minnesota Real Estate Laws' },
-                'realestate-local': { icon: '🏘️', name: 'Local Real Estate Laws' },
-                'business-federal': { icon: '🏢', name: 'Federal Business Laws' },
-                'business-state': { icon: '📊', name: 'Minnesota Business Laws' },
-                'business-local': { icon: '🏪', name: 'Local Business Laws' }
-            };
-            
-            const config = sectionConfig[section] || { icon: '📚', name: 'Laws' };
-            document.getElementById('resultsTitle').textContent = `${config.icon} ${config.name}`;
-            document.getElementById('resultsCount').textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
-        }        function renderStatuteCard(statute) {
-            const keyPoints = statute.key_points?.slice(0, 3) || [];
-            const relatedForms = statute.related_forms?.slice(0, 2) || [];
-            
-            return `
-                <div class="law-card">
-                    <div class="law-card-header">
-                        <div>
-                            <div class="law-card-title">${statute.title}</div>
-                            <div class="law-card-citation">${statute.citation}</div>
-                        </div>
-                        <span class="law-card-badge">${formatCategory(statute.category)}</span>
-                    </div>
-                    <div class="law-card-summary">${statute.summary}</div>
-                    <div class="key-points">
-                        ${keyPoints.map(p => `<span class="key-point">✓ ${truncate(p, 40)}</span>`).join('')}
-                    </div>
-                    <div class="law-card-footer">
-                        <div class="related-forms">
-                            ${relatedForms.map(f => `<span class="form-link">📝 ${formatFormName(f)}</span>`).join('')}
-                        </div>
-                        <button class="view-full-btn" onclick="viewStatute('${statute.id}')">View Full Text</button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderCourtRuleCard(rule) {
-            const tips = rule.practical_tips?.slice(0, 3) || [];
-            
-            return `
-                <div class="law-card">
-                    <div class="law-card-header">
-                        <div>
-                            <div class="law-card-title">${rule.title}</div>
-                            <div class="law-card-citation">Rule ${rule.rule_number}</div>
-                        </div>
-                        <span class="law-card-badge">${formatCategory(rule.category)}</span>
-                    </div>
-                    <div class="law-card-summary">${rule.summary}</div>
-                    <div class="key-points">
-                        ${tips.map(t => `<span class="key-point">💡 ${truncate(t, 40)}</span>`).join('')}
-                    </div>
-                    <div class="law-card-footer">
-                        <div></div>
-                        <button class="view-full-btn" onclick="viewCourtRule('${rule.id}')">View Full Text</button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderCaseLawCard(caseItem) {
-            return `
-                <div class="law-card">
-                    <div class="law-card-header">
-                        <div>
-                            <div class="law-card-title">${caseItem.case_name}</div>
-                            <div class="law-card-citation">${caseItem.citation}</div>
-                        </div>
-                        <span class="law-card-badge">${caseItem.court}</span>
-                    </div>
-                    <div class="law-card-summary">${caseItem.summary}</div>
-                    <div class="key-points">
-                        <span class="key-point">📅 Decided: ${caseItem.date_decided}</span>
-                    </div>
-                    <div class="law-card-footer">
-                        <div style="color: var(--text-secondary); font-size: 0.85rem;">
-                            ${caseItem.relevance}
-                        </div>
-                        <button class="view-full-btn" onclick="viewCaseLaw('${caseItem.id}')">View Details</button>
-                    </div>
-                </div>
-            `;
-        }
-        
+        // Ask AI Librarian
         async function askLibrarian() {
-            const question = document.getElementById('searchInput').value.trim();
-            if (!question) return;
-            
-            const btn = document.getElementById('askLibrarian');
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Searching...';
-            
-            const card = document.getElementById('librarianCard');
-            card.style.display = 'block';
-            document.getElementById('librarianResponse').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            document.getElementById('sourcesList').innerHTML = '';
-            document.getElementById('suggestedActions').innerHTML = '';
-            
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            const panel = document.getElementById('aiPanel');
+            const response = document.getElementById('aiResponse');
+            const sources = document.getElementById('aiSources');
+
+            panel.classList.add('active');
+            response.innerHTML = '<div class="loading"><div class="spinner"></div> Researching...</div>';
+            sources.innerHTML = '';
+
             try {
-                const resp = await fetch(`${API_BASE}/librarian/ask`, {
+                const res = await fetch('/api/law-library/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
+                    body: JSON.stringify({ question: query })
                 });
-                
-                const data = await resp.json();
-                
-                // Format answer with markdown-like processing
-                const formattedAnswer = formatAnswer(data.answer);
-                document.getElementById('librarianResponse').innerHTML = formattedAnswer;
-                
-                // Sources
-                const sourcesHtml = data.sources.map(s => 
-                    `<span class="source-tag" onclick="viewSource('${s.type}', '${s.id}')">${s.title}</span>`
-                ).join('');
-                document.getElementById('sourcesList').innerHTML = sourcesHtml;
-                
-                // Suggested Actions
-                const actionsHtml = data.suggested_actions.map(a => 
-                    `<button class="action-btn">✓ ${a}</button>`
-                ).join('');
-                document.getElementById('suggestedActions').innerHTML = actionsHtml;
-                
-                // Related topics
-                if (data.related_topics?.length) {
-                    document.getElementById('suggestedActions').innerHTML += `
-                        <div style="grid-column: 1 / -1; margin-top: 1rem; color: var(--text-secondary);">
-                            <strong>Related Topics:</strong> ${data.related_topics.join(' • ')}
-                        </div>
+
+                if (res.ok) {
+                    const data = await res.json();
+                    response.innerHTML = `
+                        <h4>${data.topic || 'Answer'}</h4>
+                        <p>${data.answer || data.response || 'No answer available.'}</p>
+                        ${data.key_points ? `<ul>${data.key_points.map(p => `<li>${p}</li>`).join('')}</ul>` : ''}
+                    `;
+
+                    if (data.sources && data.sources.length > 0) {
+                        sources.innerHTML = '<strong style="font-size:0.8rem;color:var(--text-muted);margin-right:0.5rem;">Sources:</strong>' +
+                            data.sources.map(s => `<span class="ai-source" onclick="showLaw('${s.id}')">${s.citation || s.title}</span>`).join('');
+                    }
+                } else {
+                    // Fallback for no API
+                    response.innerHTML = `
+                        <h4>Search Results for: "${query}"</h4>
+                        <p>Use the topic cards below to browse relevant laws, or try searching for specific statute numbers like "504B.321".</p>
                     `;
                 }
-                
             } catch (err) {
-                document.getElementById('librarianResponse').innerHTML = `
-                    <p style="color: var(--danger);">⚠️ Error: ${err.message}</p>
-                    <p>Please try again or browse the library manually.</p>
+                response.innerHTML = `
+                    <h4>Search: "${query}"</h4>
+                    <p>Browse the topic cards below to find relevant Minnesota laws about ${query}.</p>
                 `;
             }
-            
-            btn.disabled = false;
-            btn.innerHTML = '🤖 Ask Librarian';
         }
-        
-        function formatAnswer(text) {
-            // Convert markdown-like formatting to HTML
-            return text
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n- /g, '</p><ul><li>')
-                .replace(/\n(\d+)\. /g, '</p><ol><li>')
-                .replace(/\n   - /g, '</li><li>')
-                .replace(/<\/li><li>([^<]+)$/gm, '</li><li>$1</li></ul>')
-                .split('\n').map(line => {
-                    if (line.startsWith('- ')) return `<li>${line.substring(2)}</li>`;
-                    return line;
-                }).join('\n')
-                .replace(/^/, '<p>')
-                .replace(/$/, '</p>');
+
+        function closeAI() {
+            const panel = document.getElementById('aiPanel');
+            panel.classList.toggle('minimized');
+            const btn = panel.querySelector('.ai-close');
+            btn.textContent = panel.classList.contains('minimized') ? '+' : '−';
+            btn.title = panel.classList.contains('minimized') ? 'Expand' : 'Minimize';
         }
-        
-        function viewStatute(id) {
-            const statute = allStatutes.find(s => s.id === id);
-            if (!statute) return;
-            
-            document.getElementById('modalTitle').textContent = statute.title;
-            document.getElementById('modalCitation').textContent = statute.citation;
-            document.getElementById('modalBody').innerHTML = `
-                <h3>Summary</h3>
-                <p>${statute.summary}</p>
-                
-                <h3>Key Points</h3>
-                <ul>
-                    ${statute.key_points.map(p => `<li>${p}</li>`).join('')}
-                </ul>
-                
-                <h3>Full Text</h3>
-                <p>${statute.full_text}</p>
-                
-                ${statute.related_forms?.length ? `
-                    <h3>Related Forms</h3>
-                    <div class="key-points">
-                        ${statute.related_forms.map(f => `<span class="key-point">📝 ${formatFormName(f)}</span>`).join('')}
-                    </div>
-                ` : ''}
-                
-                ${statute.effective_date ? `<p style="color: var(--text-secondary); margin-top: 1rem;">Effective: ${statute.effective_date}</p>` : ''}
-            `;
-            
-            document.getElementById('modalOverlay').classList.add('active');
+
+        function expandAI() {
+            const panel = document.getElementById('aiPanel');
+            panel.classList.remove('minimized');
+            panel.classList.add('active');
+            const btn = panel.querySelector('.ai-close');
+            btn.textContent = '−';
+            btn.title = 'Minimize';
         }
+
+        // Voice search - accessibility feature
+        let voiceRecognition = null;
         
-        function viewCourtRule(id) {
-            const rule = allCourtRules.find(r => r.id === id);
-            if (!rule) return;
+        function startVoiceSearch() {
+            const voiceBtn = document.querySelector('.voice-btn');
+            const searchInput = document.getElementById('searchInput');
             
-            document.getElementById('modalTitle').textContent = rule.title;
-            document.getElementById('modalCitation').textContent = `Rule ${rule.rule_number}`;
-            document.getElementById('modalBody').innerHTML = `
-                <h3>Summary</h3>
-                <p>${rule.summary}</p>
-                
-                <h3>Full Text</h3>
-                <p>${rule.full_text}</p>
-                
-                ${rule.practical_tips?.length ? `
-                    <h3>Practical Tips</h3>
-                    <ul>
-                        ${rule.practical_tips.map(t => `<li>${t}</li>`).join('')}
-                    </ul>
-                ` : ''}
-            `;
-            
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-        
-        function viewCaseLaw(id) {
-            const caseItem = allCaseLaw.find(c => c.id === id);
-            if (!caseItem) return;
-            
-            document.getElementById('modalTitle').textContent = caseItem.case_name;
-            document.getElementById('modalCitation').textContent = caseItem.citation;
-            document.getElementById('modalBody').innerHTML = `
-                <p><strong>Court:</strong> ${caseItem.court}</p>
-                <p><strong>Date Decided:</strong> ${caseItem.date_decided}</p>
-                
-                <h3>Summary</h3>
-                <p>${caseItem.summary}</p>
-                
-                <h3>Holding</h3>
-                <p>${caseItem.holding}</p>
-                
-                <h3>Relevance</h3>
-                <p>${caseItem.relevance}</p>
-                
-                ${caseItem.key_quotes?.length ? `
-                    <h3>Key Quotes</h3>
-                    ${caseItem.key_quotes.map(q => `<blockquote style="border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1rem 0; font-style: italic;">"${q}"</blockquote>`).join('')}
-                ` : ''}
-            `;
-            
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-        
-        function viewSource(type, id) {
-            if (type === 'statute') {
-                viewStatute(id);
-            } else if (type === 'court_rule') {
-                viewCourtRule(id);
+            // Check if already listening
+            if (voiceRecognition && voiceBtn.classList.contains('listening')) {
+                voiceRecognition.stop();
+                voiceBtn.classList.remove('listening');
+                return;
             }
-        }
-        
-        function showQuickRef(topic) {
-            const quickRefs = {
-                'eviction-timeline': {
-                    title: '⏱️ Minnesota Eviction Timeline',
-                    content: `
-                        <div class="timeline-item">
-                            <div class="timeline-days">Day 0</div>
-                            <div class="timeline-content">
-                                <h4>Notice Served</h4>
-                                <p>Landlord serves written notice (14-day for nonpayment, 30-day for lease violation)</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-days">Day 14-30</div>
-                            <div class="timeline-content">
-                                <h4>Notice Period Expires</h4>
-                                <p>If not cured, landlord may file eviction complaint</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-days">Day 1-3</div>
-                            <div class="timeline-content">
-                                <h4>Complaint Filed & Served</h4>
-                                <p>Summons and Complaint personally served or posted + mailed</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-days">7 Days</div>
-                            <div class="timeline-content">
-                                <h4>Answer Due</h4>
-                                <p><strong>CRITICAL:</strong> File your Answer within 7 days of service!</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-days">7-14 Days</div>
-                            <div class="timeline-content">
-                                <h4>Court Hearing</h4>
-                                <p>Hearing scheduled within 7-14 days after Answer filed</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-days">24 Hours</div>
-                            <div class="timeline-content">
-                                <h4>Writ of Recovery</h4>
-                                <p>If judgment for landlord, writ may issue after 24 hours</p>
-                            </div>
-                        </div>
-                    `
-                },
-                'tenant-rights': {
-                    title: '🛡️ Minnesota Tenant Rights',
-                    content: `
-                        <ul style="list-style: none; padding: 0;">
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>🏠 Habitability</strong><br>
-                                Right to safe, sanitary housing with working utilities
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>📋 Proper Notice</strong><br>
-                                Right to written notice before eviction (14-30 days)
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>⚖️ Court Hearing</strong><br>
-                                Right to contest eviction in court before removal
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>🔧 Repair Rights</strong><br>
-                                Right to repair and deduct or withhold rent for habitability issues
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>🛡️ Retaliation Protection</strong><br>
-                                Protected from eviction for reporting violations
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>💰 Security Deposit</strong><br>
-                                Right to return of deposit within 21 days
-                            </li>
-                            <li style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; margin-bottom: 0.75rem;">
-                                <strong>👥 Fair Housing</strong><br>
-                                Protection from discrimination
-                            </li>
-                        </ul>
-                    `
-                },
-                'defenses': {
-                    title: '🗡️ Common Eviction Defenses',
-                    content: `
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Improper Notice</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Notice period wrong, wrong address, or wrong form</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Habitability Defense</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Landlord failed to maintain habitable premises</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Retaliation</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Eviction in response to complaints or exercising rights</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Discrimination</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Eviction based on protected class</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Rent Paid / Tender</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Rent was paid or offered before trial</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Waiver / Estoppel</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Landlord accepted rent after violation</p>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; border-left: 4px solid var(--success);">
-                                <strong>Emergency Rental Assistance</strong>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">Application pending for ERA funds</p>
-                            </div>
-                        </div>
-                    `
-                },
-                'accommodations': {
-                    title: '♿ Reasonable Accommodations Guide',
-                    content: `
-                        <div style="margin-bottom: 1.5rem;">
-                            <h3 style="color: var(--primary); margin-bottom: 1rem;">What Are Reasonable Accommodations?</h3>
-                            <p style="line-height: 1.6;">Changes to rules, policies, practices, or services that allow a person with a disability equal opportunity to use and enjoy their housing.</p>
-                        </div>
-                        
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Common Examples</h3>
-                        <div style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; display: flex; gap: 1rem;">
-                                <span style="font-size: 1.5rem;">🐕</span>
-                                <div><strong>Assistance Animals</strong><br><span style="color: var(--text-secondary);">Service animals or ESAs in no-pet housing</span></div>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; display: flex; gap: 1rem;">
-                                <span style="font-size: 1.5rem;">🅿️</span>
-                                <div><strong>Reserved Parking</strong><br><span style="color: var(--text-secondary);">Accessible space closer to unit</span></div>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; display: flex; gap: 1rem;">
-                                <span style="font-size: 1.5rem;">📅</span>
-                                <div><strong>Rent Payment Changes</strong><br><span style="color: var(--text-secondary);">Different due date based on SSI/SSDI schedule</span></div>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; display: flex; gap: 1rem;">
-                                <span style="font-size: 1.5rem;">👥</span>
-                                <div><strong>Live-In Aide</strong><br><span style="color: var(--text-secondary);">Allow additional occupant as caregiver</span></div>
-                            </div>
-                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 10px; display: flex; gap: 1rem;">
-                                <span style="font-size: 1.5rem;">📧</span>
-                                <div><strong>Communication Methods</strong><br><span style="color: var(--text-secondary);">Email notices, large print, accessible formats</span></div>
-                            </div>
-                        </div>
-                        
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">How to Request</h3>
-                        <ol style="margin-left: 1.5rem; line-height: 1.8;">
-                            <li>Make request in writing (keep a copy)</li>
-                            <li>Explain the accommodation you need</li>
-                            <li>Explain connection to your disability (not diagnosis)</li>
-                            <li>Provide documentation if requested</li>
-                        </ol>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: #7c3aed22; border-radius: 10px; border-left: 4px solid #7c3aed;">
-                            <strong>⚖️ Legal Standard:</strong> Landlord must grant unless it causes "undue hardship" or "fundamentally alters" the housing.
-                        </div>
-                    `
-                },
-                'assistance-animals': {
-                    title: '🐕 Assistance Animals in Housing',
-                    content: `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px;">
-                                <h4 style="color: var(--primary); margin-bottom: 0.75rem;">🦮 Service Animals</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li>Trained for specific tasks</li>
-                                    <li>Guide dogs, hearing dogs</li>
-                                    <li>Mobility assistance</li>
-                                    <li>Seizure alert dogs</li>
-                                    <li>NO documentation required</li>
-                                </ul>
-                            </div>
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px;">
-                                <h4 style="color: var(--primary); margin-bottom: 0.75rem;">💙 Emotional Support Animals</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li>Provide emotional support</li>
-                                    <li>Help with anxiety, PTSD</li>
-                                    <li>Any type of animal</li>
-                                    <li>No special training needed</li>
-                                    <li>Need healthcare provider letter</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <h3 style="color: var(--success); margin-bottom: 1rem;">✅ Your Rights</h3>
-                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">No pet fees or deposits</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">No breed/size/weight restrictions</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Must be allowed in "no pet" buildings</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Not subject to pet policies</div>
-                        </div>
-                        
-                        <h3 style="color: var(--danger); margin-bottom: 1rem;">❌ Landlord Cannot</h3>
-                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Require certification or registration</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Ask about nature of disability</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Charge pet rent</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Require animal wear vest/ID</div>
-                        </div>
-                        
-                        <div style="padding: 1rem; background: #f59e0b22; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                            <strong>📝 ESA Documentation:</strong> Letter from licensed healthcare provider stating you have a disability-related need for the animal. Does NOT need to disclose your diagnosis.
-                        </div>
-                    `
-                },
-                'tax-guide': {
-                    title: '💰 Tax Guide for Renters & Landlords',
-                    content: `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px;">
-                                <h4 style="color: var(--success); margin-bottom: 0.75rem;">🏠 For Tenants</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li><strong>Renters Credit (M1PR)</strong></li>
-                                    <li>17% of rent = property tax</li>
-                                    <li>Need CRP from landlord</li>
-                                    <li>File by August 15</li>
-                                    <li>Income-based refund</li>
-                                </ul>
-                            </div>
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px;">
-                                <h4 style="color: var(--primary); margin-bottom: 0.75rem;">🏢 For Landlords</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li><strong>Depreciation</strong>: 27.5 years</li>
-                                    <li>Mortgage interest deductible</li>
-                                    <li>Repairs deductible</li>
-                                    <li>Must provide CRP by Jan 31</li>
-                                    <li>1031 exchange available</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Key Tax Forms</h3>
-                        <div style="display: grid; gap: 0.5rem;">
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px; display: flex; justify-content: space-between;">
-                                <span><strong>Schedule E</strong></span>
-                                <span style="color: var(--text-secondary);">Rental Income/Expenses</span>
-                            </div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px; display: flex; justify-content: space-between;">
-                                <span><strong>Form M1PR</strong></span>
-                                <span style="color: var(--text-secondary);">MN Renters Refund</span>
-                            </div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px; display: flex; justify-content: space-between;">
-                                <span><strong>CRP</strong></span>
-                                <span style="color: var(--text-secondary);">Certificate of Rent Paid</span>
-                            </div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px; display: flex; justify-content: space-between;">
-                                <span><strong>Form 8824</strong></span>
-                                <span style="color: var(--text-secondary);">1031 Exchange</span>
-                            </div>
-                        </div>
-                    `
-                },
-                'rent-control': {
-                    title: '🏘️ Rent Control in Minnesota',
-                    content: `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px; border-left: 4px solid #0ea5e9;">
-                                <h4 style="color: #0ea5e9; margin-bottom: 0.75rem;">Minneapolis</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li>3% annual cap</li>
-                                    <li>Effective May 2022</li>
-                                    <li>15-year new construction exemption</li>
-                                    <li>Hardship petitions available</li>
-                                </ul>
-                            </div>
-                            <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                                <h4 style="color: #8b5cf6; margin-bottom: 0.75rem;">St. Paul</h4>
-                                <ul style="margin-left: 1rem; line-height: 1.6; color: var(--text-secondary);">
-                                    <li>3% annual cap</li>
-                                    <li>Voter-approved Nov 2021</li>
-                                    <li>20-year new construction exemption</li>
-                                    <li>Affordable housing exemptions</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <h3 style="color: var(--success); margin-bottom: 1rem;">✅ Your Rights</h3>
-                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Rent cannot increase more than 3% per year</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Report violations to housing inspection services</div>
-                            <div style="padding: 0.75rem 1rem; background: var(--bg-dark); border-radius: 8px;">Check if building is exempt (new construction)</div>
-                        </div>
-                        
-                        <div style="padding: 1rem; background: #f59e0b22; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                            <strong>⚠️ Note:</strong> Some properties are exempt. Check with your city's housing department.
-                        </div>
-                    `
+            
+            // Check browser support
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Voice search is not supported in this browser. Please try Chrome, Edge, or Safari.');
+                return;
+            }
+            
+            voiceRecognition = new SpeechRecognition();
+            voiceRecognition.continuous = false;
+            voiceRecognition.interimResults = true;
+            voiceRecognition.lang = 'en-US';
+            
+            voiceBtn.classList.add('listening');
+            searchInput.placeholder = '🎤 Listening... speak your question';
+            
+            voiceRecognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                searchInput.value = transcript;
+            };
+            
+            voiceRecognition.onend = () => {
+                voiceBtn.classList.remove('listening');
+                searchInput.placeholder = "Ask a legal question... (e.g., 'How long do I have to answer an eviction?')";
+                
+                // Auto-submit if we got text
+                if (searchInput.value.trim()) {
+                    askLibrarian();
                 }
             };
+            
+            voiceRecognition.onerror = (event) => {
+                voiceBtn.classList.remove('listening');
+                searchInput.placeholder = "Ask a legal question... (e.g., 'How long do I have to answer an eviction?')";
+                
+                if (event.error === 'no-speech') {
+                    alert('No speech detected. Please try again.');
+                } else if (event.error !== 'aborted') {
+                    alert('Voice recognition error: ' + event.error);
+                }
+            };
+            
+            voiceRecognition.start();
+        }
 
-            const ref = quickRefs[topic];
-            if (!ref) return;
+        // Load statutes
+        async function loadStatutes() {
+            const container = document.getElementById('statuteCards');
+            
+            try {
+                const res = await fetch('/api/law-library/statutes');
+                const data = await res.json();
+                
+                // Handle new response format with disclaimer
+                const statutes = data.statutes || data;
+                const featured = statutes.slice(0, 6);
+                
+                container.innerHTML = featured.map(s => `
+                    <div class="law-card" data-law-id="${s.id}">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">${s.title}</div>
+                                <div class="law-citation">${s.citation}</div>
+                            </div>
+                            <span class="law-badge ${s.category === 'federal' ? 'federal' : 'mn'}">${s.category === 'federal' ? 'Federal' : 'MN'}</span>
+                        </div>
+                        <div class="law-summary">${s.summary}</div>
+                        <div class="law-tags">
+                            ${(s.key_points || []).slice(0, 2).map(p => `<span class="law-tag">${p.substring(0, 30)}...</span>`).join('')}
+                        </div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">⭐ Key Points</div>
+                            <ul class="popout-list">
+                                ${(s.key_points || ['View details for more information']).map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showLaw('${s.id}')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('${s.id}', '${s.title}')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="law-card" data-law-id="504B.321">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">Eviction Procedure</div>
+                                <div class="law-citation">Minn. Stat. § 504B.321</div>
+                            </div>
+                            <span class="law-badge mn">MN</span>
+                        </div>
+                        <div class="law-summary">Complaint and summons requirements for eviction actions. 7-day answer deadline.</div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">⭐ Key Points</div>
+                            <ul class="popout-list">
+                                <li>Tenant must file answer within 7 days</li>
+                                <li>Requires proper service of summons</li>
+                                <li>Hearing scheduled after answer filed</li>
+                            </ul>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showLaw('504B.321')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('504B.321', 'Eviction Procedure')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="law-card" data-law-id="504B.178">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">Security Deposits</div>
+                                <div class="law-citation">Minn. Stat. § 504B.178</div>
+                            </div>
+                            <span class="law-badge mn">MN</span>
+                        </div>
+                        <div class="law-summary">21-day return requirement, interest rules, withholding limits.</div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">⭐ Key Points</div>
+                            <ul class="popout-list">
+                                <li>Landlord has 21 days to return deposit</li>
+                                <li>Must provide itemized list of deductions</li>
+                                <li>Interest required on deposits over 1 year</li>
+                            </ul>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showLaw('504B.178')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('504B.178', 'Security Deposits')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="law-card" data-law-id="504B.161">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">Habitability Warranty</div>
+                                <div class="law-citation">Minn. Stat. § 504B.161</div>
+                            </div>
+                            <span class="law-badge mn">MN</span>
+                        </div>
+                        <div class="law-summary">Landlord's duty to maintain fit and habitable premises.</div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">⭐ Key Points</div>
+                            <ul class="popout-list">
+                                <li>Landlord must maintain safe, clean premises</li>
+                                <li>Heat, water, and essential services required</li>
+                                <li>Tenant can seek rent escrow if violated</li>
+                            </ul>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showLaw('504B.161')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('504B.161', 'Habitability Warranty')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
-            document.getElementById('modalTitle').textContent = ref.title;
-            document.getElementById('modalCitation').textContent = '';
-            document.getElementById('modalBody').innerHTML = ref.content;
-            document.getElementById('modalOverlay').classList.add('active');
+        // Load cases
+        async function loadCases() {
+            const container = document.getElementById('caseCards');
+            
+            try {
+                const res = await fetch('/api/law-library/case-law');
+                const data = await res.json();
+                
+                // Handle new response format with disclaimer
+                const cases = data.cases || data;
+                const featured = cases.slice(0, 4);
+                
+                container.innerHTML = featured.map(c => `
+                    <div class="law-card" data-case-id="${c.id}">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">${c.case_name}</div>
+                                <div class="law-citation">${c.citation}</div>
+                            </div>
+                            <span class="law-badge case">Case</span>
+                        </div>
+                        <div class="law-summary">${c.summary}</div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">📋 Case Summary</div>
+                            <p style="margin: 0.5rem 0; font-size: 0.9rem;">${c.summary}</p>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showCase('${c.id}')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('${c.id}', '${c.case_name}')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="law-card" data-case-id="fritz-warthen">
+                        <div class="law-card-header">
+                            <div>
+                                <div class="law-title">Fritz v. Warthen</div>
+                                <div class="law-citation">298 Minn. 54, 213 N.W.2d 339 (1973)</div>
+                            </div>
+                            <span class="law-badge case">Case</span>
+                        </div>
+                        <div class="law-summary">Established implied warranty of habitability in Minnesota residential leases.</div>
+                        <div class="law-card-popout">
+                            <div class="popout-header">📋 Case Summary</div>
+                            <ul class="popout-list">
+                                <li>Landmark MN Supreme Court decision</li>
+                                <li>Created implied warranty of habitability</li>
+                                <li>Tenants can withhold rent for uninhabitable conditions</li>
+                            </ul>
+                            <div class="popout-actions">
+                                <button class="popout-btn primary" onclick="event.stopPropagation(); showCase('fritz-warthen')">📖 Full Details</button>
+                                <button class="popout-btn secondary" onclick="event.stopPropagation(); askAboutLaw('fritz-warthen', 'Fritz v. Warthen')">🤖 Ask AI</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
-        
-        function closeModal(event) {
-            if (event && event.target !== document.getElementById('modalOverlay')) return;
-            document.getElementById('modalOverlay').classList.remove('active');
+
+        // Show law detail modal
+        async function showLaw(id) {
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const citation = document.getElementById('modalCitation');
+            const body = document.getElementById('modalBody');
+
+            overlay.classList.add('active');
+            title.textContent = 'Loading...';
+            citation.textContent = '';
+            body.innerHTML = '<div class="loading"><div class="spinner"></div> Loading...</div>';
+
+            try {
+                const res = await fetch(`/api/law-library/statutes/${id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const statute = data.statute || data;
+                    
+                    title.textContent = statute.title;
+                    citation.textContent = statute.citation;
+                    body.innerHTML = `
+                        <div class="modal-section">
+                            <h3>📝 Summary</h3>
+                            <p>${statute.summary}</p>
+                        </div>
+                        
+                        <div class="modal-section">
+                            <h3>⭐ Key Points</h3>
+                            <div class="key-points-list">
+                                ${(statute.key_points || []).map(p => `<div class="key-point">${p}</div>`).join('')}
+                            </div>
+                        </div>
+                        
+                        ${statute.full_text ? `
+                        <div class="modal-section">
+                            <h3>📜 Full Text</h3>
+                            <p style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; background: var(--bg-dark); padding: 1rem; border-radius: 0.5rem;">${statute.full_text}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${statute.related_forms && statute.related_forms.length > 0 ? `
+                        <div class="modal-section">
+                            <h3>📄 Related Forms</h3>
+                            <div class="related-links">
+                                ${statute.related_forms.map(f => `<a href="/eviction/forms/library?form=${f}" class="related-link">${f}</a>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="modal-section">
+                            <h3>🔗 Official Source</h3>
+                            <a href="https://www.revisor.mn.gov/statutes/cite/${statute.citation?.replace('Minn. Stat. § ', '')}" 
+                               target="_blank" class="related-link">View on revisor.mn.gov →</a>
+                        </div>
+                    `;
+                } else {
+                    body.innerHTML = '<p>Statute not found. Please try another search.</p>';
+                }
+            } catch (err) {
+                body.innerHTML = `
+                    <div class="modal-section">
+                        <h3>📜 ${id}</h3>
+                        <p>View the official text at:</p>
+                        <a href="https://www.revisor.mn.gov/statutes/cite/${id}" target="_blank" class="related-link">
+                            revisor.mn.gov/statutes/cite/${id} →
+                        </a>
+                    </div>
+                `;
+            }
         }
-        
-        // Utility functions
-        function formatCategory(cat) {
-            return cat?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'General';
+
+        function showCase(id) {
+            // Similar to showLaw but for case law
+            showLaw(id); // Reuse for now
         }
-        
-        function formatFormName(form) {
-            return form?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || form;
+
+        // Ask AI about a specific law from popout button
+        function askAboutLaw(id, title) {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = `Explain ${title} and how it applies to tenant rights`;
+            searchInput.focus();
+            askLibrarian();
         }
-        
-        function truncate(str, len) {
-            return str?.length > len ? str.substring(0, len) + '...' : str;
+
+        function showTopic(topic) {
+            // Filter or show topic-specific content
+            const queries = {
+                'eviction': 'eviction procedure rights defenses',
+                'deposits': 'security deposit return',
+                'habitability': 'habitability repairs maintenance',
+                'retaliation': 'retaliation eviction protection',
+                'fairhousing': 'fair housing discrimination',
+                'disability': 'disability accommodation ADA'
+            };
+            document.getElementById('searchInput').value = queries[topic] || topic;
+            askLibrarian();
         }
-        
-        // Keyboard shortcuts
+
+        function showAllStatutes() {
+            window.location.href = '/law-library?section=statutes';
+        }
+
+        function showAllCases() {
+            window.location.href = '/law-library?section=cases';
+        }
+
+        function closeModal(e) {
+            if (!e || e.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        }
+
+        // Close modal on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
-            if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-                e.preventDefault();
-                document.getElementById('searchInput').focus();
+        });
+
+        // Mobile: tap to expand law cards (since hover doesn't work on touch)
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.law-card');
+            if (card) {
+                // If clicking on action buttons inside popout, don't toggle
+                if (e.target.closest('.popout-btn')) {
+                    return;
+                }
+                
+                // Close other expanded cards
+                document.querySelectorAll('.law-card.expanded').forEach(c => {
+                    if (c !== card) c.classList.remove('expanded');
+                });
+                
+                // Toggle this card
+                card.classList.toggle('expanded');
+            } else {
+                // Clicked outside - close all expanded cards
+                document.querySelectorAll('.law-card.expanded').forEach(c => {
+                    c.classList.remove('expanded');
+                });
             }
         });
     </script>
 </body>
 </html>
-

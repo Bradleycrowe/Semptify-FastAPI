@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Builder - Semptify</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Override nav z-index */
+        #semptify-nav { z-index: 200; }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: var(--border);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 0;
+            height: calc(100vh - 65px);
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-left, .sidebar-right {
+                display: none;
+            }
+            .sidebar-left.mobile-open, .sidebar-right.mobile-open {
+                display: block;
+                position: fixed;
+                top: 65px;
+                bottom: 0;
+                z-index: 90;
+            }
+            .sidebar-left.mobile-open { left: 0; }
+            .sidebar-right.mobile-open { right: 0; }
+        }
+
+        /* Left Sidebar - Event Templates */
+        .sidebar-left {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .template-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .template-group-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .template-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .template-item:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .template-item:active {
+            cursor: grabbing;
+        }
+
+        .template-item.dragging {
+            opacity: 0.5;
+        }
+
+        .template-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .template-icon.notice { background: rgba(239, 68, 68, 0.2); }
+        .template-icon.filing { background: rgba(59, 130, 246, 0.2); }
+        .template-icon.hearing { background: rgba(139, 92, 246, 0.2); }
+        .template-icon.deadline { background: rgba(245, 158, 11, 0.2); }
+        .template-icon.document { background: rgba(16, 185, 129, 0.2); }
+        .template-icon.milestone { background: rgba(99, 102, 241, 0.2); }
+
+        .template-info {
+            flex: 1;
+        }
+
+        .template-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .template-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Center - Timeline Canvas */
+        .timeline-canvas {
+            background: var(--bg-dark);
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .canvas-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .canvas-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .canvas-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 0.25rem;
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .zoom-value {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* Visual Timeline */
+        .visual-timeline {
+            position: relative;
+            padding: 2rem 0;
+            min-height: 400px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--purple));
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .timeline-event {
+            position: relative;
+            width: 45%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timeline-event:nth-child(odd) {
+            margin-left: 5%;
+        }
+
+        .timeline-event:nth-child(even) {
+            margin-left: 50%;
+        }
+
+        .timeline-event:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .timeline-event.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .timeline-event::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .timeline-event:nth-child(odd)::before {
+            right: -42px;
+        }
+
+        .timeline-event:nth-child(even)::before {
+            left: -42px;
+        }
+
+        .timeline-event::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: var(--border);
+            top: 50%;
+        }
+
+        .timeline-event:nth-child(odd)::after {
+            right: -24px;
+        }
+
+        .timeline-event:nth-child(even)::after {
+            left: -24px;
+        }
+
+        .event-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-date {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .event-type-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
+        }
+
+        .badge-notice { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-filing { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-hearing { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .badge-deadline { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-document { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-milestone { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+
+        .event-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-description {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .timeline-event:hover .event-actions {
+            opacity: 1;
+        }
+
+        .event-action-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .event-action-btn:hover {
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        .event-action-btn.delete:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .drop-zone-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .drop-zone-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Right Sidebar - Properties */
+        .sidebar-right {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .properties-panel {
+            display: none;
+        }
+
+        .properties-panel.active {
+            display: block;
+        }
+
+        .property-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .property-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .property-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .property-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2rem;
+        }
+
+        /* AI Suggestions Panel */
+        .ai-panel {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid var(--purple);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-icon {
+            font-size: 1.2rem;
+        }
+
+        .ai-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .ai-suggestion {
+            background: var(--bg-dark);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ai-suggestion:hover {
+            background: var(--bg-hover);
+        }
+
+        .ai-suggestion-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-suggestion-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Mobile toggles */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1rem;
+            z-index: 80;
+            padding: 0.75rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .mobile-toggle.left { left: 1rem; }
+        .mobile-toggle.right { right: 1rem; }
+
+        @media (max-width: 1200px) {
+            .mobile-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        }
+
+        /* Quick Add Form */
+        .quick-add-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-add-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quick-add-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 0.75rem;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .quick-add-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty State */
+        .empty-timeline {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Voice Input */
+        .voice-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .voice-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .voice-btn.listening {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar-left, .sidebar-right, .mobile-toggle, .quick-add-form, .event-actions {
+                display: none !important;
+            }
+            .main-container {
+                display: block;
+            }
+            .timeline-canvas {
+                padding: 0;
+            }
+            .timeline-event {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Shared Navigation -->
+    <script src="/static/js/shared-nav.js"></script>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/static/timeline-v2.html" class="back-btn">← Back to Timeline</a>
+            <h1 class="page-title">⚡ Timeline Builder</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-ghost" onclick="printTimeline()" title="Print timeline">
+                🖨️ Print
+            </button>
+            <button class="btn btn-secondary" onclick="exportTimeline()">
+                📥 Export
+            </button>
+            <button class="btn btn-success" onclick="saveTimeline()">
+                💾 Save Timeline
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar - Templates -->
+        <aside class="sidebar-left" id="sidebarLeft">
+            <div class="sidebar-title">📋 Drag to Add</div>
+            
+            <div class="template-group">
+                <div class="template-group-title">Eviction Events</div>
+                
+                <div class="template-item" draggable="true" data-type="notice" data-title="Notice Received" data-days="0">
+                    <div class="template-icon notice">📬</div>
+                    <div class="template-info">
+                        <div class="template-name">Notice Received</div>
+                        <div class="template-desc">Initial eviction notice</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="filing" data-title="Summons & Complaint" data-days="7">
+                    <div class="template-icon filing">📜</div>
+                    <div class="template-info">
+                        <div class="template-name">Summons & Complaint</div>
+                        <div class="template-desc">Court papers served</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="deadline" data-title="Answer Deadline" data-days="7">
+                    <div class="template-icon deadline">⏰</div>
+                    <div class="template-info">
+                        <div class="template-name">Answer Deadline</div>
+                        <div class="template-desc">7 days to respond</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="filing" data-title="Answer Filed" data-days="0">
+                    <div class="template-icon filing">✍️</div>
+                    <div class="template-info">
+                        <div class="template-name">Answer Filed</div>
+                        <div class="template-desc">Response submitted</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="hearing" data-title="Court Hearing" data-days="14">
+                    <div class="template-icon hearing">⚖️</div>
+                    <div class="template-info">
+                        <div class="template-name">Court Hearing</div>
+                        <div class="template-desc">Scheduled appearance</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-group">
+                <div class="template-group-title">Documents</div>
+                
+                <div class="template-item" draggable="true" data-type="document" data-title="Evidence Gathered" data-days="0">
+                    <div class="template-icon document">📎</div>
+                    <div class="template-info">
+                        <div class="template-name">Evidence Gathered</div>
+                        <div class="template-desc">Photos, receipts, etc.</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="document" data-title="Lease Agreement" data-days="0">
+                    <div class="template-icon document">📄</div>
+                    <div class="template-info">
+                        <div class="template-name">Lease Agreement</div>
+                        <div class="template-desc">Rental contract</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-group">
+                <div class="template-group-title">Milestones</div>
+                
+                <div class="template-item" draggable="true" data-type="milestone" data-title="Case Dismissed" data-days="0">
+                    <div class="template-icon milestone">🎉</div>
+                    <div class="template-info">
+                        <div class="template-name">Case Dismissed</div>
+                        <div class="template-desc">Victory!</div>
+                    </div>
+                </div>
+                
+                <div class="template-item" draggable="true" data-type="milestone" data-title="Settlement Reached" data-days="0">
+                    <div class="template-icon milestone">🤝</div>
+                    <div class="template-info">
+                        <div class="template-name">Settlement Reached</div>
+                        <div class="template-desc">Agreement made</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center - Timeline Canvas -->
+        <main class="timeline-canvas">
+            <!-- Quick Add Form -->
+            <div class="quick-add-form">
+                <div class="quick-add-title">➕ Quick Add Event</div>
+                <div class="quick-add-grid">
+                    <div>
+                        <label class="property-label">Event Title</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="quickTitle" class="property-input" placeholder="What happened?">
+                            <button class="voice-btn" onclick="startVoiceInput('quickTitle')" title="Voice input">🎤</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="property-label">Date</label>
+                        <input type="date" id="quickDate" class="property-input">
+                    </div>
+                    <div>
+                        <label class="property-label">Type</label>
+                        <select id="quickType" class="property-input property-select">
+                            <option value="notice">📬 Notice</option>
+                            <option value="filing">📜 Filing</option>
+                            <option value="hearing">⚖️ Hearing</option>
+                            <option value="deadline">⏰ Deadline</option>
+                            <option value="document">📄 Document</option>
+                            <option value="milestone">🎉 Milestone</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="quickAddEvent()" style="height: fit-content;">Add</button>
+                </div>
+            </div>
+
+            <!-- Timeline Display -->
+            <div id="timelineContainer">
+                <div class="empty-timeline" id="emptyState">
+                    <div class="empty-icon">📅</div>
+                    <div class="empty-title">Start Building Your Timeline</div>
+                    <div class="empty-desc">Drag events from the left panel or use Quick Add above</div>
+                    <button class="btn btn-primary" onclick="loadSampleTimeline()">
+                        🚀 Load Sample Timeline
+                    </button>
+                </div>
+
+                <div class="visual-timeline" id="visualTimeline" style="display: none;">
+                    <div class="timeline-line"></div>
+                    <div id="timelineEvents"></div>
+                </div>
+            </div>
+
+            <!-- Drop Zone (shown when dragging) -->
+            <div class="drop-zone" id="dropZone" style="display: none;">
+                <div class="drop-zone-icon">📥</div>
+                <div class="drop-zone-text">Drop here to add event</div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Properties & AI -->
+        <aside class="sidebar-right" id="sidebarRight">
+            <!-- AI Suggestions -->
+            <div class="ai-panel">
+                <div class="ai-panel-header">
+                    <span class="ai-icon">🤖</span>
+                    <span class="ai-title">AI Suggestions</span>
+                </div>
+                <div id="aiSuggestions">
+                    <div class="ai-suggestion" onclick="addSuggestedEvent('deadline', 'Answer Deadline', 7)">
+                        <div class="ai-suggestion-title">⏰ Add Answer Deadline</div>
+                        <div class="ai-suggestion-desc">MN law requires answer within 7 days</div>
+                    </div>
+                    <div class="ai-suggestion" onclick="addSuggestedEvent('hearing', 'Request Hearing', 14)">
+                        <div class="ai-suggestion-title">⚖️ Schedule Hearing</div>
+                        <div class="ai-suggestion-desc">Typically 7-14 days after answer</div>
+                    </div>
+                    <div class="ai-suggestion" onclick="showLawInfo()">
+                        <div class="ai-suggestion-title">📚 View MN Eviction Timeline</div>
+                        <div class="ai-suggestion-desc">Standard procedure reference</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Properties Panel -->
+            <div class="properties-panel" id="propertiesPanel">
+                <div class="sidebar-title">✏️ Edit Event</div>
+                
+                <div class="property-group">
+                    <label class="property-label">Title</label>
+                    <input type="text" id="propTitle" class="property-input" onchange="updateSelectedEvent()">
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">Date</label>
+                    <input type="date" id="propDate" class="property-input" onchange="updateSelectedEvent()">
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">Type</label>
+                    <select id="propType" class="property-input property-select" onchange="updateSelectedEvent()">
+                        <option value="notice">📬 Notice</option>
+                        <option value="filing">📜 Filing</option>
+                        <option value="hearing">⚖️ Hearing</option>
+                        <option value="deadline">⏰ Deadline</option>
+                        <option value="document">📄 Document</option>
+                        <option value="milestone">🎉 Milestone</option>
+                    </select>
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">Description</label>
+                    <textarea id="propDescription" class="property-input property-textarea" onchange="updateSelectedEvent()" placeholder="Add details..."></textarea>
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">Status</label>
+                    <select id="propStatus" class="property-input property-select" onchange="updateSelectedEvent()">
+                        <option value="completed">✅ Completed</option>
+                        <option value="pending">🔄 Pending</option>
+                        <option value="upcoming">📅 Upcoming</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="deselectEvent()" style="width: 100%; margin-top: 1rem;">
+                    Done Editing
+                </button>
+            </div>
+
+            <!-- No Selection State -->
+            <div id="noSelectionState">
+                <div class="sidebar-title">ℹ️ Properties</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Click an event on the timeline to edit its properties.
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Mobile Toggles -->
+    <button class="mobile-toggle left" onclick="toggleSidebar('left')">📋 Events</button>
+    <button class="mobile-toggle right" onclick="toggleSidebar('right')">✏️ Edit</button>
+
+    <script>
+        // Timeline Data
+        let timelineEvents = [];
+        let selectedEventId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('quickDate').valueAsDate = new Date();
+            setupDragAndDrop();
+            loadFromStorage();
+        });
+
+        // Drag and Drop
+        function setupDragAndDrop() {
+            const templates = document.querySelectorAll('.template-item');
+            const dropZone = document.getElementById('dropZone');
+            const canvas = document.querySelector('.timeline-canvas');
+
+            templates.forEach(template => {
+                template.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify({
+                        type: template.dataset.type,
+                        title: template.dataset.title,
+                        days: parseInt(template.dataset.days) || 0
+                    }));
+                    template.classList.add('dragging');
+                    dropZone.style.display = 'block';
+                });
+
+                template.addEventListener('dragend', () => {
+                    template.classList.remove('dragging');
+                    dropZone.style.display = 'none';
+                });
+            });
+
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            canvas.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                dropZone.style.display = 'none';
+
+                try {
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    const date = new Date();
+                    date.setDate(date.getDate() + data.days);
+                    
+                    addEvent({
+                        type: data.type,
+                        title: data.title,
+                        date: date.toISOString().split('T')[0],
+                        description: '',
+                        status: data.days > 0 ? 'upcoming' : 'pending'
+                    });
+                } catch (err) {
+                    console.error('Drop error:', err);
+                }
+            });
+        }
+
+        // Add Event
+        function addEvent(eventData) {
+            const event = {
+                id: Date.now().toString(),
+                ...eventData,
+                createdAt: new Date().toISOString()
+            };
+            
+            timelineEvents.push(event);
+            timelineEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            renderTimeline();
+            saveToStorage();
+            showToast('Event added!');
+        }
+
+        // Quick Add
+        function quickAddEvent() {
+            const title = document.getElementById('quickTitle').value.trim();
+            const date = document.getElementById('quickDate').value;
+            const type = document.getElementById('quickType').value;
+
+            if (!title) {
+                showToast('Please enter a title', 'error');
+                return;
+            }
+
+            addEvent({
+                type,
+                title,
+                date: date || new Date().toISOString().split('T')[0],
+                description: '',
+                status: 'pending'
+            });
+
+            document.getElementById('quickTitle').value = '';
+        }
+
+        // Add Suggested Event
+        function addSuggestedEvent(type, title, daysFromNow) {
+            const date = new Date();
+            date.setDate(date.getDate() + daysFromNow);
+            
+            addEvent({
+                type,
+                title,
+                date: date.toISOString().split('T')[0],
+                description: 'AI suggested based on MN eviction timeline',
+                status: 'upcoming'
+            });
+        }
+
+        // Render Timeline
+        function renderTimeline() {
+            const container = document.getElementById('timelineEvents');
+            const emptyState = document.getElementById('emptyState');
+            const visualTimeline = document.getElementById('visualTimeline');
+
+            if (timelineEvents.length === 0) {
+                emptyState.style.display = 'block';
+                visualTimeline.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            visualTimeline.style.display = 'block';
+
+            container.innerHTML = timelineEvents.map(event => `
+                <div class="timeline-event ${event.id === selectedEventId ? 'selected' : ''}" 
+                     data-id="${event.id}" 
+                     onclick="selectEvent('${event.id}')">
+                    <div class="event-header">
+                        <span class="event-date">${formatDate(event.date)}</span>
+                        <span class="event-type-badge badge-${event.type}">${getTypeLabel(event.type)}</span>
+                    </div>
+                    <div class="event-title">${event.title}</div>
+                    ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                    <div class="event-actions">
+                        <button class="event-action-btn" onclick="event.stopPropagation(); editEvent('${event.id}')">✏️ Edit</button>
+                        <button class="event-action-btn delete" onclick="event.stopPropagation(); deleteEvent('${event.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select Event
+        function selectEvent(id) {
+            selectedEventId = id;
+            const event = timelineEvents.find(e => e.id === id);
+            
+            if (event) {
+                document.getElementById('propTitle').value = event.title;
+                document.getElementById('propDate').value = event.date;
+                document.getElementById('propType').value = event.type;
+                document.getElementById('propDescription').value = event.description || '';
+                document.getElementById('propStatus').value = event.status || 'pending';
+                
+                document.getElementById('propertiesPanel').classList.add('active');
+                document.getElementById('noSelectionState').style.display = 'none';
+            }
+            
+            renderTimeline();
+        }
+
+        // Update Selected Event
+        function updateSelectedEvent() {
+            if (!selectedEventId) return;
+            
+            const index = timelineEvents.findIndex(e => e.id === selectedEventId);
+            if (index === -1) return;
+
+            timelineEvents[index] = {
+                ...timelineEvents[index],
+                title: document.getElementById('propTitle').value,
+                date: document.getElementById('propDate').value,
+                type: document.getElementById('propType').value,
+                description: document.getElementById('propDescription').value,
+                status: document.getElementById('propStatus').value
+            };
+
+            timelineEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            renderTimeline();
+            saveToStorage();
+        }
+
+        // Deselect Event
+        function deselectEvent() {
+            selectedEventId = null;
+            document.getElementById('propertiesPanel').classList.remove('active');
+            document.getElementById('noSelectionState').style.display = 'block';
+            renderTimeline();
+        }
+
+        // Edit Event (same as select)
+        function editEvent(id) {
+            selectEvent(id);
+        }
+
+        // Delete Event
+        function deleteEvent(id) {
+            if (!confirm('Delete this event?')) return;
+            
+            timelineEvents = timelineEvents.filter(e => e.id !== id);
+            if (selectedEventId === id) deselectEvent();
+            
+            renderTimeline();
+            saveToStorage();
+            showToast('Event deleted');
+        }
+
+        // Helpers
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown date';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown date';
+                return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            } catch (e) {
+                return 'Unknown date';
+            }
+        }
+
+        function getTypeLabel(type) {
+            const labels = {
+                notice: '📬 Notice',
+                filing: '📜 Filing',
+                hearing: '⚖️ Hearing',
+                deadline: '⏰ Deadline',
+                document: '📄 Document',
+                milestone: '🎉 Milestone'
+            };
+            return labels[type] || type;
+        }
+
+        // Storage
+        function saveToStorage() {
+            localStorage.setItem('semptify_timeline', JSON.stringify(timelineEvents));
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('semptify_timeline');
+                if (saved) {
+                    timelineEvents = JSON.parse(saved);
+                    renderTimeline();
+                }
+            } catch (err) {
+                console.error('Load error:', err);
+            }
+        }
+
+        // Sample Timeline
+        function loadSampleTimeline() {
+            const today = new Date();
+            const sample = [
+                { type: 'notice', title: 'Eviction Notice Received', date: formatDateInput(addDays(today, -14)), description: 'Received 14-day notice to vacate', status: 'completed' },
+                { type: 'filing', title: 'Summons & Complaint Served', date: formatDateInput(addDays(today, -7)), description: 'Court papers delivered', status: 'completed' },
+                { type: 'deadline', title: 'Answer Due', date: formatDateInput(today), description: '7 days from summons', status: 'pending' },
+                { type: 'filing', title: 'File Answer with Court', date: formatDateInput(addDays(today, 1)), description: 'Submit response', status: 'upcoming' },
+                { type: 'hearing', title: 'Court Hearing', date: formatDateInput(addDays(today, 14)), description: 'Hennepin County Housing Court', status: 'upcoming' }
+            ];
+
+            sample.forEach(e => addEvent(e));
+        }
+
+        function addDays(date, days) {
+            if (!date || isNaN(date.getTime())) return '';
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+
+        function formatDateInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Export
+        function exportTimeline() {
+            const data = JSON.stringify(timelineEvents, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'semptify_timeline.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Timeline exported!');
+        }
+
+        // Print
+        function printTimeline() {
+            window.print();
+        }
+
+        // Save (to server)
+        async function saveTimeline() {
+            try {
+                const res = await fetch('/api/timeline/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ events: timelineEvents })
+                });
+                
+                if (res.ok) {
+                    showToast('Timeline saved!', 'success');
+                } else {
+                    // Fall back to local storage
+                    saveToStorage();
+                    showToast('Saved locally (offline mode)');
+                }
+            } catch (err) {
+                saveToStorage();
+                showToast('Saved locally (offline mode)');
+            }
+        }
+
+        // Voice Input
+        let voiceRecognition = null;
+        
+        function startVoiceInput(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input.parentElement.querySelector('.voice-btn');
+            
+            if (voiceRecognition && btn.classList.contains('listening')) {
+                voiceRecognition.stop();
+                btn.classList.remove('listening');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Voice input not supported in this browser');
+                return;
+            }
+
+            voiceRecognition = new SpeechRecognition();
+            voiceRecognition.continuous = false;
+            voiceRecognition.interimResults = true;
+            
+            btn.classList.add('listening');
+
+            voiceRecognition.onresult = (e) => {
+                const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+                input.value = transcript;
+            };
+
+            voiceRecognition.onend = () => {
+                btn.classList.remove('listening');
+            };
+
+            voiceRecognition.onerror = () => {
+                btn.classList.remove('listening');
+            };
+
+            voiceRecognition.start();
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar(side) {
+            const sidebar = side === 'left' ? document.getElementById('sidebarLeft') : document.getElementById('sidebarRight');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Law Info
+        function showLawInfo() {
+            alert('MN Eviction Timeline (Minn. Stat. § 504B):\n\n' +
+                  '1. Notice: Landlord must give proper notice\n' +
+                  '2. Complaint Filed: Landlord files with court\n' +
+                  '3. Summons Served: You receive court papers\n' +
+                  '4. Answer: You have 7 DAYS to file answer\n' +
+                  '5. Hearing: Usually 7-14 days after answer\n' +
+                  '6. Judgment: Court decides the case\n\n' +
+                  'Tip: Filing an Answer is CRITICAL to preserve your rights!');
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 5rem;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0.75rem 1.5rem;
+                background: ${type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--bg-card)'};
+                color: white;
+                border-radius: 0.5rem;
+                font-size: 0.9rem;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') deselectEvent();
+            if (e.key === 'Delete' && selectedEventId) deleteEvent(selectedEventId);
+        });
+    </script>
+</body>
+</html>

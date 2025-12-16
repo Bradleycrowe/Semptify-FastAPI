@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dakota County Eviction Defense - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 1rem; }
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        /* Language Selector */
+        .language-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover, .lang-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Deadline Calculator */
+        .deadline-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border: 2px solid var(--warning);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+        }
+        
+        .deadline-card h3 {
+            color: #b45309;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .deadline-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .deadline-form input[type="date"] {
+            padding: 0.75rem 1rem;
+            border: 2px solid #d97706;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .deadline-result {
+            padding: 0.75rem 1rem;
+            background: #b45309;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .deadline-result.urgent {
+            background: var(--danger);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        /* Action Cards Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+        
+        .card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-actions h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .quick-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Forms Library Section */
+        .forms-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .forms-section h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-item span {
+            font-size: 0.9rem;
+        }
+        
+        .form-item a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .resource-card {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+        
+        .resource-card h4 {
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+        
+        .resource-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        
+        .resource-card a {
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+        
+        /* Loading & Status */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Translations object */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">
+                <span>⚖️</span>
+                <span data-i18n="title">Dakota County Eviction Defense</span>
+            </h1>
+            <p class="page-subtitle" data-i18n="subtitle">
+                Your complete guide to fighting eviction in Dakota County, Minnesota
+            </p>
+        </div>
+        
+        <!-- Language Selector -->
+        <div class="language-bar">
+            <button class="lang-btn active" onclick="setLanguage('en')">🇺🇸 English</button>
+            <button class="lang-btn" onclick="setLanguage('es')">🇪🇸 Español</button>
+            <button class="lang-btn" onclick="setLanguage('so')">🇸🇴 Soomaali</button>
+            <button class="lang-btn" onclick="setLanguage('ar')">🇸🇦 العربية</button>
+        </div>
+        
+        <!-- Deadline Calculator -->
+        <div class="deadline-card">
+            <h3>⏰ <span data-i18n="deadline_title">When were you served?</span></h3>
+            <p style="margin-bottom: 1rem;" data-i18n="deadline_desc">
+                Enter the date you received eviction papers to see your deadlines
+            </p>
+            <div class="deadline-form">
+                <input type="date" id="servedDate" onchange="calculateDeadline()">
+                <button class="btn btn-primary" onclick="calculateDeadline()" data-i18n="calculate">Calculate</button>
+                <div id="deadlineResult" class="deadline-result hidden"></div>
+            </div>
+        </div>
+        
+        <!-- Main Action Cards -->
+        <h2 style="margin-bottom: 1rem;" data-i18n="what_help">What do you need help with?</h2>
+        
+        <div class="action-grid">
+            <!-- File Answer -->
+            <a href="/static/eviction_answer.html" class="action-card">
+                <div class="card-icon">📝</div>
+                <div class="card-title" data-i18n="answer_title">File Your Answer</div>
+                <div class="card-desc" data-i18n="answer_desc">
+                    Respond to an eviction complaint. Tell the court your side of the story and assert your defenses.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="start">Start Now</span> →
+                </div>
+            </a>
+            
+            <!-- Counterclaim -->
+            <a href="/static/counterclaim.html" class="action-card">
+                <div class="card-icon">⚔️</div>
+                <div class="card-title" data-i18n="counterclaim_title">File a Counterclaim</div>
+                <div class="card-desc" data-i18n="counterclaim_desc">
+                    Sue your landlord back. Claim damages for repairs, deposit issues, illegal fees, or other violations.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="start">Start Now</span> →
+                </div>
+            </a>
+            
+            <!-- Motions -->
+            <a href="/static/motions.html" class="action-card">
+                <div class="card-icon">📋</div>
+                <div class="card-title" data-i18n="motions_title">File a Motion</div>
+                <div class="card-desc" data-i18n="motions_desc">
+                    Request a dismissal, continuance, stay of execution, or fee waiver from the court.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="start">Start Now</span> →
+                </div>
+            </a>
+            
+            <!-- Hearing Prep -->
+            <a href="/static/hearing_prep.html" class="action-card">
+                <div class="card-icon">🎯</div>
+                <div class="card-title" data-i18n="hearing_title">Prepare for Hearing</div>
+                <div class="card-desc" data-i18n="hearing_desc">
+                    Get ready for your court date. Checklists, documents needed, and what to expect.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="start">Start Now</span> →
+                </div>
+            </a>
+            
+            <!-- Zoom Court -->
+            <a href="/static/zoom_court.html" class="action-card">
+                <div class="card-icon">💻</div>
+                <div class="card-title" data-i18n="zoom_title">Zoom Court Helper</div>
+                <div class="card-desc" data-i18n="zoom_desc">
+                    Tips and guidance for virtual court appearances. How to look professional on camera.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="start">Start Now</span> →
+                </div>
+            </a>
+            
+            <!-- Forms Library -->
+            <a href="/static/court_forms.html" class="action-card">
+                <div class="card-icon">📚</div>
+                <div class="card-title" data-i18n="forms_title">Court Forms Library</div>
+                <div class="card-desc" data-i18n="forms_desc">
+                    Browse and download official Minnesota court forms with instructions in your language.
+                </div>
+                <div class="card-cta">
+                    <span data-i18n="browse">Browse Forms</span> →
+                </div>
+            </a>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3>⚡ Quick Actions</h3>
+            <div class="quick-buttons">
+                <button class="btn btn-primary" onclick="generateAnswerPDF()">
+                    📄 Generate Answer PDF
+                </button>
+                <button class="btn btn-outline" onclick="loadCaseData()">
+                    📂 Load My Case Data
+                </button>
+                <a href="/eviction/api/deadlines" class="btn btn-outline" target="_blank">
+                    📅 View All Deadlines
+                </a>
+                <button class="btn btn-outline" onclick="downloadPacket()">
+                    📦 Download Defense Packet
+                </button>
+            </div>
+        </div>
+        
+        <!-- Court Forms Section -->
+        <div class="forms-section">
+            <h3>📋 Essential Court Forms</h3>
+            <div class="forms-grid" id="formsGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading forms...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legal Aid Resources -->
+        <div class="forms-section">
+            <h3>🆘 Legal Aid Resources</h3>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h4>Mid-Minnesota Legal Aid</h4>
+                    <p>Free legal help for low-income tenants in Dakota County</p>
+                    <a href="tel:612-334-5970">📞 612-334-5970</a>
+                </div>
+                <div class="resource-card">
+                    <h4>Tenant Hotline</h4>
+                    <p>HOME Line - Free legal advice and advocacy</p>
+                    <a href="tel:612-728-5767">📞 612-728-5767</a>
+                </div>
+                <div class="resource-card">
+                    <h4>Self-Help Center</h4>
+                    <p>Dakota County Self-Help Center - Court forms assistance</p>
+                    <a href="tel:651-438-8100">📞 651-438-8100</a>
+                </div>
+                <div class="resource-card">
+                    <h4>Emergency Assistance</h4>
+                    <p>Dakota County Community Services</p>
+                    <a href="tel:651-554-5611">📞 651-554-5611</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        // Translations
+        const translations = {
+            en: {
+                title: "Dakota County Eviction Defense",
+                subtitle: "Your complete guide to fighting eviction in Dakota County, Minnesota",
+                deadline_title: "When were you served?",
+                deadline_desc: "Enter the date you received eviction papers to see your deadlines",
+                calculate: "Calculate",
+                what_help: "What do you need help with?",
+                answer_title: "File Your Answer",
+                answer_desc: "Respond to an eviction complaint. Tell the court your side of the story and assert your defenses.",
+                counterclaim_title: "File a Counterclaim",
+                counterclaim_desc: "Sue your landlord back. Claim damages for repairs, deposit issues, illegal fees, or other violations.",
+                motions_title: "File a Motion",
+                motions_desc: "Request a dismissal, continuance, stay of execution, or fee waiver from the court.",
+                hearing_title: "Prepare for Hearing",
+                hearing_desc: "Get ready for your court date. Checklists, documents needed, and what to expect.",
+                zoom_title: "Zoom Court Helper",
+                zoom_desc: "Tips and guidance for virtual court appearances. How to look professional on camera.",
+                forms_title: "Court Forms Library",
+                forms_desc: "Browse and download official Minnesota court forms with instructions in your language.",
+                start: "Start Now",
+                browse: "Browse Forms",
+                days_remaining: "days to respond!",
+                deadline_passed: "DEADLINE PASSED - Act immediately!",
+                due_today: "DUE TODAY!"
+            },
+            es: {
+                title: "Defensa contra Desalojo - Condado de Dakota",
+                subtitle: "Su guía completa para luchar contra el desalojo en el condado de Dakota, Minnesota",
+                deadline_title: "¿Cuándo le notificaron?",
+                deadline_desc: "Ingrese la fecha en que recibió los documentos de desalojo para ver sus plazos",
+                calculate: "Calcular",
+                what_help: "¿Con qué necesita ayuda?",
+                answer_title: "Presentar su Respuesta",
+                answer_desc: "Responda a una demanda de desalojo. Cuente su versión al tribunal y presente sus defensas.",
+                counterclaim_title: "Presentar una Contrademanda",
+                counterclaim_desc: "Demande a su arrendador. Reclame daños por reparaciones, depósito, cargos ilegales u otras violaciones.",
+                motions_title: "Presentar una Moción",
+                motions_desc: "Solicite un desestimación, continuación, suspensión de ejecución o exención de tarifas.",
+                hearing_title: "Prepararse para la Audiencia",
+                hearing_desc: "Prepárese para su cita en el tribunal. Listas de verificación, documentos necesarios y qué esperar.",
+                zoom_title: "Ayuda para Audiencia por Zoom",
+                zoom_desc: "Consejos y orientación para audiencias virtuales. Cómo verse profesional en cámara.",
+                forms_title: "Biblioteca de Formularios",
+                forms_desc: "Explore y descargue formularios oficiales del tribunal de Minnesota con instrucciones en su idioma.",
+                start: "Comenzar Ahora",
+                browse: "Ver Formularios",
+                days_remaining: "días para responder!",
+                deadline_passed: "PLAZO VENCIDO - ¡Actúe inmediatamente!",
+                due_today: "¡VENCE HOY!"
+            },
+            so: {
+                title: "Difaaca Ka-saarista - Degmada Dakota",
+                subtitle: "Hagahaaga dhamaystiran ee la dagaalanka ka-saarista ee Degmada Dakota, Minnesota",
+                deadline_title: "Goorma laguu soo gaarsiiey?",
+                deadline_desc: "Geli taariikhda aad heshay waraaqaha ka-saarista si aad u aragto waqtiyada kugu xiran",
+                calculate: "Xisaabi",
+                what_help: "Maxay tahay waxaad caawimaad u baahan tahay?",
+                answer_title: "Xaree Jawaabta",
+                answer_desc: "Ka jawaab dacwadda ka-saarista. U sheeg maxkamadda dhinacaaga oo soo bandhig difaacyadaada.",
+                counterclaim_title: "Xaree Dacwad Lid ah",
+                counterclaim_desc: "Dacwee mulkiilahaaga. Codsiga khasaaraha dayactirka, lacagta dammaanadda, kharashka sharciga darroga.",
+                motions_title: "Xaree Codsi",
+                motions_desc: "Codso joojin, dib u dhigid, hakid fulinta, ama cafinta khidmadaha maxkamadda.",
+                hearing_title: "U Diyaarsanow Dhageysiga",
+                hearing_desc: "U diyaarsan maalinta maxkamadda. Liisaska hubinta, dukumiintiyada loo baahan yahay, iyo waxa la filayo.",
+                zoom_title: "Caawiyaha Maxkamadda Zoom",
+                zoom_desc: "Talooyin iyo hagid muuqaalka maxkamadda. Sida loo u muuqdo xirfadle kamarada.",
+                forms_title: "Maktabadda Foomamka",
+                forms_desc: "Baadh oo soo deji foomamka rasmi ah ee maxkamadda Minnesota oo leh tilmaamo luqaddaada.",
+                start: "Bilow Hadda",
+                browse: "Eeg Foomamka",
+                days_remaining: "maalmood aad ku jawaabtid!",
+                deadline_passed: "WAQTIGA WAA LA DHAAFAY - Isla markiiba wax ka qabo!",
+                due_today: "MAANTA AYUU DHAMMAANAYAA!"
+            },
+            ar: {
+                title: "الدفاع عن الإخلاء - مقاطعة داكوتا",
+                subtitle: "دليلك الكامل لمحاربة الإخلاء في مقاطعة داكوتا، مينيسوتا",
+                deadline_title: "متى تم تبليغك؟",
+                deadline_desc: "أدخل تاريخ استلام أوراق الإخلاء لمعرفة مواعيدك النهائية",
+                calculate: "احسب",
+                what_help: "ما الذي تحتاج المساعدة فيه؟",
+                answer_title: "قدم ردك",
+                answer_desc: "الرد على شكوى الإخلاء. أخبر المحكمة بجانبك من القصة وقدم دفاعاتك.",
+                counterclaim_title: "قدم دعوى مضادة",
+                counterclaim_desc: "قاضِ المالك. اطلب تعويضات عن الإصلاحات أو التأمين أو الرسوم غير القانونية.",
+                motions_title: "قدم طلب",
+                motions_desc: "اطلب رفض الدعوى أو التأجيل أو وقف التنفيذ أو إعفاء من الرسوم.",
+                hearing_title: "استعد للجلسة",
+                hearing_desc: "استعد لموعدك في المحكمة. قوائم التحقق والمستندات المطلوبة وما يمكن توقعه.",
+                zoom_title: "مساعد المحكمة عبر زوم",
+                zoom_desc: "نصائح وإرشادات لجلسات المحكمة الافتراضية. كيف تبدو محترفًا أمام الكاميرا.",
+                forms_title: "مكتبة النماذج",
+                forms_desc: "تصفح وحمل نماذج محكمة مينيسوتا الرسمية مع تعليمات بلغتك.",
+                start: "ابدأ الآن",
+                browse: "تصفح النماذج",
+                days_remaining: "أيام للرد!",
+                deadline_passed: "انتهى الموعد - تصرف فوراً!",
+                due_today: "اليوم هو الموعد النهائي!"
+            }
+        };
+        
+        let currentLang = 'en';
+        
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update RTL direction for Arabic
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update all translatable elements
+            const strings = translations[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (strings[key]) {
+                    el.textContent = strings[key];
+                }
+            });
+            
+            // Save preference
+            localStorage.setItem('semptify_lang', lang);
+        }
+        
+        function calculateDeadline() {
+            const servedDate = document.getElementById('servedDate').value;
+            const resultDiv = document.getElementById('deadlineResult');
+            const strings = translations[currentLang];
+            
+            if (!servedDate) {
+                resultDiv.classList.add('hidden');
+                return;
+            }
+            
+            const served = new Date(servedDate);
+            const deadline = new Date(served);
+            deadline.setDate(deadline.getDate() + 7); // MN: 7 days to respond
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const daysLeft = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+            
+            resultDiv.classList.remove('hidden', 'urgent');
+            
+            if (daysLeft < 0) {
+                resultDiv.textContent = `⚠️ ${strings.deadline_passed}`;
+                resultDiv.classList.add('urgent');
+            } else if (daysLeft === 0) {
+                resultDiv.textContent = `⚠️ ${strings.due_today}`;
+                resultDiv.classList.add('urgent');
+            } else if (daysLeft <= 3) {
+                resultDiv.textContent = `⚠️ ${daysLeft} ${strings.days_remaining}`;
+                resultDiv.classList.add('urgent');
+            } else {
+                resultDiv.textContent = `📅 ${daysLeft} ${strings.days_remaining}`;
+            }
+        }
+        
+        async function loadCourtForms() {
+            const grid = document.getElementById('formsGrid');
+            
+            try {
+                const response = await fetch(`/eviction/forms/list?lang=${currentLang}`);
+                
+                if (!response.ok) {
+                    // Fallback to hardcoded forms
+                    showDefaultForms(grid);
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.forms && data.forms.length > 0) {
+                    grid.innerHTML = data.forms.slice(0, 6).map(form => `
+                        <div class="form-item">
+                            <span>${form.display_name || form.name}</span>
+                            <a href="${form.url}" target="_blank">📥 Download</a>
+                        </div>
+                    `).join('');
+                } else {
+                    showDefaultForms(grid);
+                }
+            } catch (e) {
+                console.error('Failed to load forms:', e);
+                showDefaultForms(grid);
+            }
+        }
+        
+        function showDefaultForms(grid) {
+            const defaultForms = [
+                { name: 'Answer to Eviction Complaint (HOU301)', url: 'https://www.mncourts.gov/GetForms.aspx?c=19&f=272' },
+                { name: 'Motion to Dismiss', url: 'https://www.mncourts.gov/GetForms.aspx?c=19' },
+                { name: 'Motion for Continuance', url: 'https://www.mncourts.gov/GetForms.aspx?c=19' },
+                { name: 'Fee Waiver Application', url: 'https://www.mncourts.gov/GetForms.aspx?c=19&f=93' },
+                { name: 'Counterclaim Form', url: 'https://www.mncourts.gov/GetForms.aspx?c=19' },
+                { name: 'Tenant Repair Remedy', url: 'https://www.mncourts.gov/GetForms.aspx?c=19' }
+            ];
+            
+            grid.innerHTML = defaultForms.map(form => `
+                <div class="form-item">
+                    <span>${form.name}</span>
+                    <a href="${form.url}" target="_blank">📥 Download</a>
+                </div>
+            `).join('');
+        }
+        
+        async function generateAnswerPDF() {
+            try {
+                // Get any saved case data
+                const caseData = JSON.parse(localStorage.getItem('semptify_case_data') || '{}');
+                
+                const response = await fetch('/eviction/forms/answer/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_name: caseData.tenant_name || prompt('Your name:'),
+                        landlord_name: caseData.landlord_name || prompt('Landlord name:'),
+                        case_number: caseData.case_number || '',
+                        property_address: caseData.address || '',
+                        defenses: [],
+                        auto_fill: true
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Answer_to_Eviction.pdf';
+                    a.click();
+                } else {
+                    // Redirect to wizard instead
+                    window.location.href = '/static/eviction_answer.html';
+                }
+            } catch (e) {
+                console.error('PDF generation failed:', e);
+                alert('Please use the Answer wizard to generate your PDF.');
+                window.location.href = '/static/eviction_answer.html';
+            }
+        }
+        
+        async function loadCaseData() {
+            try {
+                const response = await fetch('/api/form-data/');
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('semptify_case_data', JSON.stringify(data));
+                    alert('✅ Case data loaded! Your forms will be auto-filled.');
+                }
+            } catch (e) {
+                alert('No saved case data found. Fill out a form to save your info.');
+            }
+        }
+        
+        async function downloadPacket() {
+            try {
+                const response = await fetch('/eviction/complete-packet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ include_all: true })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Defense_Packet.zip';
+                    a.click();
+                } else {
+                    alert('Please complete at least one form first.');
+                }
+            } catch (e) {
+                alert('Please complete your case information first.');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restore language preference
+            const savedLang = localStorage.getItem('semptify_lang');
+            if (savedLang && translations[savedLang]) {
+                setLanguage(savedLang);
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.textContent.includes(
+                        savedLang === 'en' ? 'English' :
+                        savedLang === 'es' ? 'Español' :
+                        savedLang === 'so' ? 'Soomaali' : 'العربية'
+                    ));
+                });
+            }
+            
+            loadCourtForms();
+        });
+    </script>
+</body>
+</html>

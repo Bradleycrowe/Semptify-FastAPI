@@ -1,0 +1,267 @@
+{
+  "case_number": "19AV-CV-25-3477",
+  "case_type": "Eviction Defense - Retaliation",
+  "plaintiff": "Velair Property Management",
+  "defendant": "Bradley Crowe",
+  "property": "Lexington Flats, Eagan MN",
+  "hearing_date": "2025-12-23",
+  "generated": "2025-12-14T18:15:22.385846",
+  "timeline_by_date": {
+    "2025-11-17": [
+      {
+        "type": "MCRO",
+        "file": "doc_42b23238b7ea_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251127030721.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_baaeafd2986f_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921 - Copy - Copy.pdf"
+      },
+      {
+        "type": "LEASEMCRO",
+        "file": "doc_c0871dc320ad_LEASEMCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_2025leses1127030721.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_ef81c18af5f8_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_2025leses1127030721 - Copy.pdf"
+      }
+    ],
+    "2025-11-19": [
+      {
+        "type": "MCRO",
+        "file": "doc_6d24ea8eea43_MCRO_19AV-CV-25-3477_Eviction Summons_2025-11-19_20251127030717 - Copy - Copy - Copy - Copy - Copy - Copy - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_8df05c3766f0_MCRO_19AV-CV-25-3477_Eviction Summons_2025-11-19_20251203175914 - Copy - Copy.pdf"
+      }
+    ],
+    "2025-11-20": [
+      {
+        "type": "MCRO",
+        "file": "doc_140d3f585d3e_MCRO_19AV-CV-25-3477_Affidavit of Plaintiff_2025-11-20_20251127030712 - Copy - Copy - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_dfe18d302c11_MCRO_19AV-CV-25-3477_Affidavit of Plaintiff_2025-11-20_20251203175911 - Copy - Copy.pdf"
+      }
+    ],
+    "2025-11-25": [
+      {
+        "type": "MCRO",
+        "file": "doc_03231878dcff_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175902.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_27ddd10f663d_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175908 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_56b5182cae20_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030702 - Copy - Copy - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_6873da7ea6d7_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030704 - Copy - Copy - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_752d32593ed5_MCRO_19AV-CV-25-3477_Affidavit-Other_2025-11-25_20251127030659 - Copy - Copy - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_919c51b75578_MCRO_19AV-CV-25-3477_Affidavit-Other_2025-11-25_20251203175858 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_aaf88eaa415a_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175904.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_fb282ad87635_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030709 - Copy - Copy - Copy - Copy.pdf"
+      }
+    ],
+    "2025-12-02": [
+      {
+        "type": "MCRO",
+        "file": "doc_0bb1cbc17494_MCRO_19AV-CV-25-3477_Notice of Motion and Motion_2025-12-02_20251203175847 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_0cee52f5a464_MCRO_19AV-CV-25-3477_Notice of Motion and Motion_2025-12-02_20251203180512 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_23452ed73f11_MCRO_19AV-CV-25-3477_Answer_2025-12-02_20251203175845 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_5c4c835e5f42_MCRO_19AV-CV-25-3477_Proposed Order or Document_2025-12-02_20251203175838 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_6c04312a0faa_MCRO_19AV-CV-25-3477_Memorandum_2025-12-02_20251203175842 - Copy - Copy.pdf"
+      }
+    ],
+    "2025-12-03": [
+      {
+        "type": "MCRO",
+        "file": "doc_07b1f6f819f3_MCRO_19AV-CV-25-3477_Notice of Remote Hearing with Instructions_2025-12-03_20251203175831 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_38ab9859de01_MCRO_19AV-CV-25-3477_Notice to Remove Judicial Officer_2025-12-03_20251203175833 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_846576ccfc7e_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-12-03_20251203175827 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_a73b6314a6c5_MCRO_19AV-CV-25-3477_Amended Motion_2025-12-03_20251207202459 - Copy - Copy (2) - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_cc418b3c8419_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-12-03_20251203180601.pdf"
+      }
+    ],
+    "2025-12-04": [
+      {
+        "type": "MCRO",
+        "file": "doc_6af5ba55336f_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202140 - Copy - Copy - Copy (2).pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_a8d7317c5b7d_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202134.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_aa70e8d5f812_MCRO_19AV-CV-25-3477_Certificate of Representation_2025-12-04_20251207202023.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_bb12a3449949_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202245 - Copy - Copy (2) - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_c5551e922d5e_MCRO_19AV-CV-25-3477_Order Granting Fee Waiver_2025-12-04_20251207202255 - Copy - Copy.pdf"
+      },
+      {
+        "type": "MCRO",
+        "file": "doc_f8d44ba03b42_MCRO_19AV-CV-25-3477_Certificate of Representation_2025-12-04_20251207202038.pdf"
+      }
+    ]
+  },
+  "documents_by_category": {
+    "court_filing": [
+      "doc_03231878dcff_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175902.pdf",
+      "doc_0bb1cbc17494_MCRO_19AV-CV-25-3477_Notice of Motion and Motion_2025-12-02_20251203175847 - Copy - Copy.pdf",
+      "doc_0cee52f5a464_MCRO_19AV-CV-25-3477_Notice of Motion and Motion_2025-12-02_20251203180512 - Copy - Copy.pdf",
+      "doc_140d3f585d3e_MCRO_19AV-CV-25-3477_Affidavit of Plaintiff_2025-11-20_20251127030712 - Copy - Copy - Copy - Copy.pdf",
+      "doc_23452ed73f11_MCRO_19AV-CV-25-3477_Answer_2025-12-02_20251203175845 - Copy - Copy.pdf",
+      "doc_27ddd10f663d_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175908 - Copy - Copy.pdf",
+      "doc_42b23238b7ea_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251127030721.pdf",
+      "doc_56b5182cae20_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030702 - Copy - Copy - Copy - Copy.pdf",
+      "doc_5c4c835e5f42_MCRO_19AV-CV-25-3477_Proposed Order or Document_2025-12-02_20251203175838 - Copy - Copy.pdf",
+      "doc_6873da7ea6d7_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030704 - Copy - Copy - Copy - Copy.pdf",
+      "doc_6af5ba55336f_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202140 - Copy - Copy - Copy (2).pdf",
+      "doc_6c04312a0faa_MCRO_19AV-CV-25-3477_Memorandum_2025-12-02_20251203175842 - Copy - Copy.pdf",
+      "doc_6d24ea8eea43_MCRO_19AV-CV-25-3477_Eviction Summons_2025-11-19_20251127030717 - Copy - Copy - Copy - Copy - Copy - Copy - Copy - Copy.pdf",
+      "doc_752d32593ed5_MCRO_19AV-CV-25-3477_Affidavit-Other_2025-11-25_20251127030659 - Copy - Copy - Copy - Copy.pdf",
+      "doc_846576ccfc7e_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-12-03_20251203175827 - Copy - Copy.pdf",
+      "doc_8df05c3766f0_MCRO_19AV-CV-25-3477_Eviction Summons_2025-11-19_20251203175914 - Copy - Copy.pdf",
+      "doc_919c51b75578_MCRO_19AV-CV-25-3477_Affidavit-Other_2025-11-25_20251203175858 - Copy - Copy.pdf",
+      "doc_a73b6314a6c5_MCRO_19AV-CV-25-3477_Amended Motion_2025-12-03_20251207202459 - Copy - Copy (2) - Copy - Copy.pdf",
+      "doc_a8d7317c5b7d_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202134.pdf",
+      "doc_aa70e8d5f812_MCRO_19AV-CV-25-3477_Certificate of Representation_2025-12-04_20251207202023.pdf",
+      "doc_aaf88eaa415a_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251203175904.pdf",
+      "doc_baaeafd2986f_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921 - Copy - Copy.pdf",
+      "doc_bb12a3449949_MCRO_19AV-CV-25-3477_Notice of Filing of Order_2025-12-04_20251207202245 - Copy - Copy (2) - Copy - Copy.pdf",
+      "doc_c0871dc320ad_LEASEMCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_2025leses1127030721.pdf",
+      "doc_c5551e922d5e_MCRO_19AV-CV-25-3477_Order Granting Fee Waiver_2025-12-04_20251207202255 - Copy - Copy.pdf",
+      "doc_cc418b3c8419_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-12-03_20251203180601.pdf",
+      "doc_dfe18d302c11_MCRO_19AV-CV-25-3477_Affidavit of Plaintiff_2025-11-20_20251203175911 - Copy - Copy.pdf",
+      "doc_ef81c18af5f8_MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_2025leses1127030721 - Copy.pdf",
+      "doc_f8d44ba03b42_MCRO_19AV-CV-25-3477_Certificate of Representation_2025-12-04_20251207202038.pdf",
+      "doc_fb282ad87635_MCRO_19AV-CV-25-3477_Affidavit of Service_2025-11-25_20251127030709 - Copy - Copy - Copy - Copy.pdf"
+    ],
+    "communication": [
+      "doc_07b1f6f819f3_MCRO_19AV-CV-25-3477_Notice of Remote Hearing with Instructions_2025-12-03_20251203175831 - Copy - Copy.pdf",
+      "doc_0cfb24224c8a_stop letter to ms Burg..pdf",
+      "doc_38ab9859de01_MCRO_19AV-CV-25-3477_Notice to Remove Judicial Officer_2025-12-03_20251203175833 - Copy - Copy.pdf",
+      "doc_c83586fe73af_Notice to vacate_ocred - Copy.pdf",
+      "doc_ff3a03b2484f_e mail final notice_ocred.pdf"
+    ],
+    "support": [
+      "doc_2128f8973b61_1 home line seeking legal OCR_ocred.pdf",
+      "doc_2bb261127a24_patty homeline_ocred.pdf"
+    ],
+    "other": [
+      "doc_36723a0dd99e_Vertical-Timeline-Template-Example.jpg",
+      "doc_45961b105947_resident reminder_ocred.pdf",
+      "doc_52c5922e8a99_image000002.jpg",
+      "doc_7cfcbfac2167_IMG_1518_ocred.pdf",
+      "doc_9d90b38ad2c5_ryan broker velair_ocred.pdf",
+      "doc_bfe30dcb4943_maintenance_ocred.pdf",
+      "doc_efb6b691a373_image000001.jpg",
+      "doc_ffc334f07102_Tenant Report Formfiled _ocred.pdf"
+    ],
+    "retaliation_evidence": [
+      "doc_38681e79221e_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf - Shortcut (2).lnk",
+      "doc_5b29d592a7e6_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf",
+      "doc_625a6cc7d789_Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+      "doc_8b191a88b1f3_notice of the lease violation _ocred.pdf",
+      "doc_effaf59e9025_Gmail - Re_ [EXTERNAL] Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Rights_ocred.pdf"
+    ],
+    "lease_rental": [
+      "doc_3bd799b0b792_Lease paperwork_pages_1-5-7-9-11-13-15-17-19-21-23-25-27-29-31-33-35-37-39-40-41-43-45-46-47-49-51-53-55-57-59-61-63-64-65-67-69-71-73-75-77-79-80-81.pdf",
+      "doc_6b41fe7f63ce_Ledger  Lexington flats 2_ocred.pdf",
+      "doc_c63cdbaaae08_Lease2 paperwork.pdf",
+      "doc_ca539d9da04c_Lease 1paperwork.pdf",
+      "doc_cc4f0f3d0bea_ledger Apt  Lexington flats 1_ocred.pdf",
+      "doc_cef0db61d5f4_Lexington Flats _ Apartments in Eagan, MN _ RENTCafe_ocred.pdf",
+      "doc_d5dbaa04bdfd_Lexington Flats _ Apartments #104 RENTCafe_ocred.pdf"
+    ]
+  },
+  "total_documents": 57,
+  "key_evidence": [
+    {
+      "filename": "doc_2bb261127a24_patty homeline_ocred.pdf",
+      "document_type": "doc_2bb261127a24_patty homeline_ocred.pdf",
+      "date": null,
+      "category": "support",
+      "path": "C:\\Semptify\\Semptify-FastAPI\\data\\intake\\SUmj5gygs2ktuxr\\doc_2bb261127a24_patty homeline_ocred.pdf",
+      "significance": "\ud83d\udcde Tenant rights assistance contact"
+    },
+    {
+      "filename": "doc_38681e79221e_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf - Shortcut (2).lnk",
+      "document_type": "doc_38681e79221e_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf - Shortcut (2).lnk",
+      "date": null,
+      "category": "retaliation_evidence",
+      "path": "C:\\Semptify\\Semptify-FastAPI\\data\\intake\\SUmj5gygs2ktuxr\\doc_38681e79221e_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf - Shortcut (2).lnk",
+      "significance": "\ud83d\udd34 KEY EVIDENCE - Retaliation documentation"
+    },
+    {
+      "filename": "doc_5b29d592a7e6_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf",
+      "document_type": "doc_5b29d592a7e6_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf",
+      "date": null,
+      "category": "retaliation_evidence",
+      "path": "C:\\Semptify\\Semptify-FastAPI\\data\\intake\\SUmj5gygs2ktuxr\\doc_5b29d592a7e6_Gmail - Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Right1s - Copy_ocred.pdf",
+      "significance": "\ud83d\udd34 KEY EVIDENCE - Retaliation documentation"
+    },
+    {
+      "filename": "doc_625a6cc7d789_Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+      "document_type": "doc_625a6cc7d789_Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+      "date": null,
+      "category": "retaliation_evidence",
+      "path": "C:\\Semptify\\Semptify-FastAPI\\data\\intake\\SUmj5gygs2ktuxr\\doc_625a6cc7d789_Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+      "significance": "\ud83d\udd34 KEY EVIDENCE - Retaliation documentation"
+    },
+    {
+      "filename": "doc_effaf59e9025_Gmail - Re_ [EXTERNAL] Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Rights_ocred.pdf",
+      "document_type": "doc_effaf59e9025_Gmail - Re_ [EXTERNAL] Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Rights_ocred.pdf",
+      "date": null,
+      "category": "retaliation_evidence",
+      "path": "C:\\Semptify\\Semptify-FastAPI\\data\\intake\\SUmj5gygs2ktuxr\\doc_effaf59e9025_Gmail - Re_ [EXTERNAL] Request for Written Rationale Regarding Non-Renewal and Assertion of Anti-Retaliation Rights_ocred.pdf",
+      "significance": "\ud83d\udd34 KEY EVIDENCE - Retaliation documentation"
+    }
+  ]
+}

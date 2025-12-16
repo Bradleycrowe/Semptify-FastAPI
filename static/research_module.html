@@ -1137,6 +1137,22 @@
             }).join('');
         }
 
+        // Format date helper
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
         // Populate liens
         function populateLiens(liens, ucc) {
             const liensTable = document.getElementById('liensTable');
@@ -1147,7 +1163,7 @@
                     <tr>
                         <td>${lien.type}</td>
                         <td>$${(lien.amount || 0).toLocaleString()}</td>
-                        <td>${lien.date}</td>
+                        <td>${formatDate(lien.date)}</td>
                         <td>${lien.creditor}</td>
                     </tr>
                 `).join('');
@@ -1160,7 +1176,7 @@
                 uccTable.innerHTML = ucc.map(filing => `
                     <tr>
                         <td>${filing.filing_number}</td>
-                        <td>${filing.date}</td>
+                        <td>${formatDate(filing.date)}</td>
                         <td>${filing.secured_party}</td>
                         <td>${filing.collateral}</td>
                     </tr>
@@ -1178,10 +1194,10 @@
 
             container.innerHTML = deeds.map(deed => `
                 <div class="timeline-item">
-                    <div class="timeline-date">${deed.date}</div>
+                    <div class="timeline-date">${formatDate(deed.date)}</div>
                     <div class="timeline-content">
                         <h4>${deed.type}</h4>
-                        <p>${deed.grantor} → ${deed.grantee}</p>
+                        <p>${deed.grantor} -> ${deed.grantee}</p>
                         <p>$${(deed.amount || 0).toLocaleString()}</p>
                     </div>
                 </div>
@@ -1198,7 +1214,7 @@
 
             table.innerHTML = calls.map(call => `
                 <tr>
-                    <td>${call.date}</td>
+                    <td>${formatDate(call.date)}</td>
                     <td>${call.type}</td>
                     <td>${call.disposition}</td>
                 </tr>
@@ -1216,7 +1232,7 @@
             container.innerHTML = news.map(item => `
                 <div class="news-item">
                     <h4><a href="${item.url}" target="_blank">${item.title}</a></h4>
-                    <div class="news-meta">${item.source} • ${item.date}</div>
+                    <div class="news-meta">${item.source} - ${formatDate(item.date)}</div>
                 </div>
             `).join('');
         }

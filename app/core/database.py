@@ -1,6 +1,7 @@
 """
 Semptify Database Module
 Async SQLAlchemy with SQLite (dev) / PostgreSQL (prod) support.
+Includes connection pooling configuration for production.
 """
 
 from typing import AsyncGenerator
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool, QueuePool
 
 from app.core.config import get_settings
 
@@ -25,17 +27,41 @@ _async_session_factory = None
 
 
 def get_engine():
-    """Get or create the async engine."""
+    """
+    Get or create the async engine with proper connection pooling.
+    
+    Pool settings:
+    - PostgreSQL: QueuePool with configurable size
+    - SQLite: NullPool (SQLite doesn't support concurrent connections well)
+    """
     global _engine
     if _engine is None:
         settings = get_settings()
+        is_sqlite = "sqlite" in settings.database_url
+        
+        # Connection pool configuration
+        pool_config = {}
+        if is_sqlite:
+            # SQLite: disable pooling, use check_same_thread=False
+            pool_config = {
+                "poolclass": NullPool,
+                "connect_args": {"check_same_thread": False},
+            }
+        else:
+            # PostgreSQL: use connection pooling
+            pool_config = {
+                "poolclass": QueuePool,
+                "pool_size": 5,  # Base connections
+                "max_overflow": 10,  # Extra connections under load
+                "pool_timeout": 30,  # Seconds to wait for connection
+                "pool_recycle": 1800,  # Recycle connections after 30 min
+                "pool_pre_ping": True,  # Verify connections before use
+            }
+        
         _engine = create_async_engine(
             settings.database_url,
             echo=settings.debug,
-            # SQLite needs special handling for async
-            connect_args={"check_same_thread": False}
-            if "sqlite" in settings.database_url
-            else {},
+            **pool_config,
         )
     return _engine
 

@@ -3,7 +3,7 @@ WebSocket Router for Real-Time Events
 Pushes events to browser for live UI updates.
 """
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Optional
 import logging
 import json
@@ -14,18 +14,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def get_user_id_from_websocket(websocket: WebSocket) -> str:
+    """Get user_id from WebSocket cookies (secure approach)."""
+    user_id = websocket.cookies.get("semptify_uid", "broadcast")
+    return user_id if user_id else "broadcast"
+
+
 @router.websocket("/events")
-async def websocket_events(
-    websocket: WebSocket,
-    user_id: Optional[str] = Query(default="broadcast"),
-):
+async def websocket_events(websocket: WebSocket):
     """
     WebSocket endpoint for real-time events.
     
-    Connect: ws://localhost:8000/ws/events?user_id=xxx
+    Connect: ws://localhost:8000/ws/events
+    (User ID is automatically read from cookies)
     
     Receives all events published to the EventBus.
     """
+    # Get user_id from cookies (not query params - security!)
+    user_id = get_user_id_from_websocket(websocket)
+    
     await websocket.accept()
     logger.info(f"🔌 WebSocket connected: {user_id}")
     

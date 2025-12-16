@@ -3,7 +3,7 @@
    Real-time contextual help across all pages
    ============================================ */
 
-/* Help Toggle Button - Fixed Position */
+/* Help Toggle Button - Fixed Position (Draggable) */
 .help-toggle {
     position: fixed;
     bottom: 20px;
@@ -16,15 +16,48 @@
     border-radius: 50px;
     font-size: 15px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: grab;
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, left 0s, top 0s;
     display: flex;
     align-items: center;
     gap: 8px;
+    user-select: none;
+    touch-action: none;
 }
 
-.help-toggle:hover {
+/* Drag handle indicator */
+.help-toggle .drag-handle,
+.semptify-help-toggle .drag-handle {
+    opacity: 0.6;
+    font-size: 12px;
+    letter-spacing: -2px;
+    cursor: grab;
+    padding-right: 6px;
+    border-right: 1px solid rgba(255,255,255,0.3);
+    margin-right: 4px;
+}
+
+.help-toggle:hover .drag-handle,
+.semptify-help-toggle:hover .drag-handle {
+    opacity: 1;
+}
+
+/* Dragging state */
+.help-toggle.dragging,
+.semptify-help-toggle.dragging {
+    cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+    opacity: 0.9;
+}
+
+.help-toggle.dragging .drag-handle,
+.semptify-help-toggle.dragging .drag-handle {
+    cursor: grabbing;
+}
+
+.help-toggle:hover:not(.dragging) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }

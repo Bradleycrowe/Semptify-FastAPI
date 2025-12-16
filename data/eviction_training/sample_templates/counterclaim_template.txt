@@ -1,0 +1,69 @@
+MINNESOTA DISTRICT COURT
+{county} COUNTY                                    FIRST JUDICIAL DISTRICT
+
+{plaintiff_name},                                  Case No.: {case_number}
+                    Plaintiff,
+        vs.                                        COUNTERCLAIM
+                                                   
+{defendant_name},
+                    Defendant/Counterclaimant.
+
+COUNTERCLAIM
+
+Defendant/Counterclaimant {defendant_name} brings this Counterclaim against 
+Plaintiff/Counterdefendant and states:
+
+PARTIES AND JURISDICTION
+
+1. Counterclaimant is a tenant at {property_address}.
+
+2. Counterdefendant is the landlord of said property.
+
+3. This Court has jurisdiction over this counterclaim pursuant to 
+   Minnesota Statute § 504B.
+
+FACTS
+
+4. On or about {lease_date}, Counterclaimant entered into a lease agreement 
+   with Counterdefendant for the premises.
+
+5. Counterdefendant has breached the lease and violated Minnesota Statute 
+   § 504B.161 by failing to:
+   a. [Specific violation 1]
+   b. [Specific violation 2]
+   c. [Specific violation 3]
+
+6. Counterclaimant notified Counterdefendant of these conditions on {notice_date}.
+
+7. Counterdefendant failed to remedy the conditions within a reasonable time.
+
+DAMAGES
+
+8. As a result of Counterdefendant's breaches, Counterclaimant has suffered:
+   a. Diminished value of tenancy: $_______
+   b. Out-of-pocket expenses: $_______
+   c. Emotional distress: $_______
+   d. Other damages: $_______
+
+CLAIMS FOR RELIEF
+
+COUNT I: BREACH OF WARRANTY OF HABITABILITY
+(Minnesota Statute § 504B.161)
+
+COUNT II: BREACH OF LEASE
+
+COUNT III: VIOLATION OF TENANT REMEDIES ACT
+(Minnesota Statute § 504B.395)
+
+WHEREFORE, Counterclaimant demands judgment against Counterdefendant for:
+1. Compensatory damages in the amount of $_______;
+2. Rent abatement;
+3. Statutory penalties;
+4. Attorney's fees and costs;
+5. Injunctive relief requiring repairs;
+6. Such other relief as is just and proper.
+
+Dated: _______________
+
+_______________________
+{defendant_name}, Pro Se Counterclaimant

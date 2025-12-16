@@ -269,12 +269,143 @@
 body.has-nav .main-content,
 body.has-nav main,
 body.has-nav .content,
+body.has-nav .container,
 body.has-nav .main-container {
+    margin-left: var(--nav-width);
+    transition: margin-left var(--nav-transition);
+}
+
+body.has-nav .header,
+body.has-nav .page-header {
+    margin-left: var(--nav-width);
+    transition: margin-left var(--nav-transition);
+}
+
+/* Desktop Collapsed Mode (default) */
+.semptify-sidebar {
+    width: var(--nav-collapsed-width);
+}
+
+/* Expand on hover */
+.semptify-sidebar:hover {
+    width: var(--nav-width);
+}
+
+/* Hide text when collapsed */
+.semptify-sidebar:not(:hover) .logo-text,
+.semptify-sidebar:not(:hover) .nav-label,
+.semptify-sidebar:not(:hover) .nav-section-title,
+.semptify-sidebar:not(:hover) .nav-section-chevron,
+.semptify-sidebar:not(:hover) .sidebar-version,
+.semptify-sidebar:not(:hover) .user-info,
+.semptify-sidebar:not(:hover) .user-chevron {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.semptify-sidebar:not(:hover) .nav-section-header {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.semptify-sidebar:not(:hover) .nav-item {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+.semptify-sidebar:not(:hover) .sidebar-header {
+    justify-content: center;
+}
+
+.semptify-sidebar:not(:hover) .sidebar-logo {
+    justify-content: center;
+}
+
+.semptify-sidebar:not(:hover) .user-button {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+/* Content offset when collapsed */
+body.has-nav .main-content,
+body.has-nav main,
+body.has-nav .content,
+body.has-nav .container,
+body.has-nav .main-container,
+body.has-nav .header,
+body.has-nav .page-header {
+    margin-left: var(--nav-collapsed-width);
+}
+
+/* Toggle button to pin sidebar open */
+.sidebar-toggle {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background: var(--nav-primary);
+    border: 2px solid var(--nav-bg);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: white;
+    z-index: 1001;
+    transition: var(--nav-transition);
+    opacity: 0;
+}
+
+.semptify-sidebar:hover .sidebar-toggle {
+    opacity: 1;
+}
+
+.sidebar-toggle:hover {
+    background: var(--nav-primary-hover);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Pinned/expanded state */
+body.nav-pinned .semptify-sidebar {
+    width: var(--nav-width);
+}
+
+body.nav-pinned .semptify-sidebar .logo-text,
+body.nav-pinned .semptify-sidebar .nav-label,
+body.nav-pinned .semptify-sidebar .nav-section-title,
+body.nav-pinned .semptify-sidebar .nav-section-chevron,
+body.nav-pinned .semptify-sidebar .sidebar-version,
+body.nav-pinned .semptify-sidebar .user-info,
+body.nav-pinned .semptify-sidebar .user-chevron {
+    opacity: 1;
+    width: auto;
+}
+
+body.nav-pinned .semptify-sidebar .nav-section-header,
+body.nav-pinned .semptify-sidebar .nav-item,
+body.nav-pinned .semptify-sidebar .sidebar-header,
+body.nav-pinned .semptify-sidebar .sidebar-logo,
+body.nav-pinned .semptify-sidebar .user-button {
+    justify-content: flex-start;
+}
+
+body.nav-pinned .main-content,
+body.nav-pinned main,
+body.nav-pinned .content,
+body.nav-pinned .container,
+body.nav-pinned .main-container,
+body.nav-pinned .header,
+body.nav-pinned .page-header {
     margin-left: var(--nav-width);
 }
 
-body.has-nav .header {
-    margin-left: var(--nav-width);
+body.nav-pinned .sidebar-toggle {
+    opacity: 1;
 }
 
 /* Mobile Styles */
@@ -309,53 +440,23 @@ body.has-nav .header {
     body.has-nav .main-content,
     body.has-nav main,
     body.has-nav .content,
+    body.has-nav .container,
     body.has-nav .main-container,
-    body.has-nav .header {
+    body.has-nav .header,
+    body.has-nav .page-header {
         margin-left: 0;
     }
 
     /* Add padding for hamburger button */
-    body.has-nav .header {
+    body.has-nav .header,
+    body.has-nav .page-header {
         padding-left: 60px;
     }
 }
 
-/* Tablet - Collapsed sidebar */
+/* Tablet - uses same collapsed sidebar behavior as desktop */
 @media (min-width: 769px) and (max-width: 1024px) {
-    .semptify-sidebar {
-        width: var(--nav-collapsed-width);
-    }
-
-    .semptify-sidebar:hover {
-        width: var(--nav-width);
-    }
-
-    .semptify-sidebar:not(:hover) .logo-text,
-    .semptify-sidebar:not(:hover) .nav-label,
-    .semptify-sidebar:not(:hover) .nav-section-title,
-    .semptify-sidebar:not(:hover) .nav-section-chevron,
-    .semptify-sidebar:not(:hover) .sidebar-version {
-        opacity: 0;
-        width: 0;
-        overflow: hidden;
-    }
-
-    .semptify-sidebar:not(:hover) .nav-section-header {
-        justify-content: center;
-    }
-
-    .semptify-sidebar:not(:hover) .nav-item {
-        justify-content: center;
-        padding: 0.75rem;
-    }
-
-    body.has-nav .main-content,
-    body.has-nav main,
-    body.has-nav .content,
-    body.has-nav .main-container,
-    body.has-nav .header {
-        margin-left: var(--nav-collapsed-width);
-    }
+    /* Desktop collapsed styles already apply */
 }
 
 /* Dark theme support (already dark by default) */
@@ -437,7 +538,7 @@ body.has-nav .header {
 }
 
 .user-storage.connected {
-    color: #4ade80;
+    color: #60a5fa;
 }
 
 .user-storage.session {
@@ -620,8 +721,8 @@ body.has-nav .header {
 }
 
 .storage-dot.connected {
-    background: #4ade80;
-    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+    background: #60a5fa;
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
 }
 
 .storage-dot.disconnected {
@@ -705,7 +806,7 @@ body.has-nav .header {
 }
 
 .status-active {
-    color: #4ade80;
+    color: #60a5fa;
 }
 
 /* User Panel Footer */

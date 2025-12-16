@@ -61,11 +61,19 @@ class OneDriveProvider(StorageProvider):
         filename: str,
         mime_type: Optional[str] = None,
     ) -> StorageFile:
-        """Upload file to OneDrive."""
+        """Upload file to OneDrive AppFolder (Semptify app-specific folder)."""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # For small files (< 4MB), use simple upload
         if len(file_content) < 4 * 1024 * 1024:
+            # Using AppFolder scope - files go to /Apps/Semptify/ folder
+            # This uses the special/approot endpoint instead of root
             path = f"{destination_path}/{filename}".strip("/")
-            url = f"{self.GRAPH_URL}/me/drive/root:/{path}:/content"
+            # AppFolder endpoint: /me/drive/special/approot:/path:/content
+            url = f"{self.GRAPH_URL}/me/drive/special/approot:/{path}:/content"
+            
+            logger.info(f"Uploading to OneDrive AppFolder: {path}")
             
             async with httpx.AsyncClient() as client:
                 response = await client.put(
@@ -77,6 +85,8 @@ class OneDriveProvider(StorageProvider):
                     content=file_content,
                     timeout=60.0,
                 )
+                
+                logger.info(f"OneDrive upload response: {response.status_code}")
                 
                 if response.status_code in (200, 201):
                     data = response.json()
@@ -90,13 +100,17 @@ class OneDriveProvider(StorageProvider):
                             data.get("lastModifiedDateTime", "").replace("Z", "+00:00")
                         ) if data.get("lastModifiedDateTime") else datetime.now(timezone.utc),
                     )
+                else:
+                    logger.error(f"OneDrive upload failed: {response.status_code} - {response.text}")
+                    raise Exception(f"OneDrive upload failed: {response.status_code} - {response.text[:200]}")
 
-        raise Exception("Upload failed or file too large for simple upload")
+        raise Exception("File too large for simple upload (>4MB)")
 
     async def download_file(self, file_path: str) -> bytes:
-        """Download file from OneDrive."""
+        """Download file from OneDrive AppFolder."""
         path = file_path.strip("/")
-        url = f"{self.GRAPH_URL}/me/drive/root:/{path}:/content"
+        # Use AppFolder endpoint
+        url = f"{self.GRAPH_URL}/me/drive/special/approot:/{path}:/content"
         
         async with httpx.AsyncClient() as client:
             response = await client.get(
@@ -112,9 +126,10 @@ class OneDriveProvider(StorageProvider):
         raise Exception(f"Download failed: {file_path}")
     
     async def delete_file(self, file_path: str) -> bool:
-        """Delete file from OneDrive."""
+        """Delete file from OneDrive AppFolder."""
         path = file_path.strip("/")
-        url = f"{self.GRAPH_URL}/me/drive/root:/{path}"
+        # Use AppFolder endpoint
+        url = f"{self.GRAPH_URL}/me/drive/special/approot:/{path}"
         
         async with httpx.AsyncClient() as client:
             response = await client.delete(
@@ -130,14 +145,15 @@ class OneDriveProvider(StorageProvider):
         folder_path: str = "/",
         recursive: bool = False,
     ) -> list[StorageFile]:
-        """List files in a OneDrive folder."""
+        """List files in OneDrive AppFolder."""
         files = []
         
+        # Use AppFolder endpoint (special/approot)
         if folder_path in ("/", ""):
-            url = f"{self.GRAPH_URL}/me/drive/root/children"
+            url = f"{self.GRAPH_URL}/me/drive/special/approot/children"
         else:
             path = folder_path.strip("/")
-            url = f"{self.GRAPH_URL}/me/drive/root:/{path}:/children"
+            url = f"{self.GRAPH_URL}/me/drive/special/approot:/{path}:/children"
         
         async with httpx.AsyncClient() as client:
             response = await client.get(
@@ -197,9 +213,10 @@ class OneDriveProvider(StorageProvider):
         return files
 
     async def file_exists(self, file_path: str) -> bool:
-        """Check if file exists in OneDrive."""
+        """Check if file exists in OneDrive AppFolder."""
         path = file_path.strip("/")
-        url = f"{self.GRAPH_URL}/me/drive/root:/{path}"
+        # Use AppFolder endpoint
+        url = f"{self.GRAPH_URL}/me/drive/special/approot:/{path}"
         
         try:
             async with httpx.AsyncClient() as client:
@@ -213,7 +230,7 @@ class OneDriveProvider(StorageProvider):
             return False
     
     async def create_folder(self, folder_path: str) -> bool:
-        """Create folder in OneDrive."""
+        """Create folder in OneDrive AppFolder."""
         # Check if already exists
         if await self.file_exists(folder_path):
             return True
@@ -223,12 +240,13 @@ class OneDriveProvider(StorageProvider):
         folder_name = parts[-1]
         parent_path = "/".join(parts[:-1])
         
+        # Use AppFolder endpoint
         if parent_path:
             # Ensure parent exists
             await self.create_folder(parent_path)
-            url = f"{self.GRAPH_URL}/me/drive/root:/{parent_path}:/children"
+            url = f"{self.GRAPH_URL}/me/drive/special/approot:/{parent_path}:/children"
         else:
-            url = f"{self.GRAPH_URL}/me/drive/root/children"
+            url = f"{self.GRAPH_URL}/me/drive/special/approot/children"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(

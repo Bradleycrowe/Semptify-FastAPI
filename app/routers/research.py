@@ -63,7 +63,6 @@ async def research_health_check():
 @router.post("/property/{property_id}")
 async def research_property(
     property_id: str,
-    user_id: str = Query("anonymous", description="User ID for tracking"),
     user: StorageUser = Depends(require_user),
 ):
     """
@@ -85,7 +84,7 @@ async def research_property(
     
     try:
         result = await service.collect_landlord_data(
-            user_id=user_id,
+            user_id=user.user_id,
             property_id=property_id,
         )
         return result

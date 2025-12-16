@@ -165,8 +165,8 @@ async def get_storage_client(user: StorageUser, db: AsyncSession, settings: Sett
         from app.services.storage.dropbox import DropboxProvider
         return DropboxProvider(access_token)
     elif provider == "onedrive":
-        from app.services.storage.onedrive import OneDriveClient
-        return OneDriveClient(access_token)
+        from app.services.storage.onedrive import OneDriveProvider
+        return OneDriveProvider(access_token)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -603,6 +603,77 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-secondary);
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-body h3 {
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-body code {
+            background: var(--bg-dark);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .page-header {
+            position: relative;
+        }
     </style>
     <link rel="stylesheet" href="/static/css/help-system.css">
 </head>
@@ -625,6 +696,98 @@
         <div class="page-header">
             <h1 class="page-title">⚖️ Legal Analysis Engine</h1>
             <p class="page-subtitle">Analyze evidence, check consistency, evaluate legal merit</p>
+            <button class="btn btn-secondary" onclick="showHelp()" style="position: absolute; right: 2rem; top: 1rem;">
+                ❓ Help Guide
+            </button>
+        </div>
+
+        <!-- Help Modal -->
+        <div id="helpModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <h2>📖 Legal Analysis - Quick Start Guide</h2>
+                    <button class="close-btn" onclick="closeHelp()">✕</button>
+                </div>
+                <div class="modal-body" style="text-align: left; line-height: 1.8;">
+                    
+                    <h3 style="color: var(--primary); margin-top: 1rem;">🚀 Getting Started</h3>
+                    <ol style="margin-left: 1.5rem;">
+                        <li><strong>Create a Tenancy Case first</strong> → Go to <a href="/my_tenancy.html" style="color: var(--info);">/my_tenancy.html</a></li>
+                        <li><strong>Add your information</strong> → Tenant, Landlord, Property, Lease Terms</li>
+                        <li><strong>Upload documents</strong> → Lease, notices, communications, receipts</li>
+                        <li><strong>Come back here</strong> → Select your case from the dropdown</li>
+                        <li><strong>Run analysis</strong> → Click "Quick Health Check" or "Full Merit Assessment"</li>
+                    </ol>
+
+                    <h3 style="color: var(--primary); margin-top: 1.5rem;">📁 Where Does Case Data Come From?</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <tr style="background: var(--bg-card);">
+                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Data</th>
+                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Source</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);">Cases List</td>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);"><code>/api/tenancy/cases</code> - from My Tenancy page</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);">Documents</td>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);"><code>/api/documents</code> - uploaded via Documents page</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);">Timeline Events</td>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);"><code>/api/timeline</code> - from Timeline page</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);">Issues</td>
+                            <td style="padding: 0.75rem; border: 1px solid var(--border);">Added in My Tenancy → Issues section</td>
+                        </tr>
+                    </table>
+
+                    <h3 style="color: var(--primary); margin-top: 1.5rem;">🔍 Understanding Health Checks</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success);">
+                            <strong>📄 Evidence</strong><br>
+                            Do you have enough documents to support your case?
+                        </div>
+                        <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--info);">
+                            <strong>🔗 Consistency</strong><br>
+                            Is your story consistent across all documents?
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--warning);">
+                            <strong>📅 Timeline</strong><br>
+                            Are all dates accounted for? Any conflicts?
+                        </div>
+                        <div style="background: rgba(124, 58, 237, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--primary);">
+                            <strong>📋 Documentation</strong><br>
+                            Is your case documentation complete?
+                        </div>
+                    </div>
+
+                    <h3 style="color: var(--primary); margin-top: 1.5rem;">⚠️ No Cases Showing?</h3>
+                    <p>If the dropdown is empty, you need to create a case first:</p>
+                    <ol style="margin-left: 1.5rem;">
+                        <li>Go to <a href="/my_tenancy.html" style="color: var(--info);">My Tenancy</a></li>
+                        <li>Click <strong>"+ New Case"</strong></li>
+                        <li>Enter a case name (e.g., "My Apartment 2024")</li>
+                        <li>Fill in as much information as you can</li>
+                        <li>Return here and click <strong>"🔄 Refresh Cases"</strong></li>
+                    </ol>
+
+                    <h3 style="color: var(--primary); margin-top: 1.5rem;">📚 Full Documentation</h3>
+                    <p>For detailed instructions, see the <a href="/docs/USER_GUIDE.md" target="_blank" style="color: var(--info);">Complete User Guide</a></p>
+                    
+                    <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+                        <strong>🔗 Quick Links:</strong>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <a href="/my_tenancy.html" style="color: var(--info);">📋 My Tenancy</a>
+                            <a href="/documents.html" style="color: var(--info);">📄 Documents</a>
+                            <a href="/timeline.html" style="color: var(--info);">📅 Timeline</a>
+                            <a href="/eviction-defense" style="color: var(--info);">🛡️ Eviction Defense</a>
+                            <a href="/api/docs" target="_blank" style="color: var(--info);">📖 API Docs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Case Selector -->
@@ -858,7 +1021,7 @@
             <p style="margin-top: 0.5rem;">
                 <a href="/api/legal-analysis/mn-eviction-requirements" target="_blank" style="color: var(--text-secondary);">📖 MN Eviction Requirements</a> · 
                 <a href="/api/legal-analysis/evidence-types" target="_blank" style="color: var(--text-secondary);">📋 Evidence Types</a> · 
-                <a href="/docs" target="_blank" style="color: var(--text-secondary);">📚 API Docs</a>
+                <a href="/api/docs" target="_blank" style="color: var(--text-secondary);">📚 API Docs</a>
             </p>
         </div>
     </main>
@@ -867,6 +1030,20 @@
         const API_BASE = '/api';
         let currentCaseId = null;
         let brainWs = null;
+
+        // Help Modal Functions
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        document.getElementById('helpModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'helpModal') closeHelp();
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1311,9 +1488,67 @@
             handleFiles(e.target.files);
         });
 
-        function handleFiles(files) {
-            // For now just show a message - could integrate with document upload
-            alert(`Selected ${files.length} file(s). Integration with document upload coming soon!`);
+        async function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'upload-status';
+            statusDiv.innerHTML = `<div class="spinner"></div> Uploading ${files.length} file(s)...`;
+            uploadZone.appendChild(statusDiv);
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const file of files) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const response = await fetch('/api/vault/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        successCount++;
+                        
+                        // Auto-analyze the uploaded document
+                        if (result.document_id) {
+                            try {
+                                await fetch(`/api/documents/${result.document_id}/analyze`, {
+                                    method: 'POST'
+                                });
+                            } catch (e) {
+                                console.log('Auto-analysis skipped:', e);
+                            }
+                        }
+                    } else {
+                        errorCount++;
+                    }
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    errorCount++;
+                }
+            }
+            
+            // Update status
+            statusDiv.innerHTML = '';
+            if (successCount > 0) {
+                statusDiv.innerHTML = `<span style="color: #22c55e;">✓ ${successCount} file(s) uploaded successfully!</span>`;
+                // Refresh documents list if exists
+                if (typeof loadDocuments === 'function') {
+                    loadDocuments();
+                }
+            }
+            if (errorCount > 0) {
+                statusDiv.innerHTML += `<span style="color: #ef4444;"> ✗ ${errorCount} file(s) failed</span>`;
+            }
+            
+            // Remove status after 5 seconds
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
         }
     </script>
     <script src="/static/js/help-system.js"></script>

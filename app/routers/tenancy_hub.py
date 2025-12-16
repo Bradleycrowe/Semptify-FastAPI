@@ -5,11 +5,12 @@ Provides unified access to all tenancy documentation, with search,
 cross-referencing, and context-aware information retrieval.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 
+from app.core.security import get_user_id
 from ..services.tenancy_hub import (
     get_tenancy_hub_service,
     TenancyCase,
@@ -159,7 +160,7 @@ class SearchRequest(BaseModel):
 @router.post("/cases")
 async def create_case(
     request: CreateCaseRequest,
-    user_id: str = Query(default="default_user")
+    user_id: str = Depends(get_user_id)
 ):
     """Create a new tenancy case."""
     service = get_tenancy_hub_service()
@@ -172,7 +173,7 @@ async def create_case(
 
 
 @router.get("/cases")
-async def list_cases(user_id: str = Query(default="default_user")):
+async def list_cases(user_id: str = Depends(get_user_id)):
     """List all tenancy cases for a user."""
     service = get_tenancy_hub_service()
     cases = service.get_user_cases(user_id)

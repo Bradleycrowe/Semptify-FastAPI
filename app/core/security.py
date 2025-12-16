@@ -570,6 +570,139 @@ def get_token_from_request(request: Request) -> Optional[str]:
     return None
 
 
+# =============================================================================
+# Input Sanitization
+# =============================================================================
+
+import html
+import re as _re
+
+# Dangerous patterns for path traversal and injection
+_PATH_TRAVERSAL_PATTERN = _re.compile(r'\.\.[\\/]|[\\/]\.\.|\.\./|/\.\.')
+_SCRIPT_TAG_PATTERN = _re.compile(r'<\s*script', _re.IGNORECASE)
+_SQL_INJECTION_PATTERNS = [
+    _re.compile(r";\s*(DROP|DELETE|INSERT|UPDATE|ALTER|CREATE)\s", _re.IGNORECASE),
+    _re.compile(r"'\s*OR\s+'?1'?\s*=\s*'?1'?", _re.IGNORECASE),
+    _re.compile(r"UNION\s+SELECT", _re.IGNORECASE),
+]
+
+
+def sanitize_html(text: str) -> str:
+    """
+    Sanitize text for safe HTML display.
+    Escapes HTML special characters to prevent XSS.
+    """
+    if not text:
+        return ""
+    return html.escape(str(text))
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Sanitize a filename to prevent path traversal attacks.
+    Removes path separators and dangerous characters.
+    """
+    if not filename:
+        return ""
+    
+    # Remove path components
+    filename = str(filename)
+    filename = filename.replace("\\", "/")
+    filename = filename.split("/")[-1]  # Take only the filename part
+    
+    # Remove null bytes and control characters
+    filename = _re.sub(r'[\x00-\x1f\x7f]', '', filename)
+    
+    # Remove dangerous characters
+    filename = _re.sub(r'[<>:"|?*]', '', filename)
+    
+    # Limit length
+    if len(filename) > 255:
+        filename = filename[:255]
+    
+    return filename
+
+
+def check_path_traversal(path: str) -> bool:
+    """
+    Check if a path contains path traversal attempts.
+    Returns True if path is SAFE, False if suspicious.
+    """
+    if not path:
+        return True
+    return not _PATH_TRAVERSAL_PATTERN.search(str(path))
+
+
+def sanitize_user_input(text: str, max_length: int = 10000) -> str:
+    """
+    General purpose input sanitization.
+    - Escapes HTML
+    - Truncates to max length
+    - Removes null bytes
+    """
+    if not text:
+        return ""
+    
+    text = str(text)
+    
+    # Remove null bytes
+    text = text.replace("\x00", "")
+    
+    # Truncate
+    if len(text) > max_length:
+        text = text[:max_length]
+    
+    # Escape HTML
+    text = html.escape(text)
+    
+    return text
+
+
+def check_sql_injection(text: str) -> bool:
+    """
+    Check for common SQL injection patterns.
+    Returns True if text is SAFE, False if suspicious.
+    
+    Note: This is a basic check - always use parameterized queries!
+    """
+    if not text:
+        return True
+    
+    text = str(text)
+    for pattern in _SQL_INJECTION_PATTERNS:
+        if pattern.search(text):
+            logger.warning("Potential SQL injection detected: %s...", text[:50])
+            return False
+    
+    return True
+
+
+def check_xss(text: str) -> bool:
+    """
+    Check for XSS attempts.
+    Returns True if text is SAFE, False if suspicious.
+    """
+    if not text:
+        return True
+    
+    text = str(text)
+    if _SCRIPT_TAG_PATTERN.search(text):
+        logger.warning("Potential XSS detected: %s...", text[:50])
+        return False
+    
+    # Check for javascript: URLs
+    if _re.search(r'javascript\s*:', text, _re.IGNORECASE):
+        logger.warning("Potential XSS (javascript:) detected: %s...", text[:50])
+        return False
+    
+    # Check for event handlers
+    if _re.search(r'on\w+\s*=', text, _re.IGNORECASE):
+        logger.warning("Potential XSS (event handler) detected: %s...", text[:50])
+        return False
+    
+    return True
+
+
 def get_admin_token_from_request(request: Request) -> Optional[str]:
     """
     Extract admin token from request.
@@ -641,17 +774,86 @@ async def get_current_user(
             return session.to_context()
 
     # Check for welcome sequence user ID cookie
-    if semptify_uid and len(semptify_uid) >= 6:
-        # User created via welcome sequence - create a context from the UID
-        return UserContext(
-            user_id=semptify_uid,
-            provider=StorageProvider.GOOGLE_DRIVE,  # Default, will change when they connect
-            storage_user_id=semptify_uid,
-            access_token="welcome-user-token",
-            role=UserRole.USER,
-        )
-
+    # SECURITY: Only accept UIDs that look like valid connected users
+    # Valid format: <provider><role><8-char-random> (minimum 10 chars)
+    # Do NOT create fallback contexts - user must complete OAuth
+    if semptify_uid and len(semptify_uid) >= 10:
+        provider_code = semptify_uid[0].upper()
+        role_code = semptify_uid[1].upper()
+        
+        # Map provider code to StorageProvider
+        provider_map = {
+            'G': StorageProvider.GOOGLE_DRIVE,
+            'D': StorageProvider.DROPBOX,
+            'O': StorageProvider.ONEDRIVE,
+        }
+        role_map = {
+            'A': UserRole.ADMIN,
+            'M': UserRole.MANAGER,
+            'U': UserRole.USER,
+            'V': UserRole.ADVOCATE,
+            'L': UserRole.LEGAL,
+        }
+        
+        provider = provider_map.get(provider_code)
+        role = role_map.get(role_code)
+        
+        # Only create context if we have valid provider and role codes
+        if provider and role:
+            return UserContext(
+                user_id=semptify_uid,
+                provider=provider,
+                storage_user_id=semptify_uid,
+                access_token="cookie-token",  # Will be refreshed from storage
+                role=role,
+            )
+    
+    # No valid cookie - user needs to connect storage
     return None
+
+
+def is_valid_user_storage(user_id: str) -> bool:
+    """
+    Check if user ID represents a valid user with connected storage.
+    
+    SECURITY: System users and demo users are NOT valid for production use.
+    Users MUST connect their own cloud storage.
+    
+    Valid user ID format: <provider><role><8-char-random>
+    Example: GU7x9kM2pQ = Google Drive + User + 7x9kM2pQ
+    
+    Invalid patterns:
+    - "open-mode-user" - demo/testing only
+    - "system-*" - system processes only  
+    - "su*" or "SU*" - system user prefix
+    - "test*" - testing only
+    - IDs shorter than 10 characters
+    """
+    if not user_id:
+        return False
+    
+    # Block system/demo user patterns
+    invalid_prefixes = ["open-mode", "system", "su", "test", "demo", "admin-", "guest"]
+    user_lower = user_id.lower()
+    for prefix in invalid_prefixes:
+        if user_lower.startswith(prefix):
+            return False
+    
+    # Valid user IDs are at least 10 chars (1 provider + 1 role + 8 random)
+    if len(user_id) < 10:
+        return False
+    
+    # Check provider code is valid (G, D, O)
+    provider_code = user_id[0].upper()
+    if provider_code not in ['G', 'D', 'O']:
+        return False
+    
+    # Check role code is valid (A, M, U, V, L)
+    role_code = user_id[1].upper()
+    if role_code not in ['A', 'M', 'U', 'V', 'L']:
+        return False
+    
+    return True
 
 
 async def require_user(
@@ -659,14 +861,16 @@ async def require_user(
     settings: Settings = Depends(get_settings),
 ) -> UserContext:
     """
-    Require authenticated user.
+    Require authenticated user WITH connected storage.
     Returns UserContext with role, provider, and permissions.
     
-    In open mode, ALWAYS use open-mode-user for data consistency (demo mode).
-    This ensures all pre-populated timeline/case data is accessible.
+    SECURITY POLICY:
+    - Every user MUST have their own cloud storage connected
+    - System users and demo users are NEVER allowed in production
+    - Open mode only allowed in development (debug=true)
     """
-    # In open mode, always use the demo user for data consistency
-    if settings.security_mode == "open":
+    # SECURITY: Only allow open mode in actual development environment
+    if settings.security_mode == "open" and settings.debug:
         return UserContext(
             user_id="open-mode-user",
             provider=StorageProvider.GOOGLE_DRIVE,
@@ -675,13 +879,29 @@ async def require_user(
             role=UserRole.USER,
         )
 
-    # If we have a user from cookie/session, use it
+    # If we have a user from cookie/session, validate it
     if user:
+        # SECURITY: Verify this is a real user with storage, not a system user
+        if not is_valid_user_storage(user.user_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "storage_required",
+                    "message": "You must connect your own cloud storage to use Semptify. System accounts are not allowed.",
+                    "action": "redirect",
+                    "redirect_url": "/storage/providers"
+                },
+            )
         return user
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication required. Connect your cloud storage at /storage/providers",
+        detail={
+            "error": "auth_required",
+            "message": "Authentication required. Connect your cloud storage to continue.",
+            "action": "redirect",
+            "redirect_url": "/storage/providers"
+        },
         headers={"WWW-Authenticate": "Bearer"},
     )
 def require_role(*roles: UserRole):
@@ -742,12 +962,64 @@ async def require_admin(
     settings: Settings = Depends(get_settings),
 ) -> dict:
     """Require admin authentication (separate from user auth)."""
-    if settings.security_mode == "open":
+    # SECURITY: Open mode only in debug
+    if settings.security_mode == "open" and settings.debug:
         return {"id": "open-mode-admin", "mode": "open"}
 
     # Rate limiting for admin routes
     limiter = get_rate_limiter()
     client_ip = request.client.host if request.client else "unknown"
+
+
+async def get_user_id(
+    user: Optional[UserContext] = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> str:
+    """
+    Get user_id from authenticated session.
+    
+    This is the SECURE way to get user_id - it comes from the session,
+    not from query parameters that can be spoofed.
+    
+    SECURITY: Open mode only allowed in debug environment.
+    """
+    if settings.security_mode == "open" and settings.debug:
+        return "open-mode-user"
+    
+    if user:
+        return user.user_id
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "error": "storage_required",
+            "message": "Please connect your cloud storage to continue",
+            "action": "redirect",
+            "redirect_url": "/storage/providers"
+        },
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+async def get_optional_user_id(
+    user: Optional[UserContext] = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> Optional[str]:
+    """
+    Get user_id from session if available, otherwise None.
+    
+    This is for endpoints where auth is optional but we still want
+    to avoid user_id query parameter spoofing.
+    
+    SECURITY: Open mode only allowed in debug environment.
+    """
+    if settings.security_mode == "open" and settings.debug:
+        return "open-mode-user"
+    
+    if user:
+        return user.user_id
+    
+    return None
     key = f"admin:{client_ip}:{request.url.path}"
     
     allowed, retry_after = limiter.check(
@@ -864,7 +1136,8 @@ async def require_anonymous_user(
     Used for vault access with 12-digit tokens.
     Returns user_id if valid.
     """
-    if settings.security_mode == "open":
+    # SECURITY: Open mode only in debug
+    if settings.security_mode == "open" and settings.debug:
         return "open-mode-user"
     
     # Extract token from request
@@ -952,6 +1225,15 @@ __all__ = [
     "require_anonymous_user",
     "optional_anonymous_user",
     "rate_limit_dependency",
+    "get_user_id",
+    "get_optional_user_id",
+    # Input Sanitization
+    "sanitize_html",
+    "sanitize_filename",
+    "sanitize_user_input",
+    "check_path_traversal",
+    "check_sql_injection",
+    "check_xss",
     # CSRF
     "generate_csrf_token",
     "validate_csrf",

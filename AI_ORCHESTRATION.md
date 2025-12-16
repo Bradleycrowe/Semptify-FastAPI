@@ -46,6 +46,8 @@ Each AI reads this file FIRST before doing any work.
 - [x] Buttons with icons now have title/aria-label attributes
 - [x] Form inputs have proper labels for screen readers
 - [x] Modal close buttons accessible
+- [x] Safari browser compatibility fixes (webkit prefixes) (Agent 1)
+- [x] PWA enhancement - manifest + service worker on all v2 pages (Agent 1)
 
 ---
 
@@ -53,8 +55,8 @@ Each AI reads this file FIRST before doing any work.
 
 ### High Priority
 - [x] **TASK-001**: Add voice input for accessibility ✅ Agent 1 DONE
-- [ ] **TASK-002**: Mobile responsive fixes
-- [ ] **TASK-003**: Offline mode / PWA enhancements
+- [x] **TASK-002**: Mobile responsive fixes ✅ Already implemented
+- [x] **TASK-003**: Offline mode / PWA enhancements ✅ Agent 1 DONE
 
 ### Medium Priority
 - [ ] **TASK-004**: Export timeline to PDF

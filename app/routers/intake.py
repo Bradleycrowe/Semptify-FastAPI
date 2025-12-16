@@ -9,10 +9,11 @@ Provides endpoints for:
 - Batch processing
 """
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Query
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from pydantic import BaseModel, Field
 from typing import Optional
 
+from app.core.security import get_user_id
 from app.services.document_intake import (
     get_intake_engine,
     DocumentType,
@@ -20,6 +21,14 @@ from app.services.document_intake import (
     IssueSeverity,
     LanguageCode,
 )
+from app.core.event_bus import event_bus, EventType as BusEventType
+
+# Import flow orchestrator for complete pipeline
+try:
+    from app.services.document_flow_orchestrator import DocumentFlowOrchestrator
+    FLOW_AVAILABLE = True
+except ImportError:
+    FLOW_AVAILABLE = False
 
 
 router = APIRouter(prefix="/api/intake", tags=["Document Intake"])
@@ -174,6 +183,119 @@ async def upload_document(
     )
 
 
+class AutoProcessResponse(BaseModel):
+    """Response for auto-processed upload."""
+    id: str
+    filename: str
+    status: str
+    doc_type: str
+    message: str
+    extracted_data: dict = {}
+    timeline_events: int = 0
+    issues_found: int = 0
+
+
+@router.post("/upload/auto", response_model=AutoProcessResponse)
+async def upload_and_process(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_user_id),
+):
+    """
+    Upload and automatically process a document (complete pipeline).
+    
+    This is the recommended endpoint for the full document flow:
+    1. Upload & validate
+    2. OCR/text extraction (auto-detects if image/scan)
+    3. Document type classification (summons, lease, notice, etc.)
+    4. Data extraction (dates, amounts, parties)
+    5. Timeline event creation
+    6. FormData hub update
+    7. Issue detection
+    8. UI refresh via WebSocket
+    
+    Returns complete processing result in one call.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    engine = get_intake_engine()
+    
+    # Read file content
+    content = await file.read()
+    
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Empty file")
+    
+    if len(content) > 25 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 25MB)")
+    
+    # Step 1: Intake the document
+    doc = await engine.intake_document(
+        user_id=user_id,
+        file_content=content,
+        filename=file.filename or "unknown",
+        mime_type=file.content_type or "application/octet-stream",
+    )
+    
+    # Step 2: Process (extract text, classify, analyze)
+    try:
+        doc = await engine.process_document(doc.id)
+    except Exception as e:
+        logger.error(f"Processing failed: {e}")
+        return AutoProcessResponse(
+            id=doc.id,
+            filename=doc.filename,
+            status="error",
+            doc_type="unknown",
+            message=f"Processing failed: {str(e)}",
+        )
+    
+    # Step 3: Run full flow orchestration
+    flow_result = {}
+    if FLOW_AVAILABLE:
+        try:
+            orchestrator = DocumentFlowOrchestrator()
+            flow_result = await orchestrator.process_document_complete(
+                doc_id=doc.id,
+                user_id=user_id,
+            )
+        except Exception as flow_err:
+            logger.warning(f"Flow orchestration partial: {flow_err}")
+    
+    # Publish completion event
+    await event_bus.publish(
+        BusEventType.DOCUMENT_PROCESSED,
+        {
+            "doc_id": doc.id,
+            "user_id": user_id,
+            "doc_type": doc.doc_type.value if doc.doc_type else "unknown",
+            "filename": doc.filename,
+        },
+        user_id=user_id,
+    )
+    
+    # Build response
+    extracted_data = {}
+    if doc.extraction:
+        extracted_data = {
+            "dates": len(doc.extraction.dates) if doc.extraction.dates else 0,
+            "parties": len(doc.extraction.parties) if doc.extraction.parties else 0,
+            "amounts": len(doc.extraction.amounts) if doc.extraction.amounts else 0,
+            "summary": doc.extraction.summary[:200] if doc.extraction.summary else "",
+        }
+    
+    return AutoProcessResponse(
+        id=doc.id,
+        filename=doc.filename,
+        status=doc.status.value if doc.status else "complete",
+        doc_type=doc.doc_type.value if doc.doc_type else "unknown",
+        message="Document processed successfully",
+        extracted_data=extracted_data,
+        timeline_events=flow_result.get("stages", {}).get("events", {}).get("count", 0),
+        issues_found=len(doc.extraction.issues) if doc.extraction and doc.extraction.issues else 0,
+    )
+
+
 @router.post("/upload/batch", response_model=BatchUploadResponse)
 async def upload_documents_batch(
     files: list[UploadFile] = File(...),
@@ -231,16 +353,18 @@ async def upload_documents_batch(
 # =============================================================================
 
 @router.post("/process/{doc_id}", response_model=IntakeDocumentResponse)
-async def process_document(doc_id: str):
+async def process_document(doc_id: str, user_id: str = Depends(get_user_id)):
     """
     Process an uploaded document.
     
     This runs the full pipeline:
     1. Validation
-    2. Text extraction
-    3. Content analysis
+    2. Text extraction (OCR if needed)
+    3. Content analysis & document type detection
     4. Issue detection
-    5. Context enrichment
+    5. Timeline event creation
+    6. FormData hub update
+    7. UI refresh via WebSocket
     
     Returns the complete extraction result.
     """
@@ -255,7 +379,34 @@ async def process_document(doc_id: str):
         return _doc_to_response(doc)
     
     try:
+        # Run basic processing first
         doc = await engine.process_document(doc_id)
+        
+        # Run full flow orchestration if available
+        if FLOW_AVAILABLE:
+            try:
+                orchestrator = DocumentFlowOrchestrator()
+                flow_result = await orchestrator.process_document_complete(
+                    doc_id=doc_id,
+                    user_id=user_id,
+                )
+                # Attach flow result to response
+                if flow_result.get("status") == "complete":
+                    await event_bus.publish(
+                        BusEventType.DOCUMENT_PROCESSED,
+                        {
+                            "doc_id": doc_id,
+                            "user_id": user_id,
+                            "doc_type": doc.doc_type.value if doc.doc_type else "unknown",
+                            "flow_stages": list(flow_result.get("stages", {}).keys()),
+                        },
+                        user_id=user_id,
+                    )
+            except Exception as flow_err:
+                # Log but don't fail - basic processing succeeded
+                import logging
+                logging.getLogger(__name__).warning(f"Flow orchestration warning: {flow_err}")
+        
         return _doc_to_response(doc)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
@@ -283,7 +434,7 @@ async def get_processing_status(doc_id: str):
 
 @router.get("/documents", response_model=list[IntakeDocumentResponse])
 async def list_documents(
-    user_id: str = Query(..., description="User ID to list documents for"),
+    user_id: str = Depends(get_user_id),
     status: Optional[str] = Query(None, description="Filter by status"),
 ):
     """
@@ -461,7 +612,7 @@ async def get_document_text(doc_id: str):
 # =============================================================================
 
 @router.get("/issues/critical")
-async def get_critical_issues(user_id: str = Query(...)):
+async def get_critical_issues(user_id: str = Depends(get_user_id)):
     """
     Get all CRITICAL issues across all user's documents.
     
@@ -499,7 +650,7 @@ async def get_critical_issues(user_id: str = Query(...)):
 
 @router.get("/deadlines/upcoming")
 async def get_upcoming_deadlines(
-    user_id: str = Query(...),
+    user_id: str = Depends(get_user_id),
     days: int = Query(14, description="Number of days to look ahead"),
 ):
     """
@@ -533,7 +684,7 @@ async def get_upcoming_deadlines(
 
 
 @router.get("/summary")
-async def get_user_intake_summary(user_id: str = Query(...)):
+async def get_user_intake_summary(user_id: str = Depends(get_user_id)):
     """
     Get a summary of all intake documents for a user.
     """

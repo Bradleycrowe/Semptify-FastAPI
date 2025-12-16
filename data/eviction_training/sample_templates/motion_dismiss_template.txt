@@ -1,0 +1,49 @@
+MINNESOTA DISTRICT COURT
+{county} COUNTY                                    FIRST JUDICIAL DISTRICT
+
+{plaintiff_name},                                  Case No.: {case_number}
+                    Plaintiff,
+        vs.                                        MOTION TO DISMISS
+
+{defendant_name},
+                    Defendant.
+
+MOTION TO DISMISS
+
+Defendant {defendant_name} moves this Court for an Order dismissing 
+Plaintiff's Complaint for the following reasons:
+
+1. IMPROPER NOTICE
+
+The eviction notice served on Defendant failed to comply with Minnesota 
+Statute § 504B.321 because:
+[ ] The notice period was insufficient
+[ ] The notice was not properly served
+[ ] The notice failed to state required information
+[ ] Other: _______________
+
+2. PROCEDURAL DEFECTS
+
+The Complaint and/or service thereof is defective because:
+[ ] Service was not made as required by Minn. Stat. § 504B.331
+[ ] The Complaint fails to state a claim upon which relief can be granted
+[ ] The wrong party is named as Plaintiff
+[ ] The wrong party is named as Defendant
+[ ] Other: _______________
+
+3. SUBSTANTIVE DEFENSES
+
+This eviction should be dismissed because:
+[ ] All rent due has been paid
+[ ] Plaintiff accepted rent after serving the notice
+[ ] The eviction is retaliatory (Minn. Stat. § 504B.285)
+[ ] Plaintiff failed to maintain habitability
+[ ] Other: _______________
+
+WHEREFORE, Defendant respectfully requests this Court dismiss Plaintiff's 
+Complaint with prejudice.
+
+Dated: _______________
+
+_______________________
+{defendant_name}, Pro Se Defendant

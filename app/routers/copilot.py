@@ -322,6 +322,45 @@ async def call_anthropic(message: str, context: Optional[str], settings: Setting
         )
 
 
+async def call_gemini(message: str, context: Optional[str], settings: Settings) -> str:
+    """Call Google Gemini API (FREE tier: 1,500 requests/day)."""
+    try:
+        import httpx
+
+        # Build prompt with system context
+        prompt = SYSTEM_PROMPT + "\n\n"
+        if context:
+            prompt += f"Context: {context}\n\n"
+        prompt += f"User: {message}\n\nAssistant:"
+
+        api_key = settings.gemini_api_key or settings.google_ai_api_key
+        model = settings.gemini_model
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "topP": 0.95,
+                        "maxOutputTokens": 2048,
+                    }
+                },
+                timeout=60.0,
+            )
+            response.raise_for_status()
+            data = response.json()
+            # Extract text from Gemini response format
+            return data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "No response generated")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Google Gemini API error: {str(e)}",
+        )
+
+
 # =============================================================================
 # Endpoints
 # =============================================================================
@@ -346,6 +385,7 @@ async def copilot_status(settings: Settings = Depends(get_settings)):
         "ollama": settings.ollama_model,
         "groq": settings.groq_model,
         "anthropic": settings.anthropic_model,
+        "gemini": settings.gemini_model,
     }.get(provider, "unknown")
 
     # Check if API keys are configured
@@ -359,6 +399,8 @@ async def copilot_status(settings: Settings = Depends(get_settings)):
     elif provider == "groq" and settings.groq_api_key:
         available = True
     elif provider == "anthropic" and settings.anthropic_api_key:
+        available = True
+    elif provider == "gemini" and (settings.gemini_api_key or settings.google_ai_api_key):
         available = True
 
     return CopilotStatusResponse(
@@ -408,6 +450,8 @@ async def ask_copilot(
         response_text = await call_groq(request.message, request.context, settings)
     elif provider == "anthropic":
         response_text = await call_anthropic(request.message, request.context, settings)
+    elif provider == "gemini":
+        response_text = await call_gemini(request.message, request.context, settings)
     else:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

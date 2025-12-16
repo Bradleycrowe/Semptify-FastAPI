@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File a Counterclaim - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+            max-width: 900px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 1rem; }
+        }
+        
+        /* Progress Bar */
+        .progress-container { margin-bottom: 2rem; }
+        .progress-steps { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .step-circle {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--bg-card); border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; z-index: 1; transition: all 0.3s;
+        }
+        .step-circle.active { background: var(--primary); border-color: var(--primary); }
+        .step-circle.completed { background: var(--success); border-color: var(--success); }
+        .step-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+        
+        /* Step Content */
+        .step-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .step-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .step-description { color: var(--text-muted); margin-bottom: 1.5rem; }
+        
+        /* Form Styles */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 2px solid var(--border); border-radius: 0.5rem;
+            background: rgba(255,255,255,0.05); color: var(--text);
+            font-size: 1rem; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+        
+        /* Claim Options */
+        .claim-options { display: grid; gap: 1rem; }
+        .claim-option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .claim-option:hover { border-color: var(--primary); }
+        .claim-option.selected { background: rgba(59, 130, 246, 0.2); border-color: var(--primary); }
+        .claim-option input { display: none; }
+        .claim-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .claim-checkbox {
+            width: 24px; height: 24px; border: 2px solid var(--border);
+            border-radius: 4px; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s;
+        }
+        .claim-option.selected .claim-checkbox { background: var(--primary); border-color: var(--primary); }
+        .claim-option.selected .claim-checkbox::after { content: '✓'; color: white; }
+        .claim-title { font-weight: 600; }
+        .claim-desc { font-size: 0.9rem; color: var(--text-muted); margin-left: 36px; }
+        
+        /* Buttons */
+        .step-nav { display: flex; justify-content: space-between; gap: 1rem; }
+        .btn {
+            padding: 0.875rem 1.5rem; border-radius: 0.5rem;
+            font-weight: 600; cursor: pointer; border: none;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; transition: all 0.2s; text-decoration: none;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        
+        /* Review & Alerts */
+        .review-section { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+        .review-section h4 { color: var(--primary); margin-bottom: 0.5rem; }
+        .review-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+        .review-item:last-child { border-bottom: none; }
+        .review-label { color: var(--text-muted); }
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .alert-info { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary); }
+        .alert-warning { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); color: var(--warning); }
+        .alert-success { background: rgba(34, 197, 94, 0.2); border: 1px solid var(--success); }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem; z-index: 1000;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step"><div class="step-circle active">1</div><span class="step-label">Party Info</span></div>
+                <div class="progress-step"><div class="step-circle">2</div><span class="step-label">Claims</span></div>
+                <div class="progress-step"><div class="step-circle">3</div><span class="step-label">Damages</span></div>
+                <div class="progress-step"><div class="step-circle">4</div><span class="step-label">Review</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 25%"></div></div>
+        </div>
+        
+        <!-- Step 1: Party Information -->
+        <div id="step1" class="step-content">
+            <h2 class="step-title">⚔️ File a Counterclaim</h2>
+            <p class="step-description">Turn the tables on your landlord. If they owe you money or violated your rights, you can sue them back.</p>
+            
+            <div class="alert alert-info">
+                💡 <strong>What is a Counterclaim?</strong> Instead of just defending yourself, you can claim money from your landlord for things like unreturned deposits, failed repairs, illegal fees, or lease violations they committed.
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tenantName">Your Full Name *</label>
+                    <input type="text" id="tenantName" required placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <label for="landlordName">Landlord Name *</label>
+                    <input type="text" id="landlordName" required placeholder="Landlord/Company Name">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="caseNumber">Case Number (if known)</label>
+                    <input type="text" id="caseNumber" placeholder="27-CV-XX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="propertyAddress">Property Address *</label>
+                    <input type="text" id="propertyAddress" required placeholder="123 Main St, City, MN 55XXX">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="leaseStart">Lease Start Date</label>
+                    <input type="date" id="leaseStart">
+                </div>
+                <div class="form-group">
+                    <label for="monthlyRent">Monthly Rent Amount</label>
+                    <input type="text" id="monthlyRent" placeholder="$1,200">
+                </div>
+            </div>
+            
+            <div class="step-nav">
+                <a href="/static/dakota_defense.html" class="btn btn-outline">← Back to Menu</a>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Select Claims →</button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Select Claims -->
+        <div id="step2" class="step-content hidden">
+            <h2 class="step-title">💰 What Do They Owe You?</h2>
+            <p class="step-description">Select all claims that apply. Under Minnesota law, you may be entitled to recover money from your landlord.</p>
+            
+            <div class="claim-options">
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="security_deposit">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">💵 Security Deposit Not Returned</span>
+                    </div>
+                    <p class="claim-desc">Landlord kept my deposit without proper cause or didn't return it within 21 days. May recover deposit + bad faith penalty.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="habitability">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">🔧 Failed to Make Repairs (Rent Abatement)</span>
+                    </div>
+                    <p class="claim-desc">Landlord didn't fix serious problems (heat, water, safety). I may be owed a rent reduction for the time I lived with issues.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="illegal_fees">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">🚫 Illegal Fees Charged</span>
+                    </div>
+                    <p class="claim-desc">Charged illegal late fees, application fees over $75, or other prohibited fees.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="utility_shutoff">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">⚡ Illegal Utility Shutoff</span>
+                    </div>
+                    <p class="claim-desc">Landlord shut off utilities, changed locks, or removed my belongings without court order.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="privacy_violation">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">🔑 Illegal Entry / Privacy Violation</span>
+                    </div>
+                    <p class="claim-desc">Landlord entered my unit without proper notice (24 hours required) or reasonable purpose.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="retaliation">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">🎯 Retaliation Damages</span>
+                    </div>
+                    <p class="claim-desc">Landlord retaliated against me for exercising my rights. May recover damages and attorney fees.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="personal_property">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">📦 Damaged/Stolen Property</span>
+                    </div>
+                    <p class="claim-desc">Landlord or their agents damaged or took my personal property.</p>
+                </label>
+                
+                <label class="claim-option" onclick="toggleClaim(this)">
+                    <input type="checkbox" name="claim" value="lease_violation">
+                    <div class="claim-header">
+                        <div class="claim-checkbox"></div>
+                        <span class="claim-title">📜 Lease Violation by Landlord</span>
+                    </div>
+                    <p class="claim-desc">Landlord violated terms of the lease agreement (promised amenities, services, etc).</p>
+                </label>
+            </div>
+            
+            <div class="step-nav" style="margin-top: 2rem;">
+                <button class="btn btn-outline" onclick="prevStep()">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Calculate Damages →</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Damages -->
+        <div id="step3" class="step-content hidden">
+            <h2 class="step-title">💰 Calculate Your Damages</h2>
+            <p class="step-description">Provide details and amounts for each claim. Be specific - courts want to see how you calculated your damages.</p>
+            
+            <div id="damagesForms"></div>
+            
+            <div class="form-group">
+                <label for="claimDetails">Detailed Explanation *</label>
+                <textarea id="claimDetails" rows="6" placeholder="Describe what happened with dates and specifics. For example:
+
+On August 1, 2024, I paid a $1,500 security deposit. I moved out on December 31, 2024, leaving the apartment clean. As of today (more than 21 days later), I have not received my deposit back or any written explanation of deductions.
+
+The furnace stopped working on November 15, 2024. I notified the landlord in writing. It wasn't fixed until December 10 - 25 days without heat while outside temps were below 20°F."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="totalDamages">Total Damages Requested *</label>
+                <input type="text" id="totalDamages" placeholder="$3,500">
+            </div>
+            
+            <div class="step-nav">
+                <button class="btn btn-outline" onclick="prevStep()">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep()">Next: Review →</button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Review & Generate -->
+        <div id="step4" class="step-content hidden">
+            <h2 class="step-title">👀 Review Your Counterclaim</h2>
+            <p class="step-description">Review all information before generating your document.</p>
+            
+            <div class="review-section">
+                <h4>📋 Party Information</h4>
+                <div class="review-item"><span class="review-label">Counter-Plaintiff:</span><span id="reviewTenant">-</span></div>
+                <div class="review-item"><span class="review-label">Counter-Defendant:</span><span id="reviewLandlord">-</span></div>
+                <div class="review-item"><span class="review-label">Case Number:</span><span id="reviewCase">-</span></div>
+                <div class="review-item"><span class="review-label">Property:</span><span id="reviewProperty">-</span></div>
+            </div>
+            
+            <div class="review-section">
+                <h4>💰 Claims</h4>
+                <div id="reviewClaims">-</div>
+            </div>
+            
+            <div class="review-section">
+                <h4>📝 Statement</h4>
+                <div id="reviewStatement" style="white-space: pre-wrap;">-</div>
+            </div>
+            
+            <div class="review-section">
+                <h4>💵 Total Damages Requested</h4>
+                <div id="reviewTotal" style="font-size: 1.5rem; font-weight: bold; color: var(--success);">-</div>
+            </div>
+            
+            <div class="alert alert-warning">
+                ⚠️ <strong>Important:</strong> This generates a draft document. It is NOT legal advice. Consider consulting with Legal Aid before filing.
+            </div>
+            
+            <div class="step-nav">
+                <button class="btn btn-outline" onclick="prevStep()">← Edit</button>
+                <button class="btn btn-success" onclick="generateCounterclaim()">✅ Generate Counterclaim</button>
+            </div>
+        </div>
+        
+        <!-- Download Page -->
+        <div id="step5" class="step-content hidden">
+            <h2 class="step-title">🎉 Counterclaim Generated!</h2>
+            
+            <div class="alert alert-success">✅ Your Counterclaim document is ready!</div>
+            
+            <div class="review-section">
+                <h4>📋 Next Steps</h4>
+                <ol style="padding-left: 1.5rem; line-height: 2;">
+                    <li><strong>File with your Answer</strong> - Submit counterclaim along with your Answer to Eviction</li>
+                    <li><strong>Pay filing fee</strong> - Or request a fee waiver if you can't afford it</li>
+                    <li><strong>Serve the landlord</strong> - Give them a copy of your counterclaim</li>
+                    <li><strong>Gather evidence</strong> - Collect receipts, photos, communications</li>
+                    <li><strong>Prepare for hearing</strong> - Be ready to explain your claims to the judge</li>
+                </ol>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 2rem 0;">
+                <button class="btn btn-primary" onclick="downloadPDF()">📥 Download</button>
+                <button class="btn btn-outline" onclick="printDocument()">🖨️ Print</button>
+                <a href="/static/eviction_answer.html" class="btn btn-outline">📝 File Answer</a>
+                <a href="/static/dakota_defense.html" class="btn btn-outline">← Defense Center</a>
+            </div>
+        </div>
+    </main>
+    
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Generating your counterclaim...</p>
+    </div>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        let currentStep = 1;
+        let formData = {};
+        let generatedBlob = null;
+        
+        const claimLabels = {
+            'security_deposit': '💵 Security Deposit Not Returned',
+            'habitability': '🔧 Failed to Make Repairs',
+            'illegal_fees': '🚫 Illegal Fees Charged',
+            'utility_shutoff': '⚡ Illegal Utility Shutoff',
+            'privacy_violation': '🔑 Privacy Violation',
+            'retaliation': '🎯 Retaliation Damages',
+            'personal_property': '📦 Damaged/Stolen Property',
+            'lease_violation': '📜 Lease Violation by Landlord'
+        };
+        
+        function toggleClaim(el) {
+            el.classList.toggle('selected');
+            el.querySelector('input').checked = el.classList.contains('selected');
+        }
+        
+        function updateProgress() {
+            document.querySelectorAll('.step-circle').forEach((c, i) => {
+                c.classList.remove('active', 'completed');
+                if (i + 1 < currentStep) { c.classList.add('completed'); c.innerHTML = '✓'; }
+                else if (i + 1 === currentStep) { c.classList.add('active'); c.innerHTML = i + 1; }
+                else { c.innerHTML = i + 1; }
+            });
+            document.querySelector('.progress-fill').style.width = (currentStep / 5 * 100) + '%';
+        }
+        
+        function showStep(step) {
+            for (let i = 1; i <= 5; i++) document.getElementById('step' + i).classList.add('hidden');
+            document.getElementById('step' + step).classList.remove('hidden');
+            currentStep = step;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function validateStep(step) {
+            if (step === 1) {
+                const t = document.getElementById('tenantName').value.trim();
+                const l = document.getElementById('landlordName').value.trim();
+                const a = document.getElementById('propertyAddress').value.trim();
+                if (!t || !l || !a) { alert('Please fill in all required fields'); return false; }
+                formData.tenant_name = t;
+                formData.landlord_name = l;
+                formData.case_number = document.getElementById('caseNumber').value.trim();
+                formData.address = a;
+                formData.lease_start = document.getElementById('leaseStart').value;
+                formData.monthly_rent = document.getElementById('monthlyRent').value;
+            }
+            if (step === 2) {
+                const claims = [];
+                document.querySelectorAll('.claim-option.selected input').forEach(i => claims.push(i.value));
+                if (claims.length === 0) { alert('Please select at least one claim'); return false; }
+                formData.claims = claims;
+                buildDamagesForms();
+            }
+            if (step === 3) {
+                const details = document.getElementById('claimDetails').value.trim();
+                const total = document.getElementById('totalDamages').value.trim();
+                if (!details || !total) { alert('Please provide details and total damages'); return false; }
+                formData.claim_details = details;
+                formData.damages_requested = total;
+                populateReview();
+            }
+            return true;
+        }
+        
+        function buildDamagesForms() {
+            const container = document.getElementById('damagesForms');
+            container.innerHTML = formData.claims.map(c => `
+                <div class="form-group">
+                    <label>${claimLabels[c]} - Amount</label>
+                    <input type="text" id="damage_${c}" placeholder="$0.00">
+                </div>
+            `).join('');
+        }
+        
+        function populateReview() {
+            document.getElementById('reviewTenant').textContent = formData.tenant_name;
+            document.getElementById('reviewLandlord').textContent = formData.landlord_name;
+            document.getElementById('reviewCase').textContent = formData.case_number || 'Will be assigned';
+            document.getElementById('reviewProperty').textContent = formData.address;
+            document.getElementById('reviewClaims').innerHTML = formData.claims.map(c => 
+                `<div style="margin: 0.5rem 0;">• ${claimLabels[c]}</div>`
+            ).join('');
+            document.getElementById('reviewStatement').textContent = formData.claim_details;
+            document.getElementById('reviewTotal').textContent = formData.damages_requested;
+        }
+        
+        function nextStep() { if (validateStep(currentStep) && currentStep < 5) showStep(currentStep + 1); }
+        function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+        
+        async function generateCounterclaim() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            try {
+                const response = await fetch('/eviction/counterclaim/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    generatedBlob = await response.blob();
+                } else {
+                    generateClientSide();
+                }
+            } catch (e) {
+                generateClientSide();
+            }
+            localStorage.setItem('semptify_case_data', JSON.stringify(formData));
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            showStep(5);
+        }
+        
+        function generateClientSide() {
+            const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Counterclaim</title>
+<style>body{font-family:Times New Roman,serif;font-size:12pt;margin:1in;line-height:1.6}
+.header{text-align:center;font-weight:bold;text-transform:uppercase}
+.title{text-align:center;text-decoration:underline;font-weight:bold;margin:20px 0}
+.section{margin:15px 0}.section h3{text-decoration:underline}</style></head>
+<body>
+<div class="header">STATE OF MINNESOTA<br>COUNTY OF DAKOTA<br>DISTRICT COURT</div>
+<p style="text-align:right">Case No: ${formData.case_number || '___________'}</p>
+<p><strong>${formData.landlord_name}</strong>, Plaintiff<br>vs.<br><strong>${formData.tenant_name}</strong>, Defendant/Counter-Plaintiff</p>
+<div class="title">COUNTERCLAIM</div>
+<div class="section"><p>COMES NOW Defendant/Counter-Plaintiff ${formData.tenant_name} and for counterclaim against Plaintiff states:</p></div>
+<div class="section"><h3>CLAIMS</h3><ol>${formData.claims.map(c => `<li>${claimLabels[c]}</li>`).join('')}</ol></div>
+<div class="section"><h3>STATEMENT OF FACTS</h3><p>${formData.claim_details}</p></div>
+<div class="section"><h3>DAMAGES</h3><p>Counter-Plaintiff requests judgment against Counter-Defendant in the amount of <strong>${formData.damages_requested}</strong> plus costs and such other relief as the Court deems just.</p></div>
+<div style="margin-top:40px"><p>Date: ${new Date().toLocaleDateString()}</p><br><p>_______________________</p><p>${formData.tenant_name}, Counter-Plaintiff Pro Se</p><p>${formData.address}</p></div>
+</body></html>`;
+            localStorage.setItem('semptify_counterclaim_html', html);
+            generatedBlob = new Blob([html], { type: 'text/html' });
+        }
+        
+        function downloadPDF() {
+            if (generatedBlob) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(generatedBlob);
+                a.download = `Counterclaim_${formData.tenant_name.replace(/\s+/g, '_')}.${generatedBlob.type.includes('pdf') ? 'pdf' : 'html'}`;
+                a.click();
+            }
+        }
+        
+        function printDocument() {
+            const html = localStorage.getItem('semptify_counterclaim_html');
+            if (html) { const w = window.open('', '_blank'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500); }
+        }
+        
+        // Load saved case data
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('semptify_case_data');
+            if (saved) {
+                try {
+                    const d = JSON.parse(saved);
+                    if (d.tenant_name) document.getElementById('tenantName').value = d.tenant_name;
+                    if (d.landlord_name) document.getElementById('landlordName').value = d.landlord_name;
+                    if (d.case_number) document.getElementById('caseNumber').value = d.case_number;
+                    if (d.address) document.getElementById('propertyAddress').value = d.address;
+                } catch (e) {}
+            }
+        });
+    </script>
+</body>
+</html>

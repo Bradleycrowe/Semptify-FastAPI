@@ -1,14 +1,14 @@
 {
-  "SEM-2025-000152-3ABD": {
-    "document_id": "SEM-2025-000152-3ABD",
+  "SEM-2025-000151-94C9": {
+    "document_id": "SEM-2025-000151-94C9",
     "user_id": "user_123",
     "case_number": null,
-    "original_filename": "\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442_\u0442\u0435\u0441\u0442.pdf",
+    "original_filename": "notice (copy) [2024].pdf",
     "file_size": 63,
     "mime_type": "application/pdf",
     "content_hash": "f3c0b81970e1f08029a73cfde1bbbe4fabe6801e070f26d8ee309029e42a8c8c",
-    "metadata_hash": "b95b1deb1302c1a4c78267bed948a12bab27bcce7dbed2dd639babadc40aa2c3",
-    "combined_hash": "f63c7422dabf06f1e6e4d01d0cee31962c0e5c6c16fcc5fb2b4bfed3eb8f14d6",
+    "metadata_hash": "cde47f30303f8d0fe3fa528f897c8197c60c8d102faf7405cb416673f11ab657",
+    "combined_hash": "06ab3a84e4b11a7a47cfa60f7c52eaf9fca8d018648f43df032efb1ca2a03c65",
     "status": "original",
     "integrity_status": "verified",
     "is_duplicate": false,
@@ -18,24 +18,24 @@
     "forgery_alerts": [],
     "forgery_score": 0.0,
     "requires_review": false,
-    "registered_at": "2025-12-11T20:25:14.048185+00:00",
+    "registered_at": "2025-12-14T18:18:29.468315+00:00",
     "last_verified_at": null,
     "last_accessed_at": null,
     "custody_chain": [
       {
-        "timestamp": "2025-12-11T20:25:14.048189+00:00",
+        "timestamp": "2025-12-14T18:18:29.468327+00:00",
         "action": "received",
         "actor": "user_123",
-        "details": "Document registered: \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442_\u0442\u0435\u0441\u0442.pdf",
+        "details": "Document registered: notice (copy) [2024].pdf",
         "ip_address": null,
         "device_info": null,
-        "integrity_hash": "f63c7422dabf06f1e6e4d01d0cee31962c0e5c6c16fcc5fb2b4bfed3eb8f14d6"
+        "integrity_hash": "06ab3a84e4b11a7a47cfa60f7c52eaf9fca8d018648f43df032efb1ca2a03c65"
       }
     ],
     "versions": [
       {
         "version": 1,
-        "timestamp": "2025-12-11T20:25:14.048196+00:00",
+        "timestamp": "2025-12-14T18:18:29.468343+00:00",
         "content_hash": "f3c0b81970e1f08029a73cfde1bbbe4fabe6801e070f26d8ee309029e42a8c8c",
         "changes": "Initial registration",
         "changed_by": "user_123"

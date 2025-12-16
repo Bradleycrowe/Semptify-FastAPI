@@ -135,11 +135,11 @@
     </div>
     <div class="card-body">
       <div class="grid gap-3">
-        <a href="/documents/upload" class="btn btn-secondary w-full justify-start">
+        <a href="/static/document_intake.html" class="btn btn-secondary w-full justify-start">
           <i class="fas fa-upload"></i>
           Upload Document
         </a>
-        <a href="/eviction/flows" class="btn btn-secondary w-full justify-start">
+        <a href="/static/journey.html" class="btn btn-secondary w-full justify-start">
           <i class="fas fa-route"></i>
           Start Eviction Flow
         </a>
@@ -147,7 +147,7 @@
           <i class="fas fa-lock"></i>
           Secure Vault
         </a>
-        <a href="/calendar" class="btn btn-secondary w-full justify-start">
+        <a href="/static/calendar.html" class="btn btn-secondary w-full justify-start">
           <i class="fas fa-calendar-plus"></i>
           Add Calendar Event
         </a>
@@ -240,7 +240,7 @@
         container.innerHTML = `
           <div class="empty-state p-6">
             <p class="text-muted">No documents yet</p>
-            <a href="/documents/upload" class="btn btn-primary btn-sm mt-2">Upload First Document</a>
+            <a href="/static/document_intake.html" class="btn btn-primary btn-sm mt-2">Upload First Document</a>
           </div>
         `;
         return;
@@ -318,7 +318,7 @@
   });
 
   document.getElementById('new-document-btn')?.addEventListener('click', () => {
-    window.location.href = '/documents/upload';
+    window.location.href = '/static/document_intake.html';
   });
 })();
 </script>

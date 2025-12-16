@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom Court Helper - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-dark: #2563eb; --success: #22c55e;
+            --warning: #f59e0b; --danger: #ef4444; --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f; --text: #ffffff; --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1); --zoom-blue: #2D8CFF;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text); min-height: 100vh;
+        }
+        .main-content { margin-left: 280px; padding: 2rem; max-width: 1100px; }
+        @media (max-width: 768px) { .main-content { margin-left: 0; padding: 1rem; } }
+        
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        .page-subtitle { color: var(--text-muted); }
+        
+        /* Zoom link card */
+        .zoom-join-card {
+            background: linear-gradient(135deg, var(--zoom-blue), #1E78E0);
+            border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; text-align: center;
+        }
+        .zoom-join-card h2 { margin-bottom: 1rem; }
+        .zoom-input-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+        .zoom-input {
+            padding: 1rem; font-size: 1.1rem; border: none; border-radius: 0.5rem;
+            width: 300px; max-width: 100%;
+        }
+        .btn-join {
+            background: white; color: var(--zoom-blue); font-size: 1.1rem;
+            padding: 1rem 2rem; border-radius: 0.5rem; font-weight: bold;
+            border: none; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-join:hover { transform: scale(1.05); }
+        
+        /* Sections */
+        .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Setup checklist */
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .setup-card {
+            background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem;
+            display: flex; align-items: flex-start; gap: 1rem;
+        }
+        .setup-icon { font-size: 2rem; }
+        .setup-text h4 { margin-bottom: 0.25rem; }
+        .setup-text p { color: var(--text-muted); font-size: 0.9rem; }
+        
+        /* Do/Don't lists */
+        .do-dont-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .do-card { background: rgba(34, 197, 94, 0.2); border: 1px solid var(--success); border-radius: 0.5rem; padding: 1rem; }
+        .dont-card { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); border-radius: 0.5rem; padding: 1rem; }
+        .do-card h4 { color: var(--success); margin-bottom: 0.5rem; }
+        .dont-card h4 { color: var(--danger); margin-bottom: 0.5rem; }
+        .do-card ul, .dont-card ul { padding-left: 1.25rem; line-height: 1.8; }
+        
+        /* Etiquette cards */
+        .etiquette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .etiquette-card { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; text-align: center; }
+        .etiquette-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .etiquette-card h4 { margin-bottom: 0.5rem; }
+        .etiquette-card p { color: var(--text-muted); font-size: 0.9rem; }
+        
+        /* Troubleshooting */
+        .trouble-item {
+            background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem;
+            margin-bottom: 0.5rem; cursor: pointer;
+        }
+        .trouble-item:hover { background: rgba(255,255,255,0.1); }
+        .trouble-question { font-weight: 600; display: flex; justify-content: space-between; }
+        .trouble-answer { color: var(--text-muted); margin-top: 0.75rem; display: none; }
+        .trouble-item.open .trouble-answer { display: block; }
+        
+        /* Test area */
+        .test-area {
+            background: rgba(0,0,0,0.3); border-radius: 0.5rem; padding: 1rem;
+            text-align: center;
+        }
+        .test-video {
+            width: 100%; max-width: 400px; aspect-ratio: 4/3;
+            background: #000; border-radius: 0.5rem; margin: 1rem auto;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+        }
+        .test-controls { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-test {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.2s;
+            background: var(--primary); color: white;
+        }
+        
+        /* Quick reference */
+        .quick-ref { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; text-align: center; }
+        .quick-item { background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 0.5rem; }
+        .quick-item kbd { background: #333; padding: 0.25rem 0.5rem; border-radius: 3px; font-family: monospace; }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; border: none; display: inline-flex; align-items: center;
+            gap: 0.5rem; text-decoration: none; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">💻 Zoom Court Helper</h1>
+            <p class="page-subtitle">Everything you need for your virtual court hearing</p>
+        </div>
+        
+        <!-- Join Hearing -->
+        <div class="zoom-join-card">
+            <h2>🎥 Join Your Court Hearing</h2>
+            <div class="zoom-input-group">
+                <input type="text" class="zoom-input" id="zoomLink" placeholder="Paste your Zoom link here...">
+                <button class="btn-join" onclick="joinZoom()">📞 Join Now</button>
+            </div>
+            <p style="opacity: 0.9;">Or enter Meeting ID: <input type="text" id="meetingId" placeholder="000 000 0000" style="padding: 0.5rem; border-radius: 0.25rem; border: none; width: 150px;"></p>
+        </div>
+        
+        <!-- Pre-Hearing Setup -->
+        <div class="section">
+            <h2 class="section-title">🔧 Pre-Hearing Setup Checklist</h2>
+            <div class="setup-grid">
+                <div class="setup-card">
+                    <div class="setup-icon">📶</div>
+                    <div class="setup-text">
+                        <h4>Internet Connection</h4>
+                        <p>Use wired connection if possible. Be near your WiFi router. Close other tabs/apps.</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">🎤</div>
+                    <div class="setup-text">
+                        <h4>Microphone</h4>
+                        <p>Test your mic. Use headphones with built-in mic for best quality. Mute when not speaking.</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">📷</div>
+                    <div class="setup-text">
+                        <h4>Camera</h4>
+                        <p>Position at eye level. Check lighting - light should be in FRONT of you, not behind.</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">🔋</div>
+                    <div class="setup-text">
+                        <h4>Power</h4>
+                        <p>Plug in your device. Have charger nearby. Don't rely on battery.</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">🔇</div>
+                    <div class="setup-text">
+                        <h4>Environment</h4>
+                        <p>Find quiet space. Tell others not to disturb. Turn off notifications.</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">📱</div>
+                    <div class="setup-text">
+                        <h4>Backup Plan</h4>
+                        <p>Have phone ready with Zoom app. Save court phone number in case of tech issues.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Your Setup -->
+        <div class="section">
+            <h2 class="section-title">🧪 Test Your Setup</h2>
+            <div class="test-area">
+                <div class="test-video" id="testVideo">
+                    <span>Click "Test Camera" to preview</span>
+                </div>
+                <div class="test-controls">
+                    <button class="btn-test" onclick="testCamera()">📷 Test Camera</button>
+                    <button class="btn-test" onclick="testMic()">🎤 Test Microphone</button>
+                    <button class="btn-test" onclick="stopTest()">⏹️ Stop Test</button>
+                </div>
+                <p style="margin-top: 1rem; color: var(--text-muted);">Or use <a href="https://zoom.us/test" target="_blank" style="color: var(--primary);">Zoom's official test</a></p>
+            </div>
+        </div>
+        
+        <!-- Court Etiquette -->
+        <div class="section">
+            <h2 class="section-title">👔 Virtual Court Etiquette</h2>
+            <div class="etiquette-grid">
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">👔</div>
+                    <h4>Dress Professionally</h4>
+                    <p>Business casual at minimum. Dress as if in-person.</p>
+                </div>
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">🖼️</div>
+                    <h4>Plain Background</h4>
+                    <p>Clean, neutral background. No distracting items visible.</p>
+                </div>
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">👀</div>
+                    <h4>Look at Camera</h4>
+                    <p>When speaking, look at camera, not screen. Shows respect.</p>
+                </div>
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">🔇</div>
+                    <h4>Stay Muted</h4>
+                    <p>Mute unless speaking. Unmute only when addressed.</p>
+                </div>
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">⏰</div>
+                    <h4>Join Early</h4>
+                    <p>Join 10-15 minutes early. You may wait in lobby.</p>
+                </div>
+                <div class="etiquette-card">
+                    <div class="etiquette-icon">📵</div>
+                    <h4>No Distractions</h4>
+                    <p>Turn off phone. Don't eat, smoke, or do other activities.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Do/Don't -->
+        <div class="section">
+            <h2 class="section-title">✅ Do's and Don'ts</h2>
+            <div class="do-dont-grid">
+                <div class="do-card">
+                    <h4>✅ DO:</h4>
+                    <ul>
+                        <li>Use your real name as display name</li>
+                        <li>Say "Your Honor" when addressing judge</li>
+                        <li>Speak clearly and slowly</li>
+                        <li>Wait your turn to speak</li>
+                        <li>Have documents ready to share</li>
+                        <li>Say "May I speak?" if needed</li>
+                        <li>Nod to show you understand</li>
+                    </ul>
+                </div>
+                <div class="dont-card">
+                    <h4>❌ DON'T:</h4>
+                    <ul>
+                        <li>Interrupt anyone speaking</li>
+                        <li>Use virtual backgrounds</li>
+                        <li>Drive during hearing</li>
+                        <li>Join from public places</li>
+                        <li>Have others visible on camera</li>
+                        <li>Record without permission</li>
+                        <li>Use chat unless instructed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Reference -->
+        <div class="section">
+            <h2 class="section-title">⌨️ Zoom Shortcuts</h2>
+            <div class="quick-ref">
+                <div class="quick-item"><kbd>Alt+A</kbd><br>Mute/Unmute</div>
+                <div class="quick-item"><kbd>Alt+V</kbd><br>Start/Stop Video</div>
+                <div class="quick-item"><kbd>Alt+S</kbd><br>Share Screen</div>
+                <div class="quick-item"><kbd>Alt+F</kbd><br>Fullscreen</div>
+                <div class="quick-item"><kbd>Space</kbd><br>Push to Talk</div>
+                <div class="quick-item"><kbd>Alt+Y</kbd><br>Raise Hand</div>
+            </div>
+        </div>
+        
+        <!-- Troubleshooting -->
+        <div class="section">
+            <h2 class="section-title">🔧 Troubleshooting</h2>
+            
+            <div class="trouble-item" onclick="this.classList.toggle('open')">
+                <div class="trouble-question">
+                    <span>"They can't hear me"</span>
+                    <span>+</span>
+                </div>
+                <div class="trouble-answer">
+                    <ol>
+                        <li>Check if you're muted (look for red mic icon)</li>
+                        <li>Click arrow next to mic → select correct microphone</li>
+                        <li>Leave and rejoin the meeting</li>
+                        <li>Call in by phone as backup (dial-in numbers in invite)</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="trouble-item" onclick="this.classList.toggle('open')">
+                <div class="trouble-question">
+                    <span>"I can't hear them"</span>
+                    <span>+</span>
+                </div>
+                <div class="trouble-answer">
+                    <ol>
+                        <li>Check computer volume is turned up</li>
+                        <li>Click arrow next to Audio → select correct speaker</li>
+                        <li>Check headphones are plugged in properly</li>
+                        <li>Leave and rejoin, select "Join with Computer Audio"</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="trouble-item" onclick="this.classList.toggle('open')">
+                <div class="trouble-question">
+                    <span>"Video is frozen/choppy"</span>
+                    <span>+</span>
+                </div>
+                <div class="trouble-answer">
+                    <ol>
+                        <li>Turn off video (audio only is acceptable)</li>
+                        <li>Close other programs using internet</li>
+                        <li>Move closer to WiFi router</li>
+                        <li>Ask others in home to pause streaming</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="trouble-item" onclick="this.classList.toggle('open')">
+                <div class="trouble-question">
+                    <span>"I got disconnected"</span>
+                    <span>+</span>
+                </div>
+                <div class="trouble-answer">
+                    <ol>
+                        <li>DON'T PANIC - rejoin immediately using same link</li>
+                        <li>If can't rejoin, call court phone number immediately</li>
+                        <li>Explain technical difficulties - courts understand</li>
+                        <li>Court will likely wait a few minutes for you</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="trouble-item" onclick="this.classList.toggle('open')">
+                <div class="trouble-question">
+                    <span>"I can't find the link"</span>
+                    <span>+</span>
+                </div>
+                <div class="trouble-answer">
+                    <ol>
+                        <li>Check email from court (search "Zoom" or "hearing")</li>
+                        <li>Check court notice/paperwork for meeting info</li>
+                        <li>Call court clerk immediately for link</li>
+                        <li>Dakota County: (651) 438-8100</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Contacts -->
+        <div class="section">
+            <h2 class="section-title">📞 Emergency Contacts</h2>
+            <div class="setup-grid">
+                <div class="setup-card">
+                    <div class="setup-icon">🏛️</div>
+                    <div class="setup-text">
+                        <h4>Dakota County Court</h4>
+                        <p><strong>(651) 438-8100</strong><br>1560 Highway 55, Hastings, MN</p>
+                    </div>
+                </div>
+                <div class="setup-card">
+                    <div class="setup-icon">⚖️</div>
+                    <div class="setup-text">
+                        <h4>Minnesota Legal Aid</h4>
+                        <p><strong>1-888-543-5254</strong><br>Free legal help for qualifying tenants</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="btn-group">
+            <a href="/static/hearing_prep.html" class="btn btn-primary">🎯 Hearing Prep Checklist</a>
+            <a href="/static/dakota_defense.html" class="btn btn-outline">🛡️ Defense Center</a>
+            <a href="/static/briefcase.html" class="btn btn-outline">💼 Your Briefcase</a>
+        </div>
+    </main>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        let mediaStream = null;
+        
+        function joinZoom() {
+            const link = document.getElementById('zoomLink').value.trim();
+            const meetingId = document.getElementById('meetingId').value.trim();
+            
+            if (link) {
+                window.open(link, '_blank');
+            } else if (meetingId) {
+                const cleanId = meetingId.replace(/\s/g, '');
+                window.open(`https://zoom.us/j/${cleanId}`, '_blank');
+            } else {
+                alert('Please enter a Zoom link or meeting ID');
+            }
+        }
+        
+        async function testCamera() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const video = document.createElement('video');
+                video.srcObject = mediaStream;
+                video.autoplay = true;
+                video.muted = true;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                video.style.borderRadius = '0.5rem';
+                
+                const container = document.getElementById('testVideo');
+                container.innerHTML = '';
+                container.appendChild(video);
+            } catch (err) {
+                alert('Could not access camera. Please check permissions.');
+                console.error(err);
+            }
+        }
+        
+        async function testMic() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const audioContext = new AudioContext();
+                const analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(mediaStream);
+                source.connect(analyser);
+                
+                const container = document.getElementById('testVideo');
+                container.innerHTML = '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div id="micLevel" style="width:200px;height:20px;background:#333;border-radius:10px;overflow:hidden;"><div id="micBar" style="height:100%;background:linear-gradient(90deg,#22c55e,#f59e0b);width:0%;transition:width 0.1s;"></div></div><p style="margin-top:1rem;">Speak to test...</p></div>';
+                
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                function updateLevel() {
+                    analyser.getByteFrequencyData(dataArray);
+                    const avg = dataArray.reduce((a,b) => a+b, 0) / dataArray.length;
+                    document.getElementById('micBar').style.width = Math.min(avg * 2, 100) + '%';
+                    if (mediaStream) requestAnimationFrame(updateLevel);
+                }
+                updateLevel();
+            } catch (err) {
+                alert('Could not access microphone. Please check permissions.');
+                console.error(err);
+            }
+        }
+        
+        function stopTest() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            document.getElementById('testVideo').innerHTML = '<span>Click "Test Camera" to preview</span>';
+        }
+        
+        // Save zoom link for convenience
+        document.getElementById('zoomLink').addEventListener('change', function() {
+            localStorage.setItem('semptify_zoom_link', this.value);
+        });
+        
+        // Restore saved link
+        const savedLink = localStorage.getItem('semptify_zoom_link');
+        if (savedLink) document.getElementById('zoomLink').value = savedLink;
+    </script>
+</body>
+</html>

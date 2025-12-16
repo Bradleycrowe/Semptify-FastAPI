@@ -1,0 +1,845 @@
+{
+  "timestamp": "2025-12-13T17:32:31.258509",
+  "summary": {
+    "pages_checked": 75,
+    "links_checked": 98,
+    "api_endpoints_checked": 64,
+    "total_issues": 104,
+    "errors": 20,
+    "warnings": 2,
+    "info": 82
+  },
+  "issues": [
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': \ud83c\udfe0 Local Legal Aid",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': \u2696\ufe0f Pro Bono Lawyers",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': How to Answer an Eviction",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Your Rights as a Tenant",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\admin\\mission_control.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Preparing for Court",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\brain.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "warning",
+      "page": "static\\briefcase.html",
+      "type": "possible_undefined_function",
+      "description": "onclick handler '${isDisabled ? '' : `selectMoveTarget' may be undefined",
+      "element": "${isDisabled ? '' : `selectMoveTarget('${folder.id}')`}"
+    },
+    {
+      "severity": "info",
+      "page": "static\\briefcase.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\calendar.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\campaign.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\command_center.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\command_center.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': \ud83d\udcddSticky Notes",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\command_center.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': \u2705Checklist",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\complaints.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\complaints.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': \ud83d\udce4 Go to Agency Filing Portal",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\components\\auth-strip.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\components\\header.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\components\\header.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': View all notifications",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\components\\header.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Profile",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "todo",
+      "description": "TODO:  Implement interaction logging modal",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': All Contacts0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Landlords0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Attorneys0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Witnesses0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Inspectors0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Agencies0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\contacts.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Legal Aid0",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\court_learning.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\court_packet.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\crisis_intake.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Find Local Legal Aid",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\dashboard-v2.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\dashboard.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\document_intake.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\document_intake_backup.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\documents-v2.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\documents.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\documents_simple.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\enterprise-dashboard.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\enterprise-dashboard.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Dashboard",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\funding_search.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\home.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': No, not yet",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\index-simple-backup.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\interactive-timeline.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\interactive-timeline.html",
+      "type": "todo",
+      "description": "TODO:  Implement edit functionality",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\journey.html",
+      "type": "todo",
+      "description": "todo: {",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Filing Answer",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Jury Trial",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Defenses",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Return Rules",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Violations",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Warranty",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Rent Escrow",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': 90-Day Rule",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Complaints",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Protected Classes",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': File Complaint",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Accommodations",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Assistance Animals",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': See all statutes \u2192",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': See all cases \u2192",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\law_library_old.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\legal_analysis.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\legal_trails.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\mesh_network.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\module-converter.html",
+      "type": "todo",
+      "description": "TODO:  Migrate your Flask logic here",
+      "element": ""
+    },
+    {
+      "severity": "warning",
+      "page": "static\\pdf_tools.html",
+      "type": "missing_image",
+      "description": "Image tag with missing or empty src",
+      "element": "<img alt=\"PDF Page\" class=\"page-image\" id=\"pageImage\"/>"
+    },
+    {
+      "severity": "info",
+      "page": "static\\pdf_tools.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\recognition.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\recognition_demo.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\research_module.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\roles.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\setup_wizard.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\storage_setup.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\style_editor.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Home",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\style_editor.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Dashboard",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\style_editor.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Documents",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\style_editor.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Crisis Help",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\templates\\pages\\dashboard.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\timeline.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\welcome.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Terms",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\welcome_backup.html",
+      "type": "debug_code",
+      "description": "Contains console.error() calls",
+      "element": ""
+    },
+    {
+      "severity": "info",
+      "page": "static\\welcome_new.html",
+      "type": "placeholder_link",
+      "description": "Link with href='#': Terms",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/documents/ returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/timeline/ returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/defenses/ returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/motions/ returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/counterclaims/ returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/laws/categories returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/law-library/quick-reference/eviction_process returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/documents/list returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/eviction-defense/counterclaims returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/eviction-defense/procedures returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /actions/next returned 500",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /dashboard/greeting returned 404",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/law-library/statutes returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/setup/status returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/setup/documents returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/eviction-defense/defenses returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/eviction-defense/motions returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/setup/summary returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/law-library/categories returned 401",
+      "element": ""
+    },
+    {
+      "severity": "error",
+      "page": "API",
+      "type": "api_error",
+      "description": "API error: /api/law-library/case-law returned 401",
+      "element": ""
+    }
+  ],
+  "broken_links": [],
+  "api_errors": [
+    {
+      "endpoint": "/api/documents/",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/timeline/",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/defenses/",
+      "status": 404,
+      "response": "{'detail': 'Not Found'}"
+    },
+    {
+      "endpoint": "/api/motions/",
+      "status": 404,
+      "response": "{'detail': 'Not Found'}"
+    },
+    {
+      "endpoint": "/api/counterclaims/",
+      "status": 404,
+      "response": "{'detail': 'Not Found'}"
+    },
+    {
+      "endpoint": "/api/laws/categories",
+      "status": 404,
+      "response": "{'detail': 'Not Found'}"
+    },
+    {
+      "endpoint": "/api/law-library/quick-reference/eviction_process",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/documents/list",
+      "status": 404,
+      "response": "{'detail': 'Document not found'}"
+    },
+    {
+      "endpoint": "/api/eviction-defense/counterclaims",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/eviction-defense/procedures",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/actions/next",
+      "status": 500,
+      "response": "{'detail': 'Internal server error'}"
+    },
+    {
+      "endpoint": "/dashboard/greeting",
+      "status": 404,
+      "response": "{'detail': 'Not Found'}"
+    },
+    {
+      "endpoint": "/api/law-library/statutes",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/setup/status",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/setup/documents",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/eviction-defense/defenses",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/eviction-defense/motions",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/setup/summary",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/law-library/categories",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    },
+    {
+      "endpoint": "/api/law-library/case-law",
+      "status": 401,
+      "response": "{'detail': 'Authentication required. Connect your cloud storage at /storage/providers'}"
+    }
+  ]
+}

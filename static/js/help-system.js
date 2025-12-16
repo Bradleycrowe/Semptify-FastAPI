@@ -1028,7 +1028,7 @@ const SemptifyHelp = {
     },
 
     /**
-     * Create the floating help toggle button
+     * Create the floating help toggle button (draggable)
      */
     createHelpToggle() {
         // Don't create if already exists
@@ -1037,14 +1037,153 @@ const SemptifyHelp = {
         const toggle = document.createElement('button');
         toggle.className = 'semptify-help-toggle';
         toggle.innerHTML = `
+            <span class="drag-handle" title="Drag to move">⋮⋮</span>
             <span class="toggle-icon">❓</span>
             <span class="toggle-text">Help</span>
         `;
         toggle.setAttribute('title', 'Toggle help mode to see explanations for all features');
         
-        toggle.addEventListener('click', () => this.toggleHelp());
+        // Click handler (only if not dragging)
+        toggle.addEventListener('click', (e) => {
+            if (!toggle.classList.contains('was-dragged')) {
+                this.toggleHelp();
+            }
+            toggle.classList.remove('was-dragged');
+        });
+        
+        // Make draggable
+        this.makeDraggable(toggle);
+        
+        // Restore saved position
+        this.restoreTogglePosition(toggle);
         
         document.body.appendChild(toggle);
+    },
+
+    /**
+     * Make an element draggable with touch and mouse support
+     */
+    makeDraggable(element) {
+        let isDragging = false;
+        let hasMoved = false;
+        let startX, startY, startLeft, startTop;
+        
+        const onStart = (e) => {
+            // Only drag from the handle or element itself
+            const touch = e.touches ? e.touches[0] : e;
+            
+            isDragging = true;
+            hasMoved = false;
+            
+            const rect = element.getBoundingClientRect();
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startLeft = rect.left;
+            startTop = rect.top;
+            
+            element.classList.add('dragging');
+            element.style.transition = 'none';
+            
+            // Prevent text selection
+            e.preventDefault();
+        };
+        
+        const onMove = (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
+            
+            // Only mark as moved if dragged more than 5px
+            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                hasMoved = true;
+            }
+            
+            // Calculate new position
+            let newLeft = startLeft + deltaX;
+            let newTop = startTop + deltaY;
+            
+            // Keep within viewport bounds
+            const bounds = {
+                minX: 0,
+                maxX: window.innerWidth - element.offsetWidth,
+                minY: 0,
+                maxY: window.innerHeight - element.offsetHeight
+            };
+            
+            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
+            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
+            
+            // Apply position (switch from bottom/right to top/left for dragging)
+            element.style.left = newLeft + 'px';
+            element.style.top = newTop + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            
+            e.preventDefault();
+        };
+        
+        const onEnd = () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            element.classList.remove('dragging');
+            element.style.transition = '';
+            
+            if (hasMoved) {
+                element.classList.add('was-dragged');
+                // Save position
+                this.saveTogglePosition(element);
+                
+                // Remove was-dragged after a short delay
+                setTimeout(() => element.classList.remove('was-dragged'), 100);
+            }
+        };
+        
+        // Mouse events
+        element.addEventListener('mousedown', onStart);
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onEnd);
+        
+        // Touch events
+        element.addEventListener('touchstart', onStart, { passive: false });
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onEnd);
+    },
+
+    /**
+     * Save toggle button position to localStorage
+     */
+    saveTogglePosition(element) {
+        const rect = element.getBoundingClientRect();
+        const position = {
+            left: rect.left,
+            top: rect.top
+        };
+        localStorage.setItem('semptify_help_toggle_pos', JSON.stringify(position));
+    },
+
+    /**
+     * Restore toggle button position from localStorage
+     */
+    restoreTogglePosition(element) {
+        const saved = localStorage.getItem('semptify_help_toggle_pos');
+        if (saved) {
+            try {
+                const pos = JSON.parse(saved);
+                // Validate position is still within viewport
+                if (pos.left >= 0 && pos.left <= window.innerWidth - 100 &&
+                    pos.top >= 0 && pos.top <= window.innerHeight - 50) {
+                    element.style.left = pos.left + 'px';
+                    element.style.top = pos.top + 'px';
+                    element.style.right = 'auto';
+                    element.style.bottom = 'auto';
+                }
+            } catch (e) {
+                console.warn('Failed to restore help toggle position');
+            }
+        }
     },
 
     /**
@@ -1077,7 +1216,7 @@ const SemptifyHelp = {
         const styles = document.createElement('style');
         styles.id = 'semptify-help-styles';
         styles.textContent = `
-            /* Help Toggle Button */
+            /* Help Toggle Button - Draggable */
             .semptify-help-toggle {
                 position: fixed;
                 bottom: 20px;
@@ -1091,14 +1230,41 @@ const SemptifyHelp = {
                 color: white;
                 border: none;
                 border-radius: 25px;
-                cursor: pointer;
+                cursor: grab;
                 font-size: 14px;
                 font-weight: 600;
                 box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-                transition: all 0.3s ease;
+                transition: all 0.3s ease, left 0s, top 0s;
+                user-select: none;
+                touch-action: none;
             }
 
-            .semptify-help-toggle:hover {
+            .semptify-help-toggle .drag-handle {
+                opacity: 0.6;
+                font-size: 12px;
+                letter-spacing: -2px;
+                cursor: grab;
+                padding-right: 4px;
+                border-right: 1px solid rgba(255,255,255,0.3);
+                margin-right: 4px;
+            }
+
+            .semptify-help-toggle:hover .drag-handle {
+                opacity: 1;
+            }
+
+            .semptify-help-toggle.dragging {
+                cursor: grabbing;
+                transform: scale(1.05);
+                box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+                opacity: 0.9;
+            }
+
+            .semptify-help-toggle.dragging .drag-handle {
+                cursor: grabbing;
+            }
+
+            .semptify-help-toggle:hover:not(.dragging) {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
             }

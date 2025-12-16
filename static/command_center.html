@@ -718,6 +718,9 @@
             <span class="case-number" id="caseNumber">Case #19AV-CV-25-3477</span>
         </div>
         <div class="header-actions">
+            <button class="btn btn-outline" onclick="showKeyboardHelp()" title="Keyboard Shortcuts (Ctrl+K)" style="padding: 0.5rem 0.75rem;">
+                ⌨️ <kbd style="font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 0.15rem 0.3rem; border-radius: 3px;">Ctrl+K</kbd>
+            </button>
             <button class="btn btn-warning" onclick="openZoomSetup()">📹 Zoom Court Setup</button>
             <button class="btn btn-danger" onclick="openEmergency()">🚨 Emergency Help</button>
             <div class="user-info">
@@ -1771,6 +1774,112 @@ What would you like help with?</div>
             const notes = JSON.parse(savedNotes);
             document.querySelectorAll('.sticky-note').forEach((note, i) => {
                 if (notes[i]) note.textContent = notes[i];
+            });
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not typing in an input/textarea
+            const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'u': // Ctrl+U = Upload document
+                        if (!isTyping) {
+                            e.preventDefault();
+                            // Trigger file upload
+                            const uploadInput = document.querySelector('input[type="file"]') || 
+                                document.getElementById('fileInput');
+                            if (uploadInput) uploadInput.click();
+                            else showToast('📤 Use the upload area to add documents', 'info');
+                        }
+                        break;
+                    case 'd': // Ctrl+D = Defense analysis
+                        if (!isTyping) {
+                            e.preventDefault();
+                            analyzeCase();
+                        }
+                        break;
+                    case 'k': // Ctrl+K = Show keyboard shortcuts
+                        e.preventDefault();
+                        showKeyboardHelp();
+                        break;
+                    case 'n': // Ctrl+N = Open notes
+                        if (!isTyping) {
+                            e.preventDefault();
+                            openNotes();
+                        }
+                        break;
+                    case 'z': // Ctrl+Z = Zoom setup (only if not typing)
+                        if (!isTyping && !e.shiftKey) {
+                            e.preventDefault();
+                            openZoomSetup();
+                        }
+                        break;
+                    case '/': // Ctrl+/ = Focus AI chat
+                        e.preventDefault();
+                        document.getElementById('aiInput')?.focus();
+                        break;
+                }
+            }
+            
+            // Escape key to close modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(m => {
+                    m.classList.remove('active');
+                });
+            }
+        });
+
+        function showKeyboardHelp() {
+            const helpModal = document.createElement('div');
+            helpModal.className = 'modal active';
+            helpModal.id = 'keyboardHelpModal';
+            helpModal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <h3 style="margin-bottom: 1rem;">⌨️ Keyboard Shortcuts</h3>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Upload Document</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+U</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Defense Analysis</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+D</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Open Notes</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+N</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Zoom Setup</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+Z</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Focus AI Chat</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+/</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Show This Help</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Ctrl+K</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-hover); border-radius: 0.25rem;">
+                            <span>Close Modal</span>
+                            <kbd style="background: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-family: monospace;">Esc</kbd>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('keyboardHelpModal')" style="margin-top: 1rem; width: 100%; padding: 0.75rem; background: var(--primary); border: none; border-radius: 0.5rem; color: white; cursor: pointer;">
+                        Got it!
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(helpModal);
+            
+            // Close on backdrop click
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    helpModal.remove();
+                }
             });
         }
     </script>

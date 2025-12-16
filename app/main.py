@@ -63,6 +63,7 @@ from app.routers.mesh import router as distributed_mesh_router
 from app.routers.legal_trails import router as legal_trails_router
 from app.routers.contacts import router as contacts_router
 from app.routers.recognition import router as recognition_router
+from app.routers.search import router as search_router
 from app.routers.court_forms import router as court_forms_router
 from app.routers.zoom_court_prep import router as zoom_court_prep_router
 from app.routers.pdf_tools import router as pdf_tools_router
@@ -73,6 +74,7 @@ from app.routers.actions import router as actions_router
 from app.routers.progress import router as progress_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.enterprise_dashboard import router as enterprise_dashboard_router
+from app.routers.crawler import router as crawler_router
 from app.core.mesh_integration import start_mesh_network, stop_mesh_network
 
 # Tenant Defense Module
@@ -98,16 +100,13 @@ except ImportError as e:
 # =============================================================================
 
 def setup_logging():
-    """Configure logging based on settings."""
+    """Configure logging based on settings using enhanced logging config."""
+    from app.core.logging_config import setup_logging as configure_logging
     settings = get_settings()
-    log_format = (
-        '{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}'
-        if settings.log_json_format
-        else "%(asctime)s - %(levelname)s - %(message)s"
-    )
-    logging.basicConfig(
-        level=getattr(logging, settings.log_level.upper()),
-        format=log_format,
+    configure_logging(
+        level=settings.log_level.upper(),
+        json_format=settings.log_json_format,
+        log_file=Path("logs/semptify.log") if settings.log_json_format else None,
     )
 
 
@@ -396,6 +395,10 @@ async def lifespan(app: FastAPI):
         await wipe_and_reset()
         raise SystemExit(f"Setup failed after retries: {e}")
     
+    # Register graceful shutdown handler
+    from app.core.shutdown import register_shutdown_handler, task_manager
+    register_shutdown_handler()
+    
     # Start distributed mesh network
     try:
         await start_mesh_network()
@@ -405,6 +408,16 @@ async def lifespan(app: FastAPI):
 
     yield  # Application runs here
 
+    # --- GRACEFUL SHUTDOWN ---
+    logger.info("")
+    logger.info("=" * 50)
+    logger.info("🛑 SHUTTING DOWN GRACEFULLY...")
+    logger.info("=" * 50)
+    
+    # Wait for background tasks to complete
+    await task_manager.wait_for_completion(timeout=10.0)
+    logger.info("   Background tasks completed")
+
     # Stop distributed mesh network
     try:
         await stop_mesh_network()
@@ -412,11 +425,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠️ Mesh network stop warning: {e}")
 
-    # --- SHUTDOWN ---
-    logger.info("")
-    logger.info("=" * 50)
-    logger.info("🛑 SHUTTING DOWN...")
-    logger.info("=" * 50)
     await close_db()
     logger.info("   Database connections closed")
     logger.info("   Goodbye! 👋")
@@ -1390,7 +1398,23 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title=settings.app_name,
-        description=settings.app_description,
+        description=f"""{settings.app_description}
+
+## Authentication
+Semptify uses **storage-based authentication**. Connect your cloud storage (Google Drive, Dropbox, or OneDrive) to authenticate. Your identity IS your storage access - no passwords required.
+
+## Rate Limits
+- Standard endpoints: 60 requests/minute
+- AI endpoints: 10 requests/minute  
+- Auth endpoints: 5 requests/minute
+- File uploads: 20 requests/minute
+
+## API Versioning
+Current version: **v1**. Check `GET /api/version` for version info.
+
+## Error Responses
+All errors return JSON with `detail` field. Rate limit errors include `retry_after` header.
+""",
         version=settings.app_version,
         lifespan=lifespan,
         docs_url="/api/docs" if settings.enable_docs else None,
@@ -1400,14 +1424,54 @@ def create_app() -> FastAPI:
         contact={
             "name": "Semptify Support",
             "url": "https://github.com/Semptify/Semptify-FastAPI",
+            "email": "support@semptify.com",
         },
         license_info={
             "name": "MIT License",
             "url": "https://opensource.org/licenses/MIT",
         },
-    )    # =========================================================================
-    # Middleware
+        servers=[
+            {"url": "/", "description": "Current server"},
+        ],
+    )
+    
     # =========================================================================
+    # Rate Limiting
+    # =========================================================================
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
+    from app.core.rate_limit import limiter, rate_limit_exceeded_handler
+    
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+    
+    # =========================================================================
+    # Middleware (order matters - first added = last to run)
+    # =========================================================================
+    
+    # Storage requirement (CRITICAL: Enforces everyone has storage connected)
+    from app.core.storage_middleware import StorageRequirementMiddleware
+    app.add_middleware(
+        StorageRequirementMiddleware,
+        enforce=settings.security_mode == "enforced"  # Only enforce in production
+    )
+    logging.getLogger(__name__).info("🔒 Storage requirement middleware enabled (enforce=%s)", settings.security_mode == "enforced")
+    
+    # Security headers (runs last, adds headers to all responses)
+    from app.core.security_headers import SecurityHeadersMiddleware
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        enable_hsts=settings.security_mode == "enforced",  # HSTS only in production
+    )
+    
+    # Request timeout (prevents hung requests)
+    from app.core.timeout import TimeoutMiddleware
+    app.add_middleware(TimeoutMiddleware)
+    
+    # Request logging (for debugging/monitoring)
+    from app.core.logging_middleware import RequestLoggingMiddleware
+    if settings.log_level.upper() == "DEBUG":
+        app.add_middleware(RequestLoggingMiddleware)
     
     # CORS
     app.add_middleware(
@@ -1430,19 +1494,16 @@ def create_app() -> FastAPI:
     # =========================================================================
     # Exception Handlers
     # =========================================================================
-    
-    @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception):
-        logger = logging.getLogger(__name__)
-        logger.error(f"Unhandled exception: {exc}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error"},
-        )
+    from app.core.errors import setup_exception_handlers
+    setup_exception_handlers(app)
     
     # =========================================================================
     # Register Routers
     # =========================================================================
+    
+    # API Version info (GET /api/version)
+    from app.core.versioning import version_router
+    app.include_router(version_router)
     
     # Health & metrics (no prefix)
     app.include_router(health.router, tags=["Health"])
@@ -1483,6 +1544,7 @@ def create_app() -> FastAPI:
     app.include_router(legal_trails_router, tags=["Legal Trails"])  # Track violations, claims, broker oversight, filing deadlines
     app.include_router(contacts_router, tags=["Contact Manager"])  # Track landlords, attorneys, witnesses, agencies
     app.include_router(recognition_router, tags=["Document Recognition"])  # World-class document recognition engine
+    app.include_router(search_router, prefix="/api/search", tags=["Global Search"])  # Universal search across all content
     app.include_router(court_forms_router, tags=["Court Forms"])  # Auto-generate Minnesota court forms
     app.include_router(zoom_court_prep_router, tags=["Zoom Court Prep"])  # Hearing preparation and tech checks
     app.include_router(pdf_tools_router, tags=["PDF Tools"])  # PDF reader, viewer, page extractor
@@ -1491,8 +1553,10 @@ def create_app() -> FastAPI:
     app.include_router(court_packet_router, tags=["Court Packet"])  # Export court-ready document packets
     app.include_router(actions_router, tags=["Smart Actions"])  # Personalized action recommendations
     app.include_router(progress_router, tags=["Progress Tracker"])  # User journey progress tracking
+
     app.include_router(dashboard_router, tags=["Unified Dashboard"])  # Combined dashboard data
     app.include_router(enterprise_dashboard_router, tags=["Enterprise Dashboard"])  # Premium enterprise UI & API
+    app.include_router(crawler_router, tags=["Public Data Crawler"])  # Ethical web crawler for MN public data
 
     # Tenant Defense Module - Evidence collection, sealing petitions, demand letters
     app.include_router(tenant_defense_router, tags=["Tenant Defense"])
@@ -1575,8 +1639,12 @@ def create_app() -> FastAPI:
         })
 
     @app.get("/dashboard", response_class=HTMLResponse)
-    async def enterprise_dashboard():
-        """Direct access to enterprise dashboard for power users."""
+    async def dashboard_page():
+        """Serve the main dashboard with onboarding modal for new users."""
+        dashboard_path = Path("static/dashboard.html")
+        if dashboard_path.exists():
+            return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
+        # Fallback to enterprise dashboard
         enterprise_path = Path("static/enterprise-dashboard.html")
         if enterprise_path.exists():
             return HTMLResponse(content=enterprise_path.read_text(encoding="utf-8"))
@@ -1922,6 +1990,61 @@ def create_app() -> FastAPI:
     async def zoom_court_page():
         """Serve the zoom court helper page."""
         return HTMLResponse(content=generate_zoom_court_html())
+
+    # =========================================================================
+    # Legal Analysis Page
+    # =========================================================================
+
+    @app.get("/legal_analysis.html", response_class=HTMLResponse)
+    @app.get("/legal-analysis", response_class=HTMLResponse)
+    async def legal_analysis_page():
+        """Serve the legal analysis page."""
+        legal_analysis_path = BASE_PATH / "static" / "legal_analysis.html"
+        if legal_analysis_path.exists():
+            return HTMLResponse(content=legal_analysis_path.read_text(encoding="utf-8"))
+        return HTMLResponse(
+            content="<h1>Legal Analysis page not found</h1>",
+            status_code=404
+        )
+
+    # =========================================================================
+    # My Tenancy Page
+    # =========================================================================
+
+    @app.get("/my_tenancy.html", response_class=HTMLResponse)
+    @app.get("/my-tenancy", response_class=HTMLResponse)
+    async def my_tenancy_page():
+        """Serve the my tenancy page."""
+        tenancy_path = BASE_PATH / "static" / "my_tenancy.html"
+        if tenancy_path.exists():
+            return HTMLResponse(content=tenancy_path.read_text(encoding="utf-8"))
+        return HTMLResponse(
+            content="<h1>My Tenancy page not found</h1>",
+            status_code=404
+        )
+
+    # =========================================================================
+    # Catch-All HTML Page Router
+    # =========================================================================
+
+    @app.get("/{page_name}.html", response_class=HTMLResponse)
+    async def serve_html_page(page_name: str):
+        """
+        Serve any HTML page from the static folder.
+        This catch-all route allows accessing pages like /dashboard.html, /documents.html, etc.
+        """
+        # Security: prevent directory traversal
+        if ".." in page_name or "/" in page_name or "\\" in page_name:
+            return HTMLResponse(content="<h1>400 - Invalid Request</h1>", status_code=400)
+        
+        page_path = BASE_PATH / "static" / f"{page_name}.html"
+        if page_path.exists():
+            return HTMLResponse(content=page_path.read_text(encoding="utf-8"))
+        
+        return JSONResponse(
+            content={"error": "not_found", "message": f"Page '{page_name}.html' not found"},
+            status_code=404
+        )
 
     return app
 # Create the app instance
