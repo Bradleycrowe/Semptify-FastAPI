@@ -72,6 +72,7 @@ const SemptifyNav = {
             items: [
                 { icon: '🧠', label: 'AI Assistant', href: '/static/brain.html' },
                 { icon: '📝', label: 'Complaint Builder', href: '/static/complaints.html' },
+                { icon: '✉️', label: 'Letter Builder', href: '/static/letter_builder.html' },
                 { icon: '📅', label: 'Calendar', href: '/static/calendar.html' },
                 { icon: '📇', label: 'Contacts', href: '/static/contacts.html' },
                 { icon: '🔬', label: 'Research', href: '/static/research.html' },

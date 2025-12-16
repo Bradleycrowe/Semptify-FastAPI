@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Builder - Semptify</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-elevated: #252538;
+            --text-primary: #e0e0e0;
+            --text-muted: #888;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --border-color: #333;
+            --success: #10b981;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .page-header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+        
+        .letter-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .letter-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .letter-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .letter-card.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .letter-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .letter-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .builder-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-elevated);
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .result-content {
+            white-space: pre-wrap;
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .disclaimer {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #f59e0b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .action-buttons button:hover {
+            border-color: var(--accent);
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Shared Navigation -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+    
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="page-header">
+            <h1><i class="bi bi-envelope-paper"></i> Letter Builder</h1>
+            <p>Generate professional letters to your landlord with AI assistance</p>
+        </div>
+        
+        <!-- Letter Type Selection -->
+        <h4 class="mb-3">Select Letter Type</h4>
+        <div class="letter-types">
+            <div class="letter-card" data-type="repair_request" onclick="selectType(this)">
+                <h3>🔧 Repair Request</h3>
+                <p>Formally request repairs for maintenance issues, habitability problems, or safety hazards</p>
+            </div>
+            <div class="letter-card" data-type="response_letter" onclick="selectType(this)">
+                <h3>📬 Response to Notice</h3>
+                <p>Respond to eviction notices, lease violations, or other landlord communications</p>
+            </div>
+            <div class="letter-card" data-type="motion" onclick="selectType(this)">
+                <h3>⚖️ Court Motion</h3>
+                <p>Draft a motion for court proceedings related to your housing case</p>
+            </div>
+            <div class="letter-card" data-type="statement" onclick="selectType(this)">
+                <h3>📝 Written Statement</h3>
+                <p>Create a formal statement documenting events, timeline, or your position</p>
+            </div>
+        </div>
+        
+        <!-- Builder Form -->
+        <div class="builder-section">
+            <h4 class="mb-3">Customize Your Letter</h4>
+            <form id="letter-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Letter Type</label>
+                        <select class="form-select" id="template-type" required>
+                            <option value="">Select a type above...</option>
+                            <option value="repair_request">Repair Request</option>
+                            <option value="response_letter">Response to Landlord</option>
+                            <option value="motion">Court Motion</option>
+                            <option value="statement">Written Statement</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tone</label>
+                        <select class="form-select" id="letter-tone">
+                            <option value="formal">Formal - Professional and business-like</option>
+                            <option value="assertive">Assertive - Firm but respectful</option>
+                            <option value="conciliatory">Conciliatory - Friendly and cooperative</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Describe Your Situation</label>
+                    <textarea class="form-control" id="letter-context" rows="5" placeholder="Include relevant details such as:
+• Your address and landlord's name
+• Specific issues or problems
+• Important dates and timeline
+• Previous attempts to resolve
+• What outcome you're seeking"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-generate" id="generate-btn">
+                    <i class="bi bi-magic"></i> Generate Letter
+                </button>
+            </form>
+            
+            <!-- Result Section (hidden initially) -->
+            <div id="result-section" class="result-section" style="display: none;">
+                <h5><i class="bi bi-check-circle text-success"></i> Generated Letter</h5>
+                <div id="result-content" class="result-content"></div>
+                
+                <div class="action-buttons">
+                    <button onclick="copyLetter()">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button onclick="downloadLetter()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                    <button onclick="printLetter()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                    <button onclick="editLetter()">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                </div>
+                
+                <div class="disclaimer">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Important:</strong> This AI-generated letter is a starting point. Please review carefully and consider consulting with a legal professional before sending. Laws vary by location and every situation is unique.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedType = '';
+        let generatedContent = '';
+        
+        function selectType(card) {
+            // Remove active from all cards
+            document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('active'));
+            // Add active to clicked card
+            card.classList.add('active');
+            // Update select
+            selectedType = card.dataset.type;
+            document.getElementById('template-type').value = selectedType;
+        }
+        
+        // Form submission
+        document.getElementById('letter-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const templateType = document.getElementById('template-type').value;
+            const tone = document.getElementById('letter-tone').value;
+            const context = document.getElementById('letter-context').value;
+            const btn = document.getElementById('generate-btn');
+            
+            if (!templateType) {
+                alert('Please select a letter type');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Generating...';
+            
+            try {
+                const response = await fetch('/api/copilot/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        template_type: templateType,
+                        tone: tone,
+                        additional_context: context
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    generatedContent = result.content;
+                    document.getElementById('result-content').textContent = generatedContent;
+                    document.getElementById('result-section').style.display = 'block';
+                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    alert(error.detail || 'Failed to generate letter. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection and try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic"></i> Generate Letter';
+            }
+        });
+        
+        function copyLetter() {
+            navigator.clipboard.writeText(generatedContent).then(() => {
+                alert('Letter copied to clipboard!');
+            });
+        }
+        
+        function downloadLetter() {
+            const blob = new Blob([generatedContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'letter.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function printLetter() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>Letter</title></head>
+                <body style="font-family: Georgia, serif; line-height: 1.8; padding: 2rem; max-width: 800px; margin: 0 auto;">
+                    <pre style="white-space: pre-wrap;">${generatedContent}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        function editLetter() {
+            const content = document.getElementById('result-content');
+            if (content.contentEditable === 'true') {
+                content.contentEditable = 'false';
+                content.style.border = 'none';
+                generatedContent = content.textContent;
+            } else {
+                content.contentEditable = 'true';
+                content.style.border = '2px dashed var(--accent)';
+                content.focus();
+            }
+        }
+        
+        // Sync card selection with dropdown
+        document.getElementById('template-type').addEventListener('change', (e) => {
+            const type = e.target.value;
+            document.querySelectorAll('.letter-card').forEach(c => {
+                c.classList.toggle('active', c.dataset.type === type);
+            });
+        });
+    </script>
+</body>
+</html>

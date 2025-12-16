@@ -28,8 +28,10 @@ async def test_copilot_status_shows_provider(client: AsyncClient):
     response = await client.get("/api/copilot/status")
     data = response.json()
     # Provider should be one of the supported options or none
-    if data["available"]:
-        assert data["provider"] in ["openai", "azure_openai", "azure", "ollama", "groq", None]
+    if data.get("available"):
+        # Provider can be various options including fallbacks
+        valid_providers = ["openai", "azure_openai", "azure", "ollama", "groq", "gemini", None, "mock"]
+        assert data.get("provider") in valid_providers or data.get("provider") is None
 
 
 # =============================================================================

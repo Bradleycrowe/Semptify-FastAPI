@@ -863,7 +863,101 @@ const UI = {
      * Show letter builder modal
      */
     showLetterBuilder(type) {
-        alert(`Letter builder for "${type}" coming soon!\n\nThis will generate professional letters to your landlord based on your situation.`);
+        // Map friendly type names to API template types
+        const typeMap = {
+            'repair': 'repair_request',
+            'repair_request': 'repair_request',
+            'response': 'response_letter',
+            'response_letter': 'response_letter',
+            'motion': 'motion',
+            'statement': 'statement'
+        };
+        
+        const templateType = typeMap[type] || 'response_letter';
+        const typeName = templateType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        
+        // Create modal HTML
+        const modalHtml = `
+            <div id="letter-builder-modal" class="modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 9999;">
+                <div class="modal-content" style="background: var(--bg-elevated, #1a1a2e); border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="margin: 0;">📝 ${typeName} Generator</h2>
+                        <button onclick="document.getElementById('letter-builder-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary);">×</button>
+                    </div>
+                    
+                    <form id="letter-builder-form">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tone</label>
+                            <select id="letter-tone" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color, #333); background: var(--bg-secondary, #252538); color: var(--text-primary);">
+                                <option value="formal">Formal</option>
+                                <option value="assertive">Assertive</option>
+                                <option value="conciliatory">Conciliatory</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Additional Context</label>
+                            <textarea id="letter-context" rows="4" placeholder="Describe your situation, key dates, issues, etc." style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color, #333); background: var(--bg-secondary, #252538); color: var(--text-primary); resize: vertical;"></textarea>
+                        </div>
+                        
+                        <button type="submit" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            ✨ Generate Letter
+                        </button>
+                    </form>
+                    
+                    <div id="letter-result" style="display: none; margin-top: 1.5rem;">
+                        <h3 style="margin-bottom: 0.5rem;">Generated Letter</h3>
+                        <div id="letter-content" style="background: var(--bg-secondary, #252538); padding: 1rem; border-radius: 8px; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button onclick="navigator.clipboard.writeText(document.getElementById('letter-content').innerText).then(() => alert('Copied!'))" style="flex: 1; padding: 0.5rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-primary);">📋 Copy</button>
+                            <button onclick="window.print()" style="flex: 1; padding: 0.5rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-primary);">🖨️ Print</button>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); font-style: italic;">⚠️ This is a starting point. Please review and consult an attorney before sending.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Handle form submission
+        document.getElementById('letter-builder-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const tone = document.getElementById('letter-tone').value;
+            const context = document.getElementById('letter-context').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Generating...';
+            
+            try {
+                const response = await fetch('/api/copilot/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        template_type: templateType,
+                        tone: tone,
+                        additional_context: context
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('letter-content').textContent = result.content;
+                    document.getElementById('letter-result').style.display = 'block';
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    alert(error.detail || 'Failed to generate letter. Please try again.');
+                }
+            } catch (error) {
+                console.error('Letter generation error:', error);
+                alert('Network error. Please check your connection and try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✨ Generate Letter';
+            }
+        });
     },
 
     /**
