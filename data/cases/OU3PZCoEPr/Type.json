@@ -1,0 +1,81 @@
+{
+  "user_id": "OU3PZCoEPr",
+  "case_number": "Type",
+  "case_type": "eviction_defense",
+  "status": "active",
+  "court": "District Court",
+  "property_address": "",
+  "rent_amount": 0,
+  "security_deposit": 0,
+  "plaintiff": {
+    "name": "Meyer Njus Tanick, PA",
+    "role": "plaintiff",
+    "address": null,
+    "phone": null
+  },
+  "defendant": {
+    "name": "Lisa Burg",
+    "role": "defendant",
+    "is_pro_se": true,
+    "address": null,
+    "phone": null
+  },
+  "hearing_date": null,
+  "answer_due": null,
+  "source_document_id": "a9b3f9fa-9477-4cab-b84a-4c4d620c901b",
+  "source_filename": "MCRO_10-CV-25-142_Summons and Complaint_2025-01-27_20251213225854.pdf",
+  "timeline": [
+    {
+      "id": "evt_doc_a9b3f9fa",
+      "date": "2025-12-17",
+      "title": "Document Received: MCRO_10-CV-25-142_Summons and Complaint_2025-01-27_20251213225854.pdf",
+      "description": "Court document 'MCRO_10-CV-25-142_Summons and Complaint_2025-01-27_20251213225854.pdf' uploaded and case auto-created",
+      "category": "court",
+      "importance": "high"
+    },
+    {
+      "id": "evt_4e1189c3_085341",
+      "date": "2025-12-17",
+      "title": "Document Added: MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921.pdf",
+      "description": "Document 'MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921.pdf' (court_filing) added to case",
+      "category": "document",
+      "importance": "medium"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evi_a9b3f9fa",
+      "title": "MCRO_10-CV-25-142_Summons and Complaint_2025-01-27_20251213225854.pdf",
+      "evidence_type": "document",
+      "date_obtained": "2025-12-17",
+      "description": "Original court filing: court_filing",
+      "source": "document_intake",
+      "relevance": "Primary court document",
+      "document_id": "a9b3f9fa-9477-4cab-b84a-4c4d620c901b"
+    },
+    {
+      "id": "evi_4e1189c3_085341",
+      "title": "MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921.pdf",
+      "evidence_type": "document",
+      "date_obtained": "2025-12-17",
+      "description": "Document type: court_filing",
+      "source": "document_intake",
+      "relevance": "Related to case",
+      "document_id": "4e1189c3-5e2e-40d0-a9ea-bc48ec7fb4fd",
+      "auto_added": true
+    }
+  ],
+  "defenses": [],
+  "counterclaims": [],
+  "motions": [],
+  "deadlines": [],
+  "notes": [
+    "Case auto-created from uploaded document: MCRO_10-CV-25-142_Summons and Complaint_2025-01-27_20251213225854.pdf",
+    "[2025-12-17 08:53] Document auto-added: MCRO_19AV-CV-25-3477_Complaint-Civil_2025-11-17_20251203175921.pdf"
+  ],
+  "created_at": "2025-12-17T08:43:06.105915",
+  "updated_at": "2025-12-17T08:53:41.381174",
+  "auto_created": true,
+  "needs_evaluation": true,
+  "last_document_added": "2025-12-17T08:53:41.381166"
+}

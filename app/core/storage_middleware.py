@@ -61,12 +61,15 @@ PUBLIC_PREFIXES = (
     "/static/",  # All static files are public
     "/api/health",
     "/api/version",
+    "/api/roles",  # Role validation API - public for upgrade requests
+    "/api/guided-intake",  # Guided intake - conversational onboarding
     "/api/timeline",  # Timeline needs to work for case management
     "/api/calendar",  # Calendar/events
     "/api/documents",  # Documents list
     "/api/eviction",   # Eviction defense
     "/api/brain",      # AI/Brain features
     "/api/copilot",    # Copilot assistance
+    "/api/case-builder",  # Case management - intake and building
 )
 
 

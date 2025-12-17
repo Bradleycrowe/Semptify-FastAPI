@@ -75,6 +75,10 @@ from app.routers.progress import router as progress_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.enterprise_dashboard import router as enterprise_dashboard_router
 from app.routers.crawler import router as crawler_router
+from app.routers.role_ui import router as role_ui_router
+from app.routers.role_upgrade import router as role_upgrade_router
+from app.routers.guided_intake import router as guided_intake_router
+from app.routers.case_builder import router as case_builder_router
 from app.core.mesh_integration import start_mesh_network, stop_mesh_network
 
 # Tenant Defense Module
@@ -1508,6 +1512,15 @@ All errors return JSON with `detail` field. Rate limit errors include `retry_aft
     # Health & metrics (no prefix)
     app.include_router(health.router, tags=["Health"])
 
+    # Role-based UI routing (directs users to appropriate interface)
+    app.include_router(role_ui_router, tags=["Role UI"])
+    
+    # Role upgrade/verification API
+    app.include_router(role_upgrade_router, tags=["Role Management"])
+    
+    # Guided Intake - Conversational intake like an attorney/advocate
+    app.include_router(guided_intake_router, tags=["Guided Intake"])
+
     # Storage OAuth (handles authentication)
     app.include_router(storage.router, tags=["Storage Auth"])
 
@@ -1553,6 +1566,7 @@ All errors return JSON with `detail` field. Rate limit errors include `retry_aft
     app.include_router(court_packet_router, tags=["Court Packet"])  # Export court-ready document packets
     app.include_router(actions_router, tags=["Smart Actions"])  # Personalized action recommendations
     app.include_router(progress_router, tags=["Progress Tracker"])  # User journey progress tracking
+    app.include_router(case_builder_router, tags=["Case Builder"])  # Case management & intake
 
     app.include_router(dashboard_router, tags=["Unified Dashboard"])  # Combined dashboard data
     app.include_router(enterprise_dashboard_router, tags=["Enterprise Dashboard"])  # Premium enterprise UI & API

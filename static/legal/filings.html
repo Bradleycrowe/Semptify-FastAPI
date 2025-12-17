@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Filings - Semptify Legal</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { font-size: 22px; font-weight: 700; }
+        .sidebar-role { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+        .sidebar-nav { flex: 1; padding: 20px 16px; }
+        .nav-section { margin-bottom: 28px; }
+        .nav-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; padding: 0 12px; margin-bottom: 12px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; text-decoration: none; color: rgba(255,255,255,0.8); font-size: 14px; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+        .nav-badge { margin-left: auto; background: var(--danger); font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        
+        .main { margin-left: 280px; min-height: 100vh; }
+        
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topbar-title { font-size: 22px; font-weight: 600; }
+        .topbar-actions { display: flex; gap: 12px; }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        
+        .content { padding: 32px; }
+        
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-card.urgent { border-left: 4px solid var(--danger); }
+        
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        /* Filing Cards */
+        .filings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .filing-card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .filing-card.pending { border-top: 4px solid var(--warning); }
+        .filing-card.filed { border-top: 4px solid var(--success); }
+        .filing-card.draft { border-top: 4px solid var(--text-muted); }
+        
+        .filing-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filing-type { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        
+        .filing-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .filing-status.pending { background: #fef3c7; color: #92400e; }
+        .filing-status.filed { background: #d1fae5; color: #065f46; }
+        .filing-status.draft { background: #f1f5f9; color: #64748b; }
+        
+        .filing-body { padding: 20px; }
+        
+        .filing-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+        .filing-case { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+        
+        .filing-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 13px;
+        }
+        
+        .meta-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+        .meta-item.urgent { color: var(--danger); font-weight: 600; }
+        
+        .filing-footer {
+            padding: 16px 20px;
+            background: var(--bg);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        
+        @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .filings-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">⚖️ Semptify Legal</div>
+            <div class="sidebar-role">Attorney Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/legal/index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/legal/cases.html" class="nav-link">
+                    <span class="nav-icon">📁</span>
+                    Case Management
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Court</div>
+                <a href="/static/legal/filings.html" class="nav-link active">
+                    <span class="nav-icon">⚖️</span>
+                    Court Filings
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="/static/legal/discovery.html" class="nav-link">
+                    <span class="nav-icon">🔍</span>
+                    Discovery
+                </a>
+                <a href="/static/legal/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Research</div>
+                <a href="/static/legal/research.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Legal Research
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📖</span>
+                    MN Statutes
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">⚖️ Court Filings</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="viewTemplates()">📋 Templates</button>
+                <button class="btn btn-primary" onclick="newFiling()">➕ New Filing</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card urgent">
+                    <div class="stat-label">Due This Week</div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-sub">Requires immediate attention</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Review</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-sub">Awaiting attorney approval</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Filed This Month</div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-sub">All confirmed received</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Drafts</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-sub">In progress</div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="pending">Pending (2)</button>
+                <button class="tab-btn" data-tab="filed">Filed (8)</button>
+                <button class="tab-btn" data-tab="drafts">Drafts (5)</button>
+                <button class="tab-btn" data-tab="all">All Filings</button>
+            </div>
+            
+            <!-- Filings Grid -->
+            <div class="filings-grid" id="filingsGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        const filings = [
+            {
+                id: 1,
+                type: 'Answer to Complaint',
+                title: 'Defendant\'s Answer and Affirmative Defenses',
+                case: 'Garcia v. Sunrise Properties',
+                status: 'pending',
+                court: 'Hennepin County District',
+                deadline: 'Dec 20, 2025',
+                deadlineUrgent: true,
+                assignedTo: 'J. Smith, Esq.'
+            },
+            {
+                id: 2,
+                type: 'Motion',
+                title: 'Motion for Extension of Time',
+                case: 'Williams v. Metro Housing',
+                status: 'pending',
+                court: 'Ramsey County District',
+                deadline: 'Dec 22, 2025',
+                deadlineUrgent: true,
+                assignedTo: 'J. Smith, Esq.'
+            },
+            {
+                id: 3,
+                type: 'Discovery',
+                title: 'Plaintiff\'s First Set of Interrogatories',
+                case: 'Martinez v. Urban Rentals',
+                status: 'filed',
+                court: 'Hennepin County District',
+                filedDate: 'Dec 10, 2025',
+                confirmationNo: 'HEN-2025-12345'
+            },
+            {
+                id: 4,
+                type: 'Brief',
+                title: 'Memorandum in Support of Motion to Compel',
+                case: 'Johnson v. Lake Properties',
+                status: 'draft',
+                court: 'Dakota County District',
+                draftProgress: '75%',
+                assignedTo: 'J. Smith, Esq.'
+            },
+            {
+                id: 5,
+                type: 'Complaint',
+                title: 'Complaint for Breach of Warranty of Habitability',
+                case: 'Brown v. Riverside Mgmt',
+                status: 'filed',
+                court: 'Washington County District',
+                filedDate: 'Dec 5, 2025',
+                confirmationNo: 'WAS-2025-67890'
+            }
+        ];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFilings('pending');
+            setupTabs();
+        });
+        
+        function renderFilings(filter) {
+            const grid = document.getElementById('filingsGrid');
+            let data = filings;
+            
+            if (filter !== 'all') {
+                data = filings.filter(f => f.status === filter);
+            }
+            
+            grid.innerHTML = data.map(f => `
+                <div class="filing-card ${f.status}">
+                    <div class="filing-header">
+                        <span class="filing-type">${f.type}</span>
+                        <span class="filing-status ${f.status}">${f.status}</span>
+                    </div>
+                    <div class="filing-body">
+                        <div class="filing-title">${f.title}</div>
+                        <div class="filing-case">📁 ${f.case}</div>
+                        <div class="filing-meta">
+                            <div class="meta-item">🏛️ ${f.court}</div>
+                            ${f.deadline ? `<div class="meta-item ${f.deadlineUrgent ? 'urgent' : ''}">📅 Due: ${f.deadline}</div>` : ''}
+                            ${f.filedDate ? `<div class="meta-item">✓ Filed: ${f.filedDate}</div>` : ''}
+                            ${f.confirmationNo ? `<div class="meta-item"># ${f.confirmationNo}</div>` : ''}
+                            ${f.draftProgress ? `<div class="meta-item">📊 ${f.draftProgress} complete</div>` : ''}
+                            ${f.assignedTo ? `<div class="meta-item">👤 ${f.assignedTo}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="filing-footer">
+                        ${f.status === 'pending' ? `
+                            <button class="btn btn-primary btn-sm" onclick="fileDocument(${f.id})">📤 E-File Now</button>
+                            <button class="btn btn-outline btn-sm" onclick="editFiling(${f.id})">✏️ Edit</button>
+                        ` : ''}
+                        ${f.status === 'draft' ? `
+                            <button class="btn btn-primary btn-sm" onclick="editFiling(${f.id})">✏️ Continue Editing</button>
+                            <button class="btn btn-outline btn-sm" onclick="previewFiling(${f.id})">👁️ Preview</button>
+                        ` : ''}
+                        ${f.status === 'filed' ? `
+                            <button class="btn btn-outline btn-sm" onclick="downloadFiling(${f.id})">⬇️ Download</button>
+                            <button class="btn btn-outline btn-sm" onclick="viewReceipt(${f.id})">📋 Receipt</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderFilings(btn.dataset.tab);
+                });
+            });
+        }
+        
+        function newFiling() {
+            alert('Opening new filing wizard...');
+        }
+        
+        function viewTemplates() {
+            alert('Opening filing templates...');
+        }
+        
+        function fileDocument(id) {
+            if (confirm('Ready to e-file this document?\n\nThis will submit to the court\'s electronic filing system.')) {
+                alert('Document submitted for e-filing. Confirmation pending...');
+            }
+        }
+        
+        function editFiling(id) {
+            alert(`Opening document editor for filing ${id}...`);
+        }
+        
+        function previewFiling(id) {
+            alert(`Opening preview for filing ${id}...`);
+        }
+        
+        function downloadFiling(id) {
+            alert(`Downloading filing ${id}...`);
+        }
+        
+        function viewReceipt(id) {
+            alert(`Viewing e-filing receipt for ${id}...`);
+        }
+    </script>
+</body>
+</html>

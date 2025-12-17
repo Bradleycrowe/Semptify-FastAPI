@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privileged Documents - Semptify Legal</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --priv-bg: #fef3c7;
+            --priv-border: #f59e0b;
+            --wp-bg: #e0e7ff;
+            --wp-border: #6366f1;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { font-size: 22px; font-weight: 700; }
+        .sidebar-role { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+        .sidebar-nav { flex: 1; padding: 20px 16px; }
+        .nav-section { margin-bottom: 28px; }
+        .nav-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; padding: 0 12px; margin-bottom: 12px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; text-decoration: none; color: rgba(255,255,255,0.8); font-size: 14px; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+        .nav-badge { margin-left: auto; background: var(--danger); font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        .nav-badge.priv { background: var(--priv-bg); color: #92400e; }
+        
+        .main { margin-left: 280px; min-height: 100vh; }
+        
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topbar-title { font-size: 22px; font-weight: 600; }
+        .topbar-actions { display: flex; gap: 12px; }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .content { padding: 32px; }
+        
+        /* Warning Banner */
+        .priv-warning {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid var(--danger);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .priv-warning-icon { font-size: 32px; }
+        .priv-warning-text { flex: 1; }
+        .priv-warning-title { font-weight: 700; color: #991b1b; font-size: 16px; }
+        .priv-warning-desc { font-size: 13px; color: #7f1d1d; margin-top: 4px; }
+        
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-pill {
+            background: var(--card);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-pill strong { color: var(--primary); }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .search-input:focus { outline: none; border-color: var(--primary); }
+        
+        /* Document Grid */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .doc-card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        
+        .doc-card:hover { transform: translateY(-2px); }
+        
+        .doc-card.privileged { border-left: 4px solid var(--priv-border); }
+        .doc-card.work-product { border-left: 4px solid var(--wp-border); }
+        
+        .doc-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .doc-badges { display: flex; gap: 8px; }
+        
+        .priv-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        
+        .priv-badge.priv { background: var(--priv-bg); color: #92400e; border: 1px solid var(--priv-border); }
+        .priv-badge.wp { background: var(--wp-bg); color: #4338ca; border: 1px solid var(--wp-border); }
+        
+        .doc-actions { display: flex; gap: 8px; }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .action-btn:hover { background: var(--bg); }
+        .action-btn.danger:hover { background: #fef2f2; border-color: var(--danger); }
+        
+        .doc-body { padding: 20px; }
+        
+        .doc-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+        .doc-case { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+        
+        .doc-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .doc-footer {
+            padding: 12px 20px;
+            background: var(--bg);
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .doc-grid { grid-template-columns: 1fr; }
+            .stats-row { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">⚖️ Semptify Legal</div>
+            <div class="sidebar-role">Attorney Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/legal/index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/legal/cases.html" class="nav-link">
+                    <span class="nav-icon">📁</span>
+                    Case Management
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Privileged</div>
+                <a href="/static/legal/privileged.html" class="nav-link active">
+                    <span class="nav-icon">🔒</span>
+                    Privileged Docs
+                    <span class="nav-badge priv">12</span>
+                </a>
+                <a href="/static/legal/work-product.html" class="nav-link">
+                    <span class="nav-icon">📝</span>
+                    Work Product
+                </a>
+                <a href="/static/legal/notes.html" class="nav-link">
+                    <span class="nav-icon">🗒️</span>
+                    Case Notes
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Court</div>
+                <a href="/static/legal/filings.html" class="nav-link">
+                    <span class="nav-icon">⚖️</span>
+                    Court Filings
+                </a>
+                <a href="/static/legal/discovery.html" class="nav-link">
+                    <span class="nav-icon">🔍</span>
+                    Discovery
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">🔒 Privileged Documents</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="exportLog()">📋 Privilege Log</button>
+                <button class="btn btn-primary" onclick="uploadPrivileged()">➕ Upload Privileged</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Warning -->
+            <div class="priv-warning">
+                <span class="priv-warning-icon">⚠️</span>
+                <div class="priv-warning-text">
+                    <div class="priv-warning-title">Attorney-Client Privilege Notice</div>
+                    <div class="priv-warning-desc">These documents are protected by attorney-client privilege. Unauthorized disclosure may waive privilege. Document access is logged.</div>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-pill">🔒 <strong>47</strong> Privileged Docs</div>
+                <div class="stat-pill">📝 <strong>23</strong> Work Product</div>
+                <div class="stat-pill">📁 <strong>8</strong> Cases</div>
+                <div class="stat-pill">⏱️ Last accessed: <strong>2 hours ago</strong></div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="priv">🔒 A/C Privileged</button>
+                <button class="filter-btn" data-filter="wp">📝 Work Product</button>
+                <button class="filter-btn" data-filter="both">Both Protections</button>
+                <input type="text" class="search-input" placeholder="🔍 Search documents..." id="searchInput">
+            </div>
+            
+            <!-- Document Grid -->
+            <div class="doc-grid" id="docGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        const documents = [
+            {
+                id: 1,
+                title: 'Client Intake Interview Notes',
+                case: 'Garcia v. Sunrise Properties',
+                type: 'both',
+                created: 'Dec 14, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: '2 hours ago'
+            },
+            {
+                id: 2,
+                title: 'Settlement Strategy Memo',
+                case: 'Garcia v. Sunrise Properties',
+                type: 'wp',
+                created: 'Dec 12, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: 'Yesterday'
+            },
+            {
+                id: 3,
+                title: 'Client Financial Declaration',
+                case: 'Williams v. Metro Housing',
+                type: 'priv',
+                created: 'Dec 10, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: '3 days ago'
+            },
+            {
+                id: 4,
+                title: 'Damages Analysis Worksheet',
+                case: 'Williams v. Metro Housing',
+                type: 'wp',
+                created: 'Dec 8, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: '5 days ago'
+            },
+            {
+                id: 5,
+                title: 'Client Communications Log',
+                case: 'Johnson v. Lake Properties',
+                type: 'priv',
+                created: 'Dec 5, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: '1 week ago'
+            },
+            {
+                id: 6,
+                title: 'Legal Research - MN 504B.285',
+                case: 'Martinez v. Urban Rentals',
+                type: 'wp',
+                created: 'Dec 3, 2025',
+                createdBy: 'J. Smith, Esq.',
+                accessed: '1 week ago'
+            }
+        ];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDocuments(documents);
+            setupFilters();
+        });
+        
+        function renderDocuments(docs) {
+            const grid = document.getElementById('docGrid');
+            
+            grid.innerHTML = docs.map(doc => `
+                <div class="doc-card ${doc.type === 'priv' ? 'privileged' : doc.type === 'wp' ? 'work-product' : 'privileged'}">
+                    <div class="doc-header">
+                        <div class="doc-badges">
+                            ${doc.type === 'priv' || doc.type === 'both' ? '<span class="priv-badge priv">🔒 PRIVILEGED</span>' : ''}
+                            ${doc.type === 'wp' || doc.type === 'both' ? '<span class="priv-badge wp">📝 WORK PRODUCT</span>' : ''}
+                        </div>
+                        <div class="doc-actions">
+                            <button class="action-btn" onclick="viewDoc(${doc.id})" title="View">👁️</button>
+                            <button class="action-btn" onclick="downloadDoc(${doc.id})" title="Download">⬇️</button>
+                            <button class="action-btn danger" onclick="revokePrivilege(${doc.id})" title="Waive Privilege">⚠️</button>
+                        </div>
+                    </div>
+                    <div class="doc-body">
+                        <div class="doc-title">${doc.title}</div>
+                        <div class="doc-case">📁 ${doc.case}</div>
+                        <div class="doc-meta">
+                            <span>📅 ${doc.created}</span>
+                            <span>👤 ${doc.createdBy}</span>
+                        </div>
+                    </div>
+                    <div class="doc-footer">
+                        <span>Last accessed: ${doc.accessed}</span>
+                        <span>Access logged ✓</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const filter = btn.dataset.filter;
+                    if (filter === 'all') {
+                        renderDocuments(documents);
+                    } else {
+                        renderDocuments(documents.filter(d => d.type === filter));
+                    }
+                });
+            });
+            
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const search = e.target.value.toLowerCase();
+                renderDocuments(documents.filter(d => 
+                    d.title.toLowerCase().includes(search) || 
+                    d.case.toLowerCase().includes(search)
+                ));
+            });
+        }
+        
+        function viewDoc(id) {
+            alert(`Opening document ${id}...\n\n⚠️ Access will be logged.`);
+        }
+        
+        function downloadDoc(id) {
+            alert(`Downloading document ${id}...\n\n⚠️ Download will be logged.`);
+        }
+        
+        function revokePrivilege(id) {
+            if (confirm('⚠️ WARNING: Waiving privilege cannot be undone.\n\nAre you sure you want to waive attorney-client privilege for this document?')) {
+                alert('Privilege waiver logged. Document status updated.');
+            }
+        }
+        
+        function exportLog() {
+            alert('Exporting privilege log...');
+        }
+        
+        function uploadPrivileged() {
+            alert('Opening privileged document upload...');
+        }
+    </script>
+</body>
+</html>

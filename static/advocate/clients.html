@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Clients - Semptify Advocate</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #10b981;
+            --primary-dark: #047857;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-logo { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .sidebar-role { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; }
+        .nav-section { margin-bottom: 24px; }
+        .nav-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: 14px; }
+        .nav-link:hover { background: var(--bg); }
+        .nav-link.active { background: rgba(5, 150, 105, 0.1); color: var(--primary); font-weight: 600; }
+        .nav-icon { font-size: 18px; }
+        
+        .main { margin-left: 260px; min-height: 100vh; }
+        
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topbar-title { font-size: 20px; font-weight: 600; }
+        .topbar-actions { display: flex; gap: 12px; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .content { padding: 24px; }
+        
+        /* Search and Filters */
+        .search-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 160px;
+        }
+        
+        /* Stats */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-pill {
+            background: var(--card);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-pill strong {
+            color: var(--primary);
+            margin-right: 6px;
+        }
+        
+        /* Client Table */
+        .clients-table {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            background: var(--bg);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .client-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .client-row:hover { background: var(--bg); }
+        .client-row:last-child { border-bottom: none; }
+        
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .client-name { font-weight: 600; }
+        .client-phone { font-size: 12px; color: var(--text-muted); }
+        
+        .case-type {
+            font-size: 13px;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .status-badge.active { background: #fef3c7; color: #92400e; }
+        .status-badge.urgent { background: #fef2f2; color: #991b1b; }
+        .status-badge.resolved { background: #d1fae5; color: #065f46; }
+        .status-badge.pending { background: #e0e7ff; color: #3730a3; }
+        
+        .next-action {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .deadline {
+            font-size: 13px;
+        }
+        
+        .deadline.urgent { color: var(--danger); font-weight: 600; }
+        
+        .row-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--card);
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover { background: var(--bg); }
+        
+        @media (max-width: 1200px) {
+            .table-header,
+            .client-row {
+                grid-template-columns: 1.5fr 1fr 1fr 100px;
+            }
+            
+            .table-header > *:nth-child(4),
+            .table-header > *:nth-child(5),
+            .client-row > *:nth-child(4),
+            .client-row > *:nth-child(5) {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .search-bar { flex-direction: column; }
+            .stats-row { flex-wrap: wrap; }
+            
+            .table-header { display: none; }
+            
+            .client-row {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🤝 Semptify</div>
+            <div class="sidebar-role">Advocate Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/advocate/index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/advocate/queue.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Case Queue
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/static/advocate/clients.html" class="nav-link active">
+                    <span class="nav-icon">👥</span>
+                    My Clients
+                </a>
+                <a href="/static/advocate/intake.html" class="nav-link">
+                    <span class="nav-icon">➕</span>
+                    New Intake
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="/static/advocate/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Resources
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">👥 My Clients</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="exportList()">📥 Export</button>
+                <button class="btn btn-primary" onclick="newIntake()">➕ New Client</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Search and Filters -->
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="🔍 Search clients by name, phone, or case..." id="searchInput">
+                <select class="filter-select" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+                <select class="filter-select" id="caseFilter">
+                    <option value="">All Case Types</option>
+                    <option value="eviction">Eviction</option>
+                    <option value="habitability">Habitability</option>
+                    <option value="deposit">Security Deposit</option>
+                    <option value="discrimination">Discrimination</option>
+                </select>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-pill"><strong>12</strong> Total Clients</div>
+                <div class="stat-pill"><strong>2</strong> Urgent</div>
+                <div class="stat-pill"><strong>7</strong> Active</div>
+                <div class="stat-pill"><strong>3</strong> Resolved This Month</div>
+            </div>
+            
+            <!-- Client Table -->
+            <div class="clients-table">
+                <div class="table-header">
+                    <span>Client</span>
+                    <span>Case Type</span>
+                    <span>Status</span>
+                    <span>Next Action</span>
+                    <span>Deadline</span>
+                    <span>Actions</span>
+                </div>
+                
+                <div id="clientsContainer">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Mock client data
+        const clients = [
+            {
+                id: 1,
+                name: 'Maria Garcia',
+                phone: '(612) 555-0123',
+                avatar: '👩',
+                caseType: 'Eviction Defense',
+                status: 'urgent',
+                nextAction: 'File Answer',
+                deadline: 'Dec 20',
+                deadlineUrgent: true
+            },
+            {
+                id: 2,
+                name: 'James Williams',
+                phone: '(651) 555-0456',
+                avatar: '👨',
+                caseType: 'Habitability',
+                status: 'active',
+                nextAction: 'Send demand letter',
+                deadline: 'Dec 28',
+                deadlineUrgent: false
+            },
+            {
+                id: 3,
+                name: 'Sarah Miller',
+                phone: '(763) 555-0789',
+                avatar: '👩',
+                caseType: 'Lease Review',
+                status: 'pending',
+                nextAction: 'Awaiting docs',
+                deadline: '-',
+                deadlineUrgent: false
+            },
+            {
+                id: 4,
+                name: 'Robert Lee',
+                phone: '(952) 555-0321',
+                avatar: '👨',
+                caseType: 'Security Deposit',
+                status: 'active',
+                nextAction: 'Follow up call',
+                deadline: 'Jan 5',
+                deadlineUrgent: false
+            },
+            {
+                id: 5,
+                name: 'Ana Martinez',
+                phone: '(612) 555-0654',
+                avatar: '👩',
+                caseType: 'Eviction Defense',
+                status: 'urgent',
+                nextAction: 'Court hearing',
+                deadline: 'Dec 18',
+                deadlineUrgent: true
+            },
+            {
+                id: 6,
+                name: 'David Johnson',
+                phone: '(651) 555-0987',
+                avatar: '👨',
+                caseType: 'Discrimination',
+                status: 'active',
+                nextAction: 'File HUD complaint',
+                deadline: 'Jan 10',
+                deadlineUrgent: false
+            },
+            {
+                id: 7,
+                name: 'Lisa Thompson',
+                phone: '(763) 555-0147',
+                avatar: '👩',
+                caseType: 'Security Deposit',
+                status: 'resolved',
+                nextAction: 'Case closed',
+                deadline: '-',
+                deadlineUrgent: false
+            },
+            {
+                id: 8,
+                name: 'Michael Brown',
+                phone: '(952) 555-0258',
+                avatar: '👨',
+                caseType: 'Habitability',
+                status: 'resolved',
+                nextAction: 'Case closed',
+                deadline: '-',
+                deadlineUrgent: false
+            }
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderClients(clients);
+            setupFilters();
+        });
+        
+        function renderClients(data) {
+            const container = document.getElementById('clientsContainer');
+            
+            container.innerHTML = data.map(client => `
+                <div class="client-row" onclick="viewClient(${client.id})">
+                    <div class="client-info">
+                        <div class="client-avatar">${client.avatar}</div>
+                        <div>
+                            <div class="client-name">${client.name}</div>
+                            <div class="client-phone">${client.phone}</div>
+                        </div>
+                    </div>
+                    <div class="case-type">${client.caseType}</div>
+                    <span class="status-badge ${client.status}">${client.status}</span>
+                    <div class="next-action">${client.nextAction}</div>
+                    <div class="deadline ${client.deadlineUrgent ? 'urgent' : ''}">${client.deadline}</div>
+                    <div class="row-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); callClient(${client.id})" title="Call">📞</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); openNotes(${client.id})" title="Notes">📝</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); openDocs(${client.id})" title="Documents">📄</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function setupFilters() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const caseFilter = document.getElementById('caseFilter');
+            
+            const applyFilters = () => {
+                const search = searchInput.value.toLowerCase();
+                const status = statusFilter.value;
+                const caseType = caseFilter.value;
+                
+                let filtered = clients;
+                
+                if (search) {
+                    filtered = filtered.filter(c => 
+                        c.name.toLowerCase().includes(search) ||
+                        c.phone.includes(search) ||
+                        c.caseType.toLowerCase().includes(search)
+                    );
+                }
+                
+                if (status) {
+                    filtered = filtered.filter(c => c.status === status);
+                }
+                
+                if (caseType) {
+                    filtered = filtered.filter(c => 
+                        c.caseType.toLowerCase().includes(caseType)
+                    );
+                }
+                
+                renderClients(filtered);
+            };
+            
+            searchInput.addEventListener('input', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+            caseFilter.addEventListener('change', applyFilters);
+        }
+        
+        // Actions
+        function viewClient(id) {
+            alert(`Opening client details for ID: ${id}`);
+            // window.location.href = `/static/advocate/client.html?id=${id}`;
+        }
+        
+        function callClient(id) {
+            const client = clients.find(c => c.id === id);
+            alert(`Calling ${client.name} at ${client.phone}`);
+        }
+        
+        function openNotes(id) {
+            alert(`Opening case notes for client ID: ${id}`);
+        }
+        
+        function openDocs(id) {
+            alert(`Opening documents for client ID: ${id}`);
+        }
+        
+        function newIntake() {
+            window.location.href = '/static/advocate/intake.html';
+        }
+        
+        function exportList() {
+            alert('Exporting client list to CSV...');
+        }
+    </script>
+</body>
+</html>

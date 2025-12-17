@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Intake - Start Your Case</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card h2 {
+            margin-bottom: 20px;
+            color: #4ecdc4;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ccc;
+        }
+        label .required {
+            color: #ff6b6b;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 16px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            display: none;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .result.success {
+            display: block;
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+        }
+        .result.error {
+            display: block;
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+        }
+        .result h3 {
+            margin-bottom: 15px;
+        }
+        .next-steps {
+            list-style: none;
+            margin-top: 15px;
+        }
+        .next-steps li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .next-steps li:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .badge-critical { background: #ff6b6b; }
+        .badge-case { background: #4ecdc4; color: #000; }
+        .tip {
+            background: rgba(255,193,7,0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .tip strong {
+            color: #ffc107;
+        }
+        a {
+            color: #4ecdc4;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .actions a {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Complaint Intake</h1>
+        <p class="subtitle">Enter information from your summons/complaint to start your case</p>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Look at the top of your summons/complaint for the case number, court, and party names.
+        </div>
+
+        <form id="intakeForm" class="card">
+            <h2>Court Information</h2>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label>Case Number <span class="required">*</span></label>
+                    <input type="text" id="case_number" required placeholder="e.g., 19HA-CV-24-1234">
+                </div>
+                <div class="form-group">
+                    <label>Court <span class="required">*</span></label>
+                    <select id="court" required>
+                        <option value="Dakota County District Court">Dakota County District Court</option>
+                        <option value="Hennepin County District Court">Hennepin County District Court</option>
+                        <option value="Ramsey County District Court">Ramsey County District Court</option>
+                        <option value="Anoka County District Court">Anoka County District Court</option>
+                        <option value="Washington County District Court">Washington County District Court</option>
+                        <option value="Scott County District Court">Scott County District Court</option>
+                        <option value="Other">Other Minnesota Court</option>
+                    </select>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 30px;">Parties</h2>
+
+            <div class="form-group">
+                <label>Plaintiff (Landlord/Property Company) <span class="required">*</span></label>
+                <input type="text" id="plaintiff_name" required placeholder="e.g., ABC Property Management LLC">
+            </div>
+
+            <div class="form-group">
+                <label>Defendant (You) <span class="required">*</span></label>
+                <input type="text" id="defendant_name" required placeholder="Your full legal name">
+            </div>
+
+            <h2 style="margin-top: 30px;">Property & Amounts</h2>
+
+            <div class="form-group">
+                <label>Property Address <span class="required">*</span></label>
+                <input type="text" id="property_address" required placeholder="e.g., 123 Main St Apt 4, Minneapolis, MN 55401">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Monthly Rent</label>
+                    <input type="number" id="rent_amount" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Amount Claimed</label>
+                    <input type="number" id="amount_claimed" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+
+            <h2 style="margin-top: 30px;">Important Dates</h2>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Filing Date</label>
+                    <input type="date" id="filing_date">
+                </div>
+                <div class="form-group">
+                    <label>Answer Deadline</label>
+                    <input type="date" id="answer_deadline">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Hearing Date/Time</label>
+                <input type="datetime-local" id="hearing_date">
+            </div>
+
+            <div class="form-group">
+                <label>Complaint Type</label>
+                <select id="complaint_type">
+                    <option value="eviction">Eviction / Unlawful Detainer</option>
+                    <option value="rent_nonpayment">Non-Payment of Rent</option>
+                    <option value="lease_violation">Lease Violation</option>
+                    <option value="holdover">Holdover Tenancy</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="notes" rows="3" placeholder="Any additional details..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                🚀 Create My Case
+            </button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('intakeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Creating Case...';
+            
+            // Get form values
+            const hearingDateInput = document.getElementById('hearing_date').value;
+            let hearingDate = null;
+            if (hearingDateInput) {
+                hearingDate = new Date(hearingDateInput).toISOString();
+            }
+            
+            const data = {
+                case_number: document.getElementById('case_number').value,
+                court: document.getElementById('court').value,
+                plaintiff_name: document.getElementById('plaintiff_name').value,
+                defendant_name: document.getElementById('defendant_name').value,
+                property_address: document.getElementById('property_address').value,
+                rent_amount: parseFloat(document.getElementById('rent_amount').value) || 0,
+                amount_claimed: parseFloat(document.getElementById('amount_claimed').value) || 0,
+                filing_date: document.getElementById('filing_date').value || null,
+                answer_deadline: document.getElementById('answer_deadline').value || null,
+                hearing_date: hearingDate,
+                complaint_type: document.getElementById('complaint_type').value,
+                notes: document.getElementById('notes').value || null
+            };
+            
+            try {
+                const response = await fetch('/api/case-builder/intake/complaint', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': localStorage.getItem('user_id') || 'default_user'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const json = await response.json();
+                
+                if (response.ok && json.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ Case Created!</h3>
+                        <p><span class="badge badge-case">Case #${json.case_number}</span></p>
+                        <p style="margin-top: 15px;">${json.message}</p>
+                        
+                        <h4 style="margin-top: 20px;">Next Steps:</h4>
+                        <ul class="next-steps">
+                            ${json.next_steps.map(step => `<li>${step}</li>`).join('')}
+                        </ul>
+                        
+                        <div class="actions">
+                            <a href="/static/case-builder.html?case=${encodeURIComponent(json.case_number)}">
+                                📂 View Case
+                            </a>
+                            <a href="/static/complaints.html">
+                                📝 File Complaint
+                            </a>
+                        </div>
+                    `;
+                    
+                    // Store in localStorage for other pages
+                    localStorage.setItem('active_case', JSON.stringify({
+                        case_number: json.case_number,
+                        court: data.court,
+                        property_address: data.property_address,
+                        plaintiff_name: data.plaintiff_name,
+                        defendant_name: data.defendant_name
+                    }));
+                    
+                } else {
+                    throw new Error(json.detail || 'Failed to create case');
+                }
+                
+            } catch (err) {
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${err.message}</p>
+                `;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🚀 Create My Case';
+        });
+        
+        // Set today's date as default for filing
+        document.getElementById('filing_date').value = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>

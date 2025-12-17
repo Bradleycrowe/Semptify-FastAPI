@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <title>Semptify - My Timeline</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header-sub { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        
+        .main { padding: 16px; }
+        
+        /* Add Event Button */
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .add-btn:hover { background: var(--primary-light); }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        
+        /* Timeline Event */
+        .event {
+            position: relative;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .event::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 2px solid var(--card);
+        }
+        
+        .event.notice::before { background: var(--danger); }
+        .event.payment::before { background: var(--success); }
+        .event.communication::before { background: var(--primary); }
+        .event.maintenance::before { background: var(--warning); }
+        .event.court::before { background: #7c3aed; }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .event-type {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .event-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .event-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .event-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .event-evidence {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--success);
+        }
+        
+        /* Month Divider */
+        .month-divider {
+            text-align: center;
+            margin: 24px 0 16px;
+            position: relative;
+        }
+        
+        .month-divider span {
+            background: var(--bg);
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card);
+            border-radius: 16px;
+        }
+        
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .empty-desc { color: var(--text-muted); font-size: 14px; }
+        
+        /* Add Event Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal-overlay.show { display: flex; }
+        
+        .modal {
+            background: var(--card);
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title { font-size: 18px; font-weight: 600; }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-textarea { resize: vertical; min-height: 100px; }
+        
+        /* Event Type Buttons */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .type-btn {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .type-btn:hover { border-color: var(--primary); }
+        .type-btn.selected { border-color: var(--primary); background: rgba(30, 64, 175, 0.1); }
+        
+        .type-btn-icon { font-size: 24px; margin-bottom: 4px; }
+        .type-btn-label { font-size: 11px; }
+        
+        .form-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-muted);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(30, 64, 175, 0.1);
+        }
+        
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 11px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📅 My Timeline</h1>
+        <div class="header-sub" id="eventCount">Loading...</div>
+    </header>
+    
+    <main class="main">
+        <button class="add-btn" onclick="showAddModal()">
+            ➕ Log What Happened
+        </button>
+        
+        <div id="timelineContent">
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <div class="empty-title">Start Your Timeline</div>
+                <div class="empty-desc">Record events as they happen to build your case</div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Add Event Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Log an Event</span>
+                <button class="modal-close" onclick="hideAddModal()">×</button>
+            </div>
+            
+            <form id="eventForm" onsubmit="submitEvent(event)">
+                <div class="form-group">
+                    <label class="form-label">What type of event?</label>
+                    <div class="type-grid">
+                        <div class="type-btn" data-type="notice" onclick="selectType('notice', this)">
+                            <div class="type-btn-icon">📋</div>
+                            <div class="type-btn-label">Notice</div>
+                        </div>
+                        <div class="type-btn" data-type="communication" onclick="selectType('communication', this)">
+                            <div class="type-btn-icon">💬</div>
+                            <div class="type-btn-label">Communication</div>
+                        </div>
+                        <div class="type-btn" data-type="payment" onclick="selectType('payment', this)">
+                            <div class="type-btn-icon">💰</div>
+                            <div class="type-btn-label">Payment</div>
+                        </div>
+                        <div class="type-btn" data-type="maintenance" onclick="selectType('maintenance', this)">
+                            <div class="type-btn-icon">🔧</div>
+                            <div class="type-btn-label">Maintenance</div>
+                        </div>
+                        <div class="type-btn" data-type="court" onclick="selectType('court', this)">
+                            <div class="type-btn-icon">⚖️</div>
+                            <div class="type-btn-label">Court</div>
+                        </div>
+                        <div class="type-btn" data-type="other" onclick="selectType('other', this)">
+                            <div class="type-btn-icon">📝</div>
+                            <div class="type-btn-label">Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="eventType" name="event_type" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">When did it happen?</label>
+                    <input type="date" class="form-input" id="eventDate" name="event_date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">What happened?</label>
+                    <input type="text" class="form-input" id="eventTitle" name="title" placeholder="Brief summary" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Details (optional)</label>
+                    <textarea class="form-textarea" id="eventDesc" name="description" placeholder="Add more details..."></textarea>
+                </div>
+                
+                <button type="submit" class="form-submit">Save Event</button>
+            </form>
+        </div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <a href="/static/tenant/index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="/static/tenant/documents.html" class="nav-item">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Docs</span>
+        </a>
+        <a href="/static/tenant/timeline.html" class="nav-item active">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Timeline</span>
+        </a>
+        <a href="/static/tenant/help.html" class="nav-item">
+            <span class="nav-icon">🆘</span>
+            <span class="nav-label">Help</span>
+        </a>
+    </nav>
+    
+    <script>
+        let events = [];
+        let selectedType = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadEvents();
+            
+            // Set default date to today
+            document.getElementById('eventDate').valueAsDate = new Date();
+            
+            // Check if action=add in URL
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('action') === 'add') {
+                showAddModal();
+            }
+        });
+        
+        // Load events
+        async function loadEvents() {
+            try {
+                const resp = await fetch('/api/timeline/events');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    events = data.events || [];
+                    renderTimeline();
+                }
+            } catch (e) {
+                console.error('Failed to load events:', e);
+            }
+            
+            document.getElementById('eventCount').textContent = 
+                events.length > 0 ? `${events.length} events recorded` : 'Start logging events';
+        }
+        
+        // Render timeline
+        function renderTimeline() {
+            const container = document.getElementById('timelineContent');
+            
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <div class="empty-title">Start Your Timeline</div>
+                        <div class="empty-desc">Record events as they happen to build your case</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date descending
+            events.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
+            
+            let html = '<div class="timeline">';
+            let currentMonth = null;
+            
+            events.forEach(event => {
+                const date = new Date(event.event_date);
+                const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+                
+                // Add month divider if new month
+                if (monthKey !== currentMonth) {
+                    currentMonth = monthKey;
+                    const monthName = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                    html += `<div class="month-divider"><span>${monthName}</span></div>`;
+                }
+                
+                html += renderEvent(event);
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Render single event
+        function renderEvent(event) {
+            const typeIcons = {
+                'notice': '📋',
+                'communication': '💬',
+                'payment': '💰',
+                'maintenance': '🔧',
+                'court': '⚖️',
+                'other': '📝'
+            };
+            
+            const date = new Date(event.event_date);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const icon = typeIcons[event.event_type] || '📝';
+            
+            return `
+                <div class="event ${event.event_type || 'other'}">
+                    <div class="event-header">
+                        <span class="event-type">${icon} ${event.event_type || 'Event'}</span>
+                        <span class="event-date">${dateStr}</span>
+                    </div>
+                    <div class="event-title">${event.title}</div>
+                    ${event.description ? `<div class="event-desc">${event.description}</div>` : ''}
+                    ${event.document_id ? `
+                        <div class="event-evidence">
+                            📎 Evidence attached
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Modal functions
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('show');
+        }
+        
+        function hideAddModal() {
+            document.getElementById('addModal').classList.remove('show');
+            resetForm();
+        }
+        
+        // Type selection
+        function selectType(type, btn) {
+            // Remove previous selection
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+            // Add selection
+            btn.classList.add('selected');
+            selectedType = type;
+            document.getElementById('eventType').value = type;
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('eventForm').reset();
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+            selectedType = null;
+            document.getElementById('eventDate').valueAsDate = new Date();
+        }
+        
+        // Submit event
+        async function submitEvent(e) {
+            e.preventDefault();
+            
+            const formData = {
+                event_type: document.getElementById('eventType').value,
+                event_date: document.getElementById('eventDate').value + 'T12:00:00Z',
+                title: document.getElementById('eventTitle').value,
+                description: document.getElementById('eventDesc').value
+            };
+            
+            try {
+                const resp = await fetch('/api/timeline/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (resp.ok) {
+                    hideAddModal();
+                    await loadEvents();
+                } else {
+                    alert('Failed to save event. Please try again.');
+                }
+            } catch (e) {
+                console.error('Submit error:', e);
+                alert('Failed to save event. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

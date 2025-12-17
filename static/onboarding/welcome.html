@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Semptify - Minnesota Tenant Rights Protection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+            color: #fff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .logo-icon { font-size: 4rem; margin-bottom: 1rem; }
+        
+        .tagline {
+            font-size: 1.3rem;
+            color: #a7f3d0;
+            margin-bottom: 2rem;
+        }
+        
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Mission Statement */
+        .mission {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mission h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .mission p {
+            color: #d1fae5;
+            font-size: 1.1rem;
+        }
+        
+        .mission-highlight {
+            background: rgba(16, 185, 129, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 4px solid #10b981;
+        }
+        
+        /* Core Values */
+        .values {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .value-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .value-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .value-title { font-weight: 600; margin-bottom: 0.3rem; }
+        .value-desc { font-size: 0.9rem; color: #a7f3d0; }
+        
+        /* How It Works */
+        .how-it-works {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .how-it-works h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.8rem 1.2rem;
+            border-radius: 30px;
+        }
+        
+        .step-num {
+            background: #10b981;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .step-arrow {
+            color: #6ee7b7;
+            font-size: 1.2rem;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            margin-top: auto;
+            padding: 2rem 0;
+        }
+        
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            padding: 1.2rem 3rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+        }
+        
+        .cta-subtext {
+            margin-top: 1rem;
+            color: #a7f3d0;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            color: #6ee7b7;
+            font-size: 0.85rem;
+        }
+        
+        .footer a {
+            color: #a7f3d0;
+            text-decoration: none;
+        }
+        
+        /* Legal Notice */
+        .legal-notice {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #fef3c7;
+        }
+        
+        .legal-notice strong { color: #fbbf24; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            .logo { font-size: 2rem; }
+            .tagline { font-size: 1.1rem; }
+            .steps { flex-direction: column; align-items: center; }
+            .step-arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="logo-icon">⚖️</div>
+            <h1 class="logo">Semptify</h1>
+            <p class="tagline">Minnesota Tenant Rights Protection Platform</p>
+            <span class="version">Version 5.0 • 100% Free • Your Data, Your Control</span>
+        </div>
+        
+        <!-- Mission -->
+        <div class="mission">
+            <h2>🎯 Our Mission</h2>
+            <p>
+                Semptify helps Minnesota tenants protect their rights with powerful tools and 
+                expert guidance. Whether you're facing an eviction, dealing with a difficult 
+                landlord, or just want to understand your rights — we're here to help.
+            </p>
+            <div class="mission-highlight">
+                <strong>Core Promise:</strong> Help tenants with tools and information to uphold 
+                tenant rights, in court if it goes that far — hopefully it won't.
+            </div>
+        </div>
+        
+        <!-- Core Values -->
+        <div class="values">
+            <div class="value-card">
+                <div class="value-icon">🆓</div>
+                <div class="value-title">100% Free</div>
+                <div class="value-desc">No hidden fees, ever</div>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🔒</div>
+                <div class="value-title">Your Data</div>
+                <div class="value-desc">Stored in YOUR cloud</div>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🏛️</div>
+                <div class="value-title">Minnesota Law</div>
+                <div class="value-desc">Built for MN tenants</div>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <div class="value-title">Community</div>
+                <div class="value-desc">Advocates & attorneys</div>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h2>📋 Getting Started</h2>
+            <div class="steps">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <span>Choose Your Role</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <span>Verify Credentials</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span>Connect Storage</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="step">
+                    <span class="step-num">4</span>
+                    <span>Start Protecting</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legal Notice -->
+        <div class="legal-notice">
+            <strong>⚖️ Important:</strong> Semptify provides legal information, not legal advice. 
+            For legal advice, consult with a licensed Minnesota attorney. If you cannot afford an 
+            attorney, contact <a href="https://www.lawhelpmn.org" target="_blank">LawHelpMN.org</a> 
+            or call HOME Line at <strong>612-728-5767</strong> for free tenant counseling.
+        </div>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+            <a href="/static/onboarding/select-role.html" class="cta-button">
+                Get Started
+                <span>→</span>
+            </a>
+            <p class="cta-subtext">Takes about 2 minutes to set up</p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Built with ❤️ for Minnesota tenants</p>
+            <p><a href="/docs">API Documentation</a> • <a href="https://github.com">Open Source</a></p>
+        </div>
+    </div>
+</body>
+</html>

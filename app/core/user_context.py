@@ -48,7 +48,52 @@ class StorageProvider(str, Enum):
 # =============================================================================
 
 ROLE_PERMISSIONS = {
+    # ==========================================================================
+    # TENANT (USER) - Mobile-first, simplified access
+    # Focus: Own case management, self-help tools, guided workflows
+    # ==========================================================================
     UserRole.USER: {
+        # Vault - own documents only
+        "vault_read",
+        "vault_write",
+        # Timeline - own case history
+        "timeline_read",
+        "timeline_write",
+        # Calendar - own deadlines
+        "calendar_read",
+        "calendar_write",
+        # AI assistance
+        "copilot_use",
+        # File complaints on own behalf
+        "complaints_create",
+        # Rent ledger
+        "ledger_read",
+        "ledger_write",
+        # Self-help tools
+        "eviction_defense",
+        "court_forms",
+        "letter_builder",
+    },
+    
+    # ==========================================================================
+    # MANAGER - Property/case oversight (future: landlord-side?)
+    # ==========================================================================
+    UserRole.MANAGER: {
+        "vault_read",
+        "vault_write",
+        "timeline_read",
+        "calendar_read",
+        "calendar_write",
+        "property_manage",
+        "user_view",  # View user info (not edit)
+    },
+    
+    # ==========================================================================
+    # ADVOCATE - Legal aid workers, paralegals, housing counselors
+    # Focus: Help multiple tenants, case management across clients
+    # ==========================================================================
+    UserRole.ADVOCATE: {
+        # All tenant permissions
         "vault_read",
         "vault_write",
         "timeline_read",
@@ -59,29 +104,24 @@ ROLE_PERMISSIONS = {
         "complaints_create",
         "ledger_read",
         "ledger_write",
+        "eviction_defense",
+        "court_forms",
+        "letter_builder",
+        # Advocate-specific
+        "complaints_review",      # Review/help with complaints
+        "multi_user",             # Access multiple tenant cases
+        "case_assignment",        # Assign cases to self
+        "case_notes",             # Add advocate notes (non-privileged)
+        "client_intake",          # Intake new clients
+        "bulk_export",            # Export case summaries
     },
-    UserRole.MANAGER: {
-        "vault_read",
-        "vault_write",
-        "timeline_read",
-        "calendar_read",
-        "calendar_write",
-        "property_manage",
-        "user_view",  # View user info (not edit)
-    },
-    UserRole.ADVOCATE: {
-        "vault_read",
-        "vault_write",
-        "timeline_read",
-        "timeline_write",
-        "calendar_read",
-        "calendar_write",
-        "copilot_use",
-        "complaints_create",
-        "complaints_review",
-        "multi_user",  # Can help multiple users
-    },
+    
+    # ==========================================================================
+    # LEGAL - Licensed attorneys (Legal Aid, pro bono, private)
+    # Focus: Full legal tools + attorney-client privilege separation
+    # ==========================================================================
     UserRole.LEGAL: {
+        # All advocate permissions
         "vault_read",
         "vault_write",
         "timeline_read",
@@ -91,12 +131,84 @@ ROLE_PERMISSIONS = {
         "copilot_use",
         "complaints_create",
         "complaints_review",
-        "legal_tools",  # Access to legal-specific tools
+        "ledger_read",
+        "ledger_write",
+        "eviction_defense",
+        "court_forms",
+        "letter_builder",
+        "multi_user",
+        "case_assignment",
+        "case_notes",
+        "client_intake",
+        "bulk_export",
+        # Attorney-specific (PRIVILEGED)
+        "legal_tools",            # Advanced legal analysis tools
+        "privileged_create",      # Create attorney-client privileged notes
+        "privileged_read",        # Read privileged work product
+        "work_product",           # Attorney work product protection
+        "legal_research",         # Advanced legal research tools
+        "court_filing",           # Generate court-ready filings
+        "discovery_prep",         # Prepare discovery responses
+        "case_strategy",          # Strategic case planning
+        "conflict_check",         # Check for conflicts of interest
     },
+    
+    # ==========================================================================
+    # ADMIN - System administrators (you)
+    # Focus: System config, analytics, full access
+    # ==========================================================================
     UserRole.ADMIN: {
         "*",  # All permissions
     },
 }
+
+
+# =============================================================================
+# Role Metadata (for UI routing and display)
+# =============================================================================
+
+ROLE_METADATA = {
+    UserRole.USER: {
+        "display_name": "Tenant",
+        "description": "Individual facing housing issues",
+        "ui_mode": "mobile",           # Mobile-first, simplified
+        "landing_page": "/tenant",
+        "icon": "🏠",
+    },
+    UserRole.MANAGER: {
+        "display_name": "Manager",
+        "description": "Property or case manager",
+        "ui_mode": "desktop",
+        "landing_page": "/manager",
+        "icon": "📋",
+    },
+    UserRole.ADVOCATE: {
+        "display_name": "Advocate",
+        "description": "Housing counselor or paralegal",
+        "ui_mode": "responsive",       # Tablet-friendly
+        "landing_page": "/advocate",
+        "icon": "🤝",
+    },
+    UserRole.LEGAL: {
+        "display_name": "Attorney",
+        "description": "Licensed legal professional",
+        "ui_mode": "desktop",          # Full complexity
+        "landing_page": "/legal",
+        "icon": "⚖️",
+    },
+    UserRole.ADMIN: {
+        "display_name": "Administrator",
+        "description": "System administrator",
+        "ui_mode": "desktop",          # Full complexity
+        "landing_page": "/admin",
+        "icon": "🔧",
+    },
+}
+
+
+def get_role_metadata(role: UserRole) -> dict:
+    """Get metadata for a role (display name, UI mode, etc.)."""
+    return ROLE_METADATA.get(role, ROLE_METADATA[UserRole.USER])
 
 
 def get_permissions(role: UserRole) -> set[str]:

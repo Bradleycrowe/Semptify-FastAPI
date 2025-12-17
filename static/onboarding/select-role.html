@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Role - Semptify</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            color: #fff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .back-link {
+            color: #a7f3d0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .back-link:hover { color: #fff; }
+        
+        .step-indicator {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        /* Title */
+        .page-title {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-title h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: #a7f3d0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        /* Role Cards */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .role-card {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .role-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-4px);
+        }
+        
+        .role-card.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+        
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .role-icon {
+            font-size: 2.5rem;
+            background: rgba(255,255,255,0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .role-title { font-size: 1.3rem; font-weight: 600; }
+        .role-subtitle { color: #a7f3d0; font-size: 0.9rem; }
+        
+        .role-description {
+            color: #d1fae5;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        .role-features {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+        
+        .role-features li {
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #a7f3d0;
+        }
+        
+        .role-features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        /* Verification Badge */
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #a7f3d0;
+        }
+        
+        .verification-badge.easy { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .verification-badge.moderate { background: rgba(251, 191, 36, 0.2); color: #fde68a; }
+        
+        /* Warning Box */
+        .role-warning {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #fef3c7;
+        }
+        
+        /* Selection Check */
+        .selection-check {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .role-card.selected .selection-check {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        
+        .selection-check::after {
+            content: "✓";
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .role-card.selected .selection-check::after {
+            opacity: 1;
+        }
+        
+        /* Best For Section */
+        .best-for {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .best-for-title {
+            font-size: 0.75rem;
+            color: #6ee7b7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+        }
+        
+        .best-for-text {
+            font-size: 0.9rem;
+            color: #d1fae5;
+        }
+        
+        /* Continue Button */
+        .continue-section {
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+        
+        .continue-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .continue-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .continue-btn.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+        }
+        
+        /* Help Text */
+        .help-section {
+            text-align: center;
+            padding: 1rem;
+            color: #a7f3d0;
+            font-size: 0.9rem;
+        }
+        
+        .help-section a {
+            color: #6ee7b7;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            .roles-grid { grid-template-columns: 1fr; }
+            .page-title h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="/static/onboarding/welcome.html" class="back-link">
+                ← Back to Welcome
+            </a>
+            <span class="step-indicator">Step 1 of 3</span>
+        </div>
+        
+        <!-- Title -->
+        <div class="page-title">
+            <h1>👤 Who Are You?</h1>
+        </div>
+        <p class="page-subtitle">
+            Select the role that best describes you. This determines your dashboard and available features.
+        </p>
+        
+        <!-- Role Cards -->
+        <div class="roles-grid">
+            <!-- Tenant Role -->
+            <div class="role-card" data-role="user" onclick="selectRole(this)">
+                <div class="selection-check"></div>
+                <div class="role-header">
+                    <div class="role-icon">🏠</div>
+                    <div>
+                        <div class="role-title">Tenant</div>
+                        <div class="role-subtitle">I rent my home</div>
+                    </div>
+                </div>
+                <div class="role-description">
+                    Minnesota renter seeking to understand and protect your tenant rights.
+                </div>
+                <div class="best-for">
+                    <div class="best-for-title">Best For</div>
+                    <div class="best-for-text">
+                        Renters facing eviction, lease disputes, repair issues, or wanting to document their tenancy
+                    </div>
+                </div>
+                <ul class="role-features">
+                    <li>Document organizer</li>
+                    <li>Timeline builder</li>
+                    <li>Court form generator</li>
+                    <li>AI-powered guidance</li>
+                    <li>Eviction defense tools</li>
+                </ul>
+                <span class="verification-badge easy">
+                    ✓ No verification needed
+                </span>
+            </div>
+            
+            <!-- Advocate Role -->
+            <div class="role-card" data-role="advocate" onclick="selectRole(this)">
+                <div class="selection-check"></div>
+                <div class="role-header">
+                    <div class="role-icon">🤝</div>
+                    <div>
+                        <div class="role-title">Housing Advocate</div>
+                        <div class="role-subtitle">I help tenants professionally</div>
+                    </div>
+                </div>
+                <div class="role-description">
+                    Housing counselor, case manager, or tenant rights advocate helping multiple clients.
+                </div>
+                <div class="best-for">
+                    <div class="best-for-title">Best For</div>
+                    <div class="best-for-text">
+                        HOME Line counselors, Legal Aid staff, HUD-certified counselors, social workers
+                    </div>
+                </div>
+                <ul class="role-features">
+                    <li>Everything in Tenant, plus:</li>
+                    <li>Client intake system</li>
+                    <li>Case queue management</li>
+                    <li>Multi-client dashboard</li>
+                    <li>Referral tracking</li>
+                </ul>
+                <span class="verification-badge moderate">
+                    🎟️ Invite code required
+                </span>
+            </div>
+            
+            <!-- Legal Role -->
+            <div class="role-card" data-role="legal" onclick="selectRole(this)">
+                <div class="selection-check"></div>
+                <div class="role-header">
+                    <div class="role-icon">⚖️</div>
+                    <div>
+                        <div class="role-title">Licensed Attorney</div>
+                        <div class="role-subtitle">I'm a lawyer in Minnesota</div>
+                    </div>
+                </div>
+                <div class="role-description">
+                    Attorney licensed to practice law in Minnesota representing tenants.
+                </div>
+                <div class="best-for">
+                    <div class="best-for-title">Best For</div>
+                    <div class="best-for-text">
+                        Housing attorneys, pro bono lawyers, Legal Aid attorneys, law school clinics
+                    </div>
+                </div>
+                <ul class="role-features">
+                    <li>Everything in Advocate, plus:</li>
+                    <li>🔒 Privileged documents</li>
+                    <li>📝 Work product protection</li>
+                    <li>⚠️ Conflict checking</li>
+                    <li>Court filing prep</li>
+                </ul>
+                <span class="verification-badge moderate">
+                    🔐 Bar number required
+                </span>
+                <div class="role-warning">
+                    ⚠️ <strong>Legal Role Notice:</strong> Attorney-client privilege applies only to 
+                    licensed attorneys. Unauthorized practice of law is prohibited under MN §481.02.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Continue Button -->
+        <div class="continue-section">
+            <button class="continue-btn" id="continueBtn" onclick="continueToValidation()">
+                Continue
+                <span>→</span>
+            </button>
+        </div>
+        
+        <!-- Help -->
+        <div class="help-section">
+            <p>Not sure which to choose? <strong>Most renters should select "Tenant"</strong></p>
+            <p>You can change your role later if needed.</p>
+        </div>
+    </div>
+    
+    <script>
+        let selectedRole = null;
+        
+        function selectRole(card) {
+            // Remove previous selection
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+            
+            // Select new
+            card.classList.add('selected');
+            selectedRole = card.dataset.role;
+            
+            // Enable continue button
+            document.getElementById('continueBtn').classList.add('active');
+        }
+        
+        function continueToValidation() {
+            if (!selectedRole) {
+                alert('Please select a role to continue');
+                return;
+            }
+            
+            // Tenant goes directly to storage (no validation needed)
+            if (selectedRole === 'user') {
+                window.location.href = '/storage/providers?role=user&from=onboarding';
+            } else {
+                // Advocate and Legal need validation
+                window.location.href = `/static/onboarding/validate-${selectedRole}.html`;
+            }
+        }
+        
+        // Check URL for pre-selected role
+        const urlParams = new URLSearchParams(window.location.search);
+        const preselect = urlParams.get('role');
+        if (preselect) {
+            const card = document.querySelector(`[data-role="${preselect}"]`);
+            if (card) selectRole(card);
+        }
+    </script>
+</body>
+</html>

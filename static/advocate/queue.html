@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Queue - Semptify Advocate</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #10b981;
+            --primary-dark: #047857;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --info: #2563eb;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .sidebar-role { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        
+        .nav-section { margin-bottom: 24px; }
+        
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover { background: var(--bg); }
+        .nav-link.active { background: rgba(5, 150, 105, 0.1); color: var(--primary); font-weight: 600; }
+        
+        .nav-icon { font-size: 18px; }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .main { margin-left: 260px; min-height: 100vh; }
+        
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .topbar-title { font-size: 20px; font-weight: 600; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .content { padding: 24px; }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Queue Cards */
+        .queue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .queue-card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .queue-card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .queue-card-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .queue-type-icon {
+            font-size: 24px;
+        }
+        
+        .queue-type-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .queue-priority {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .queue-priority.high { background: #fef2f2; color: #991b1b; }
+        .queue-priority.medium { background: #fef3c7; color: #92400e; }
+        .queue-priority.low { background: #d1fae5; color: #065f46; }
+        
+        .queue-card-body {
+            padding: 20px;
+        }
+        
+        .queue-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .queue-card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .queue-card-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+        
+        .queue-card-footer {
+            padding: 16px 20px;
+            background: var(--bg);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .queue-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🤝 Semptify</div>
+            <div class="sidebar-role">Advocate Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/advocate/index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/advocate/queue.html" class="nav-link active">
+                    <span class="nav-icon">📋</span>
+                    Case Queue
+                    <span class="nav-badge" id="queueCount">3</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/static/advocate/clients.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    My Clients
+                </a>
+                <a href="/static/advocate/intake.html" class="nav-link">
+                    <span class="nav-icon">➕</span>
+                    New Intake
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="/static/advocate/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Resources
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">📋 Case Queue</h1>
+            <button class="btn btn-primary" onclick="refreshQueue()">🔄 Refresh</button>
+        </div>
+        
+        <div class="content">
+            <!-- Filters -->
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All Cases</button>
+                <button class="filter-btn" data-filter="help">Help Requests</button>
+                <button class="filter-btn" data-filter="intake">New Intakes</button>
+                <button class="filter-btn" data-filter="transfer">Transfers</button>
+                <button class="filter-btn" data-filter="followup">Follow-ups</button>
+            </div>
+            
+            <!-- Queue Grid -->
+            <div class="queue-grid" id="queueGrid">
+                <!-- Cards will be loaded here -->
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Mock queue data
+        const queueData = [
+            {
+                id: 1,
+                type: 'help',
+                icon: '🆘',
+                priority: 'high',
+                title: 'Received eviction notice yesterday',
+                desc: 'Tenant received 14-day notice to vacate. No prior written warnings. Questions about rights and timeline.',
+                county: 'Dakota County',
+                submitted: '2 hours ago',
+                deadline: '12 days remaining'
+            },
+            {
+                id: 2,
+                type: 'intake',
+                icon: '📝',
+                priority: 'medium',
+                title: 'Security deposit dispute',
+                desc: 'Moved out 45 days ago, landlord has not returned deposit or provided itemized statement. $1,200 deposit.',
+                county: 'Hennepin County',
+                submitted: '5 hours ago',
+                deadline: 'No deadline'
+            },
+            {
+                id: 3,
+                type: 'transfer',
+                icon: '↗️',
+                priority: 'medium',
+                title: 'Transfer from HOME Line hotline',
+                desc: 'Complex habitability case. Multiple code violations documented. Landlord unresponsive.',
+                county: 'Ramsey County',
+                submitted: '1 day ago',
+                deadline: 'Review pending'
+            },
+            {
+                id: 4,
+                type: 'followup',
+                icon: '🔔',
+                priority: 'low',
+                title: 'Check-in: Settlement negotiation',
+                desc: 'Previous client - settlement discussions ongoing with landlord. Awaiting response to last offer.',
+                county: 'Minneapolis',
+                submitted: '3 days ago',
+                deadline: 'Response expected soon'
+            }
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQueue(queueData);
+            setupFilters();
+        });
+        
+        // Render queue
+        function renderQueue(data) {
+            const grid = document.getElementById('queueGrid');
+            
+            if (data.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <h3>No cases in queue</h3>
+                        <p>Check back later for new cases</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = data.map(item => `
+                <div class="queue-card" data-type="${item.type}">
+                    <div class="queue-card-header">
+                        <div class="queue-card-type">
+                            <span class="queue-type-icon">${item.icon}</span>
+                            <span class="queue-type-label">${getTypeName(item.type)}</span>
+                        </div>
+                        <span class="queue-priority ${item.priority}">${item.priority} priority</span>
+                    </div>
+                    <div class="queue-card-body">
+                        <h3 class="queue-card-title">${item.title}</h3>
+                        <p class="queue-card-desc">${item.desc}</p>
+                        <div class="queue-card-meta">
+                            <span class="meta-item">📍 ${item.county}</span>
+                            <span class="meta-item">🕐 ${item.submitted}</span>
+                            <span class="meta-item">⏱️ ${item.deadline}</span>
+                        </div>
+                    </div>
+                    <div class="queue-card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="acceptCase(${item.id})">✓ Accept Case</button>
+                        <button class="btn btn-outline btn-sm" onclick="viewDetails(${item.id})">View Details</button>
+                        <button class="btn btn-outline btn-sm" onclick="reassign(${item.id})">Reassign</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function getTypeName(type) {
+            const names = {
+                help: 'Help Request',
+                intake: 'New Intake',
+                transfer: 'Transfer',
+                followup: 'Follow-up'
+            };
+            return names[type] || type;
+        }
+        
+        // Setup filters
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const filter = btn.dataset.filter;
+                    if (filter === 'all') {
+                        renderQueue(queueData);
+                    } else {
+                        renderQueue(queueData.filter(item => item.type === filter));
+                    }
+                });
+            });
+        }
+        
+        // Actions
+        function acceptCase(id) {
+            if (confirm('Accept this case and add to your caseload?')) {
+                alert('Case accepted! Redirecting to client details...');
+                // window.location.href = `/static/advocate/client.html?id=${id}`;
+            }
+        }
+        
+        function viewDetails(id) {
+            alert(`Opening full details for case #${id}`);
+        }
+        
+        function reassign(id) {
+            alert('Opening reassignment dialog...');
+        }
+        
+        function refreshQueue() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

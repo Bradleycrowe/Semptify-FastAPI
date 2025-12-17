@@ -43,6 +43,18 @@ try:
 except ImportError:
     HAS_MODULE_HUB = False
 
+# Import case auto-creation service for court documents
+try:
+    from app.services.case_auto_creation import (
+        process_document_for_case,
+        should_create_case,
+        get_case_creation_summary,
+        get_document_added_summary,
+    )
+    HAS_CASE_AUTO_CREATION = True
+except ImportError:
+    HAS_CASE_AUTO_CREATION = False
+
 
 class ProcessingStatus(str, Enum):
     """Document processing states."""
@@ -336,6 +348,67 @@ class DocumentPipeline:
 
             except Exception as hub_err:
                 print(f"Module hub routing failed: {hub_err}")
+
+        # Process document for case management (create or add to existing case)
+        if HAS_CASE_AUTO_CREATION and doc.status == ProcessingStatus.CLASSIFIED:
+            try:
+                doc_type_str = doc.doc_type.value if doc.doc_type else ""
+                
+                # Process document - will either add to existing case or create new one
+                logger.info(f"🔍 Processing document for case management...")
+                
+                result = await process_document_for_case(
+                    user_id=doc.user_id,
+                    document_id=doc.id,
+                    doc_type=doc_type_str,
+                    full_text=doc.full_text or "",
+                    key_dates=doc.key_dates,
+                    key_parties=doc.key_parties,
+                    key_amounts=doc.key_amounts,
+                    filename=doc.filename,
+                )
+                
+                if result:
+                    action = result.get("action")
+                    case_data = result.get("case_data")
+                    summary = result.get("summary", "")
+                    
+                    if summary:
+                        print(f"\n{summary}\n")
+                    
+                    # Emit appropriate event based on action
+                    if HAS_CONTEXT_LOOP and case_data:
+                        if action == "case_created":
+                            context_loop.emit_event(
+                                EventType.ACTION_TAKEN,
+                                doc.user_id,
+                                {
+                                    "action": "case_created",
+                                    "case_number": case_data.get("case_number"),
+                                    "source": "document_intake",
+                                    "document_id": doc.id,
+                                    "case_type": case_data.get("case_type"),
+                                    "plaintiff": case_data.get("plaintiff", {}).get("name"),
+                                },
+                                source="document_pipeline",
+                            )
+                        elif action == "document_added":
+                            context_loop.emit_event(
+                                EventType.ACTION_TAKEN,
+                                doc.user_id,
+                                {
+                                    "action": "document_added_to_case",
+                                    "case_number": case_data.get("case_number"),
+                                    "source": "document_intake",
+                                    "document_id": doc.id,
+                                    "evidence_count": len(case_data.get("evidence", [])),
+                                    "needs_evaluation": True,
+                                },
+                                source="document_pipeline",
+                            )
+            except Exception as case_err:
+                logger.error(f"Case processing failed: {case_err}")
+                print(f"⚠️ Case processing failed: {case_err}")
 
         return doc
 

@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <!-- Case Context Manager - Central case data service -->
+    <script src="/static/js/case-context.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -990,8 +992,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Case Number</label>
-                                <input type="text" class="form-control" id="case-number" placeholder="e.g., 27-CV-24-12345" required>
-                                <div class="form-text">From your summons/complaint</div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="case-number" placeholder="e.g., 27-CV-24-12345" required>
+                                    <button class="btn btn-outline-primary" type="button" onclick="lookupCaseNumber()" title="Lookup existing case">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">From your summons/complaint - Click search to auto-fill from existing case</div>
+                                <div id="case-lookup-status" class="form-text text-success" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Case Type</label>
@@ -1070,7 +1078,133 @@
         document.addEventListener('DOMContentLoaded', () => {
             SemptifyNav.init();
             loadCases();
+            checkUrlParams();
         });
+        
+        // Check URL parameters for pre-fill
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const caseNumber = urlParams.get('case') || urlParams.get('case_number');
+            const prefill = urlParams.get('prefill');
+            
+            if (caseNumber) {
+                // Auto-open modal and lookup case
+                setTimeout(() => {
+                    openNewCaseModal();
+                    document.getElementById('case-number').value = caseNumber;
+                    lookupCaseNumber();
+                }, 500);
+            } else if (prefill === 'true') {
+                // Just open modal
+                setTimeout(() => openNewCaseModal(), 500);
+            }
+        }
+        
+        // Lookup case by case number and auto-fill form
+        async function lookupCaseNumber() {
+            const caseNumber = document.getElementById('case-number').value.trim();
+            const statusEl = document.getElementById('case-lookup-status');
+            
+            if (!caseNumber) {
+                statusEl.style.display = 'none';
+                return;
+            }
+            
+            statusEl.innerHTML = '<i class="bi bi-hourglass-split"></i> Looking up case...';
+            statusEl.className = 'form-text text-info';
+            statusEl.style.display = 'block';
+            
+            try {
+                // Try to fetch existing case by case number/ID
+                const response = await fetch(`/api/case-builder/cases/${encodeURIComponent(caseNumber)}`);
+                
+                if (response.ok) {
+                    const caseData = await response.json();
+                    populateFormFromCase(caseData);
+                    statusEl.innerHTML = '<i class="bi bi-check-circle"></i> Found existing case - form populated!';
+                    statusEl.className = 'form-text text-success';
+                } else {
+                    // Not found - check if we have it in the loaded cases list
+                    const localCase = cases.find(c => 
+                        c.case_number === caseNumber || 
+                        c.id === caseNumber ||
+                        c.case_number?.toLowerCase() === caseNumber.toLowerCase()
+                    );
+                    
+                    if (localCase) {
+                        // Fetch full case data
+                        const fullResponse = await fetch(`/api/case-builder/cases/${encodeURIComponent(localCase.id)}`);
+                        if (fullResponse.ok) {
+                            const fullCase = await fullResponse.json();
+                            populateFormFromCase(fullCase);
+                            statusEl.innerHTML = '<i class="bi bi-check-circle"></i> Found existing case - form populated!';
+                            statusEl.className = 'form-text text-success';
+                        } else {
+                            statusEl.innerHTML = '<i class="bi bi-info-circle"></i> New case number - fill in details below';
+                            statusEl.className = 'form-text text-muted';
+                        }
+                    } else {
+                        statusEl.innerHTML = '<i class="bi bi-info-circle"></i> New case number - fill in details below';
+                        statusEl.className = 'form-text text-muted';
+                    }
+                }
+            } catch (error) {
+                console.error('Error looking up case:', error);
+                statusEl.innerHTML = '<i class="bi bi-info-circle"></i> New case - fill in details below';
+                statusEl.className = 'form-text text-muted';
+            }
+        }
+        
+        // Populate form fields from case data
+        function populateFormFromCase(caseData) {
+            // Basic case info
+            if (caseData.case_type) {
+                document.getElementById('case-type').value = caseData.case_type;
+            }
+            if (caseData.court) {
+                document.getElementById('case-court').value = caseData.court;
+            }
+            if (caseData.property_address) {
+                document.getElementById('case-property').value = caseData.property_address;
+            }
+            
+            // Parties
+            const plaintiffName = caseData.plaintiff?.name || caseData.plaintiff_name;
+            if (plaintiffName) {
+                document.getElementById('case-plaintiff').value = plaintiffName;
+            }
+            const defendantName = caseData.defendant?.name || caseData.defendant_name;
+            if (defendantName) {
+                document.getElementById('case-defendant').value = defendantName;
+            }
+            
+            // Financial
+            if (caseData.rent_amount) {
+                document.getElementById('case-rent').value = caseData.rent_amount;
+            }
+            if (caseData.security_deposit) {
+                document.getElementById('case-deposit').value = caseData.security_deposit;
+            }
+            
+            // Dates
+            if (caseData.hearing_date) {
+                document.getElementById('case-hearing-date').value = caseData.hearing_date.split('T')[0];
+            }
+            if (caseData.lease_start) {
+                document.getElementById('case-lease-start').value = caseData.lease_start.split('T')[0];
+            }
+            if (caseData.lease_end) {
+                document.getElementById('case-lease-end').value = caseData.lease_end.split('T')[0];
+            }
+            
+            // Notes
+            if (caseData.notes && caseData.notes.length > 0) {
+                const notesText = Array.isArray(caseData.notes) ? caseData.notes.join('\n') : caseData.notes;
+                document.getElementById('case-notes').value = notesText;
+            }
+            
+            console.log('Form populated from case:', caseData);
+        }
         
         // Load cases from API
         async function loadCases() {
@@ -1312,6 +1446,24 @@
             const caseData = cases.find(c => c.id === caseId);
             if (!caseData) return;
             
+            // Set as active case in CaseContext for cross-page access
+            CaseContext.setActiveCase({
+                case_number: caseData.case_number,
+                case_type: caseData.case_type,
+                status: caseData.status,
+                court: caseData.court,
+                property_address: caseData.property_address,
+                plaintiff: { name: caseData.plaintiff_name },
+                defendant: { name: caseData.defendant_name },
+                hearing_date: caseData.hearing_date,
+                rent_amount: caseData.rent_amount,
+                security_deposit: caseData.security_deposit,
+                progress: caseData.progress,
+                defenses: caseData.defenses,
+                evidence_count: caseData.evidence_count
+            });
+            console.log('📋 Set active case:', caseData.case_number);
+            
             // Populate panel
             document.getElementById('panel-case-number').textContent = `Case #${caseData.case_number}`;
             document.getElementById('panel-case-type').textContent = formatCaseType(caseData.case_type);
@@ -1397,6 +1549,12 @@
         function openNewCaseModal() {
             const modal = new bootstrap.Modal(document.getElementById('newCaseModal'));
             modal.show();
+            
+            // Check if there's an active case to pre-fill from
+            const activeCase = CaseContext.getActiveCase();
+            if (activeCase && !document.getElementById('case-number').value) {
+                populateFormFromCase(activeCase);
+            }
         }
         
         async function createCase() {
@@ -1423,6 +1581,26 @@
                 });
                 
                 if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Set as active case in CaseContext
+                    CaseContext.setActiveCase({
+                        case_number: caseData.case_number,
+                        case_type: caseData.case_type,
+                        court: caseData.court,
+                        property_address: caseData.property_address,
+                        plaintiff: { name: caseData.plaintiff_name },
+                        defendant: { name: caseData.defendant_name },
+                        rent_amount: caseData.rent_amount,
+                        security_deposit: caseData.security_deposit,
+                        hearing_date: caseData.hearing_date,
+                        lease_start: caseData.lease_start,
+                        lease_end: caseData.lease_end,
+                        notes: caseData.notes ? [caseData.notes] : [],
+                        status: 'draft'
+                    });
+                    console.log('📋 Created and set active case:', caseData.case_number);
+                    
                     bootstrap.Modal.getInstance(document.getElementById('newCaseModal')).hide();
                     document.getElementById('new-case-form').reset();
                     loadCases();
@@ -1438,6 +1616,19 @@
         }
         
         function editCase(caseId) {
+            // Set case as active before navigating
+            const caseData = cases.find(c => c.id === caseId);
+            if (caseData) {
+                CaseContext.setActiveCase({
+                    case_number: caseData.case_number,
+                    case_type: caseData.case_type,
+                    court: caseData.court,
+                    property_address: caseData.property_address,
+                    plaintiff: { name: caseData.plaintiff_name },
+                    defendant: { name: caseData.defendant_name },
+                    status: caseData.status
+                });
+            }
             // Navigate to case builder with case ID
             window.location.href = `/static/case_builder.html?case=${caseId}`;
         }

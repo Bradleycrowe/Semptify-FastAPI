@@ -750,6 +750,53 @@ MCRO_PATTERNS = {
         r"State\s+of\s+Minnesota",
     ],
     "document_types": {
+        # === COMPLAINT PATTERNS (most common MCRO download) ===
+        "complaint": {
+            "patterns": [
+                r"complaint\s+(?:for|and|in)",
+                r"civil\s+complaint",
+                r"eviction\s+complaint",
+                r"complaint\s+for\s+(?:eviction|recovery|unlawful)",
+                r"plaintiff[s']?\s+complaint",
+                r"comes?\s+now\s+(?:the\s+)?plaintiff",
+                r"plaintiff\s+(?:hereby\s+)?(?:complains|alleges|states)",
+                r"cause[s]?\s+of\s+action",
+                r"wherefore[,]?\s+plaintiff",
+                r"recovery\s+of\s+(?:premises|possession)",
+                r"unlawful\s+detainer",
+                r"holdover\s+tenant",
+                r"eviction\s+action",
+                r"action\s+for\s+(?:eviction|possession)",
+                r"demand[s]?\s+judgment",
+                r"judgment\s+(?:in\s+favor|against\s+defendant)",
+            ],
+            "doc_type": DocumentType.COMPLAINT,
+        },
+        # === SUMMONS PATTERNS ===
+        "summons": {
+            "patterns": [
+                r"summons",
+                r"you\s+are\s+(?:hereby\s+)?summoned",
+                r"you\s+are\s+being\s+sued",
+                r"you\s+must\s+(?:respond|answer|appear)",
+                r"failure\s+to\s+(?:respond|answer|appear)",
+                r"served\s+with\s+(?:a\s+)?summons",
+                r"service\s+(?:of\s+)?summons",
+            ],
+            "doc_type": DocumentType.SUMMONS,
+        },
+        # === EVICTION FILING PATTERNS ===
+        "eviction_filing": {
+            "patterns": [
+                r"action\s+for\s+eviction",
+                r"eviction\s+(?:case|action|proceeding)",
+                r"unlawful\s+detainer\s+(?:action|complaint)",
+                r"forcible\s+(?:entry|detainer)",
+                r"writ\s+of\s+(?:restitution|recovery)",
+                r"order\s+(?:of|for)\s+eviction",
+            ],
+            "doc_type": DocumentType.EVICTION_FILING,
+        },
         "notice_of_motion": {
             "patterns": [
                 r"notice\s+of.*motion",
@@ -777,6 +824,7 @@ MCRO_PATTERNS = {
             "patterns": [
                 r"order\s+(?:granting|denying)",
                 r"court\s+order",
+                r"it\s+is\s+(?:hereby\s+)?ordered",
             ],
             "doc_type": DocumentType.COURT_ORDER,
         },
@@ -784,8 +832,32 @@ MCRO_PATTERNS = {
             "patterns": [
                 r"judgment\s+(?:for|against)",
                 r"default\s+judgment",
+                r"judgment\s+is\s+(?:hereby\s+)?entered",
             ],
             "doc_type": DocumentType.JUDGMENT,
+        },
+        # === ANSWER PATTERNS ===
+        "answer": {
+            "patterns": [
+                r"answer\s+(?:to\s+(?:the\s+)?)?complaint",
+                r"defendant[s']?\s+answer",
+                r"defendant\s+(?:hereby\s+)?answers",
+                r"affirmative\s+defense[s]?",
+                r"defendant\s+admits",
+                r"defendant\s+denies",
+            ],
+            "doc_type": DocumentType.ANSWER,
+        },
+        # === AFFIDAVIT PATTERNS ===
+        "affidavit": {
+            "patterns": [
+                r"affidavit\s+(?:of|in)",
+                r"affidavit\s+of\s+(?:service|mailing)",
+                r"being\s+(?:first\s+)?duly\s+sworn",
+                r"deposes\s+and\s+(?:says|states)",
+                r"under\s+penalty\s+of\s+perjury",
+            ],
+            "doc_type": DocumentType.AFFIDAVIT,
         },
     },
     "legal_services": {
@@ -1028,6 +1100,7 @@ class DocumentRecognitionEngine:
         Detect MCRO (Minnesota Court Records Online) documents.
         
         These documents have specific patterns from the MN court system.
+        MCRO documents are typically downloaded from: https://publicaccess.courts.state.mn.us/
         
         Returns:
             Tuple of (DocumentType, confidence, evidence) or None
@@ -1035,21 +1108,38 @@ class DocumentRecognitionEngine:
         text_lower = text.lower()
         filename_lower = filename.lower()
         
-        # Check for MCRO filename pattern
-        mcro_filename = bool(re.search(r"mcro_\d+[a-z]{0,2}-cv-\d{2}-\d+", filename_lower))
+        # Check for MCRO filename pattern (e.g., MCRO_19AV-CV-25-3477.pdf)
+        mcro_filename = bool(re.search(r"mcro[_-]?\d*[a-z]{0,2}[-_]?cv[-_]?\d{2}[-_]?\d+", filename_lower))
+        
+        # Alternative MCRO indicators in filename
+        if not mcro_filename:
+            mcro_filename = "mcro" in filename_lower or "mncourts" in filename_lower
         
         # Check for Minnesota court markers
         mn_court_markers = [
-            (r"state\s+of\s+minnesota", 0.3),
-            (r"court\s+file\s+no\.?", 0.4),
-            (r"district\s+court", 0.3),
-            (r"first\s+judicial\s+district", 0.4),
-            (r"second\s+judicial\s+district", 0.4),
-            (r"fourth\s+judicial\s+district", 0.4),  # Hennepin
-            (r"dakota\s+county", 0.3),
-            (r"hennepin\s+county", 0.3),
-            (r"ramsey\s+county", 0.3),
-            (r"filed\s+in\s+district\s+court", 0.5),
+            (r"state\s+of\s+minnesota", 0.4),
+            (r"court\s+file\s+(?:no\.?|number)", 0.5),
+            (r"district\s+court", 0.4),
+            (r"first\s+judicial\s+district", 0.5),
+            (r"second\s+judicial\s+district", 0.5),
+            (r"third\s+judicial\s+district", 0.5),
+            (r"fourth\s+judicial\s+district", 0.5),  # Hennepin
+            (r"fifth\s+judicial\s+district", 0.5),
+            (r"sixth\s+judicial\s+district", 0.5),
+            (r"seventh\s+judicial\s+district", 0.5),
+            (r"eighth\s+judicial\s+district", 0.5),
+            (r"ninth\s+judicial\s+district", 0.5),
+            (r"tenth\s+judicial\s+district", 0.5),
+            (r"dakota\s+county", 0.4),
+            (r"hennepin\s+county", 0.4),
+            (r"ramsey\s+county", 0.4),
+            (r"anoka\s+county", 0.4),
+            (r"washington\s+county", 0.4),
+            (r"scott\s+county", 0.4),
+            (r"carver\s+county", 0.4),
+            (r"filed\s+(?:in\s+)?district\s+court", 0.6),
+            (r"\d{2}[-]?[a-z]{2}[-]?\d{2}[-]?\d{3,}", 0.5),  # Case number pattern like 27-CV-24-12345
+            (r"minnesota\s+(?:rules?\s+of\s+)?(?:civil|court)", 0.4),
         ]
         
         mn_score = 0.0
@@ -1059,30 +1149,43 @@ class DocumentRecognitionEngine:
                 mn_score += weight
                 mn_evidence.append(pattern)
         
+        # If MCRO filename, boost the score significantly
+        if mcro_filename:
+            mn_score += 0.5
+            mn_evidence.append("mcro_filename")
+        
         # Need some MN court context to proceed
-        if mn_score < 0.5 and not mcro_filename:
+        if mn_score < 0.4:
             return None
         
         # Now check MCRO document types
+        best_match = None
+        best_confidence = 0.0
+        
         for doc_type_name, doc_info in MCRO_PATTERNS.get("document_types", {}).items():
             for pattern in doc_info["patterns"]:
                 match = re.search(pattern, text_lower)
                 if match:
-                    base_confidence = 0.75
+                    base_confidence = 0.70
                     # Boost for MCRO filename
                     if mcro_filename:
                         base_confidence += 0.15
                     # Boost for MN court markers
-                    base_confidence += min(mn_score * 0.1, 0.10)
+                    base_confidence += min(mn_score * 0.08, 0.12)
                     
-                    return (
-                        doc_info["doc_type"],
-                        min(base_confidence, 0.98),
-                        f"{doc_type_name}: {match.group(0)[:50]}"
-                    )
+                    if base_confidence > best_confidence:
+                        best_match = (
+                            doc_info["doc_type"],
+                            min(base_confidence, 0.98),
+                            f"{doc_type_name}: {match.group(0)[:50]}"
+                        )
+                        best_confidence = base_confidence
         
-        # If we have MCRO filename but couldn't detect type, try generic detection
-        if mcro_filename:
+        if best_match:
+            return best_match
+        
+        # If we have MCRO filename or strong MN markers but couldn't detect type
+        if mcro_filename or mn_score >= 0.8:
             # Look at filename for hints
             if "motion" in filename_lower:
                 return (DocumentType.MOTION, 0.85, "MCRO filename contains 'motion'")
@@ -1094,6 +1197,21 @@ class DocumentRecognitionEngine:
                 return (DocumentType.SUMMONS, 0.85, "MCRO filename contains 'summons'")
             if "complaint" in filename_lower:
                 return (DocumentType.COMPLAINT, 0.85, "MCRO filename contains 'complaint'")
+            if "answer" in filename_lower:
+                return (DocumentType.ANSWER, 0.85, "MCRO filename contains 'answer'")
+            if "affidavit" in filename_lower:
+                return (DocumentType.AFFIDAVIT, 0.85, "MCRO filename contains 'affidavit'")
+            
+            # High confidence MN document but couldn't determine type - try content analysis
+            if "plaintiff" in text_lower and ("complaint" in text_lower or "wherefore" in text_lower):
+                return (DocumentType.COMPLAINT, 0.80, "MN court doc with complaint indicators")
+            if "summon" in text_lower or "you are being sued" in text_lower:
+                return (DocumentType.SUMMONS, 0.80, "MN court doc with summons indicators")
+            if "ordered" in text_lower and "court" in text_lower:
+                return (DocumentType.COURT_ORDER, 0.75, "MN court doc with order indicators")
+            
+            # Generic court filing fallback
+            return (DocumentType.COMPLAINT, 0.65, f"Minnesota court document (score: {mn_score:.2f})")
         
         return None
     

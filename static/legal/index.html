@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Legal Dashboard</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --priv-bg: #fef3c7;
+            --priv-border: #f59e0b;
+            --wp-bg: #e0e7ff;
+            --wp-border: #6366f1;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-logo {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-role {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+        }
+        
+        .nav-section { margin-bottom: 28px; }
+        
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.5;
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+        
+        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .nav-badge.priv {
+            background: var(--priv-bg);
+            color: #92400e;
+        }
+        
+        /* Main Content */
+        .main { margin-left: 280px; min-height: 100vh; }
+        
+        /* Top Bar */
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .topbar-title { font-size: 22px; font-weight: 600; }
+        .topbar-actions { display: flex; gap: 12px; align-items: center; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        /* Content Area */
+        .content { padding: 32px; }
+        
+        /* Privilege Warning Banner */
+        .priv-banner {
+            background: linear-gradient(135deg, var(--priv-bg), #fef9c3);
+            border: 1px solid var(--priv-border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .priv-banner-icon { font-size: 28px; }
+        .priv-banner-text { flex: 1; }
+        .priv-banner-title { font-weight: 600; color: #92400e; }
+        .priv-banner-desc { font-size: 13px; color: #78350f; }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-change { font-size: 11px; margin-top: 4px; }
+        .stat-change.up { color: var(--success); }
+        
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+        
+        /* Card */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title { font-size: 16px; font-weight: 600; }
+        .card-action { color: var(--primary); font-size: 13px; text-decoration: none; cursor: pointer; }
+        .card-body { padding: 20px 24px; }
+        
+        /* Case List */
+        .case-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .case-item:last-child { border-bottom: none; }
+        
+        .case-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .priv-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .priv-badge.priv {
+            background: var(--priv-bg);
+            color: #92400e;
+            border: 1px solid var(--priv-border);
+        }
+        
+        .priv-badge.wp {
+            background: var(--wp-bg);
+            color: #4338ca;
+            border: 1px solid var(--wp-border);
+        }
+        
+        .case-info { flex: 1; }
+        .case-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .case-desc { font-size: 13px; color: var(--text-muted); }
+        
+        .case-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .case-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .case-status.urgent { background: #fef2f2; color: #991b1b; }
+        .case-status.active { background: #fef3c7; color: #92400e; }
+        .case-status.review { background: #e0e7ff; color: #4338ca; }
+        
+        /* Work Product Section */
+        .work-product-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .work-product-item:last-child { border-bottom: none; }
+        
+        .wp-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .wp-title { font-weight: 600; font-size: 14px; flex: 1; }
+        .wp-date { font-size: 12px; color: var(--text-muted); }
+        .wp-desc { font-size: 13px; color: var(--text-muted); }
+        
+        /* Calendar */
+        .calendar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .calendar-item:last-child { border-bottom: none; }
+        
+        .calendar-date {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-day { font-size: 18px; font-weight: 700; }
+        .calendar-month { font-size: 10px; text-transform: uppercase; }
+        .calendar-info { flex: 1; }
+        .calendar-title { font-weight: 600; font-size: 14px; }
+        .calendar-time { font-size: 12px; color: var(--text-muted); }
+        
+        /* Conflict Check */
+        .conflict-check {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .conflict-check.warning {
+            background: #fffbeb;
+            border-color: #fcd34d;
+        }
+        
+        .conflict-icon { font-size: 20px; }
+        .conflict-text { font-size: 13px; }
+        
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">⚖️ Semptify Legal</div>
+            <div class="sidebar-role">Attorney Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/legal/index.html" class="nav-link active">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/legal/cases.html" class="nav-link">
+                    <span class="nav-icon">📁</span>
+                    Case Management
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Privileged</div>
+                <a href="/static/legal/privileged.html" class="nav-link">
+                    <span class="nav-icon">🔒</span>
+                    Privileged Docs
+                    <span class="nav-badge priv">12</span>
+                </a>
+                <a href="/static/legal/work-product.html" class="nav-link">
+                    <span class="nav-icon">📝</span>
+                    Work Product
+                </a>
+                <a href="/static/legal/notes.html" class="nav-link">
+                    <span class="nav-icon">🗒️</span>
+                    Case Notes
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Court</div>
+                <a href="/static/legal/filings.html" class="nav-link">
+                    <span class="nav-icon">⚖️</span>
+                    Court Filings
+                    <span class="nav-badge">2</span>
+                </a>
+                <a href="/static/legal/discovery.html" class="nav-link">
+                    <span class="nav-icon">🔍</span>
+                    Discovery
+                </a>
+                <a href="/static/legal/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Research</div>
+                <a href="/static/legal/research.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Legal Research
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📖</span>
+                    MN Statutes
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Admin</div>
+                <a href="/static/legal/conflicts.html" class="nav-link">
+                    <span class="nav-icon">⚠️</span>
+                    Conflict Check
+                </a>
+                <a href="/static/dashboard.html" class="nav-link">
+                    <span class="nav-icon">🔧</span>
+                    Full System
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">Legal Dashboard</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="runConflictCheck()">⚠️ Conflict Check</button>
+                <button class="btn btn-primary" onclick="newCase()">➕ New Case</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Privilege Warning -->
+            <div class="priv-banner">
+                <span class="priv-banner-icon">🔒</span>
+                <div class="priv-banner-text">
+                    <div class="priv-banner-title">Attorney-Client Privilege Active</div>
+                    <div class="priv-banner-desc">Documents marked 🔒 PRIV or 📝 WP are protected. Exercise caution before sharing.</div>
+                </div>
+                <button class="btn btn-outline btn-sm">View Privilege Log</button>
+            </div>
+            
+            <!-- Conflict Check Status -->
+            <div class="conflict-check" id="conflictStatus">
+                <span class="conflict-icon">✓</span>
+                <span class="conflict-text">No conflicts detected. Last check: Today at 9:15 AM</span>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Active Cases</div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-change up">↑ 2 this month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Privileged Docs</div>
+                    <div class="stat-value">47</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Filings</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Court Dates (30d)</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Discovery Items</div>
+                    <div class="stat-value">12</div>
+                </div>
+            </div>
+            
+            <!-- Main Layout -->
+            <div class="main-layout">
+                <!-- Cases -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📁 Active Cases</span>
+                        <span class="card-action" onclick="viewAllCases()">View All →</span>
+                    </div>
+                    <div class="card-body" id="casesList">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div>
+                    <!-- Work Product -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <span class="card-title">📝 Recent Work Product</span>
+                            <span class="card-action" onclick="viewWorkProduct()">View All →</span>
+                        </div>
+                        <div class="card-body" id="workProductList">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📅 Upcoming Court Dates</span>
+                            <span class="card-action" onclick="viewCalendar()">Calendar →</span>
+                        </div>
+                        <div class="card-body" id="calendarList">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Mock data
+        const cases = [
+            {
+                id: 1,
+                name: 'Garcia v. Sunrise Properties',
+                type: 'Eviction Defense',
+                status: 'urgent',
+                hasPriv: true,
+                hasWP: true,
+                county: 'Hennepin',
+                deadline: 'Dec 20 - Answer Due'
+            },
+            {
+                id: 2,
+                name: 'Williams v. Metro Housing',
+                type: 'Habitability',
+                status: 'active',
+                hasPriv: true,
+                hasWP: false,
+                county: 'Ramsey',
+                deadline: 'Jan 5 - Discovery Due'
+            },
+            {
+                id: 3,
+                name: 'Johnson v. Lake Properties',
+                type: 'Security Deposit',
+                status: 'review',
+                hasPriv: false,
+                hasWP: true,
+                county: 'Dakota',
+                deadline: 'Jan 15 - Settlement Conf'
+            },
+            {
+                id: 4,
+                name: 'Martinez v. Urban Rentals',
+                type: 'Discrimination',
+                status: 'active',
+                hasPriv: true,
+                hasWP: true,
+                county: 'Hennepin',
+                deadline: 'Jan 22 - Mediation'
+            }
+        ];
+        
+        const workProduct = [
+            { title: 'Motion to Dismiss Draft', case: 'Garcia v. Sunrise', date: 'Today', hasWP: true },
+            { title: 'Discovery Response Analysis', case: 'Williams v. Metro', date: 'Yesterday', hasWP: true },
+            { title: 'Settlement Strategy Memo', case: 'Johnson v. Lake', date: 'Dec 14', hasWP: true }
+        ];
+        
+        const courtDates = [
+            { day: '20', month: 'Dec', title: 'Garcia v. Sunrise - Answer Due', time: '4:30 PM Deadline' },
+            { day: '22', month: 'Dec', title: 'Martinez - Status Hearing', time: '10:00 AM, Courtroom 3' },
+            { day: '05', month: 'Jan', title: 'Williams - Discovery Deadline', time: 'EOD' }
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCases();
+            renderWorkProduct();
+            renderCalendar();
+        });
+        
+        function renderCases() {
+            const container = document.getElementById('casesList');
+            
+            container.innerHTML = cases.map(c => `
+                <div class="case-item" onclick="openCase(${c.id})">
+                    <div class="case-badges">
+                        ${c.hasPriv ? '<span class="priv-badge priv">🔒 PRIV</span>' : ''}
+                        ${c.hasWP ? '<span class="priv-badge wp">📝 WP</span>' : ''}
+                    </div>
+                    <div class="case-info">
+                        <div class="case-name">${c.name}</div>
+                        <div class="case-desc">${c.type} • ${c.county} County</div>
+                        <div class="case-meta">
+                            <span>⏱️ ${c.deadline}</span>
+                        </div>
+                    </div>
+                    <span class="case-status ${c.status}">${c.status}</span>
+                </div>
+            `).join('');
+        }
+        
+        function renderWorkProduct() {
+            const container = document.getElementById('workProductList');
+            
+            container.innerHTML = workProduct.map(wp => `
+                <div class="work-product-item">
+                    <div class="wp-header">
+                        <span class="priv-badge wp">📝 WP</span>
+                        <span class="wp-title">${wp.title}</span>
+                        <span class="wp-date">${wp.date}</span>
+                    </div>
+                    <div class="wp-desc">${wp.case}</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderCalendar() {
+            const container = document.getElementById('calendarList');
+            
+            container.innerHTML = courtDates.map(e => `
+                <div class="calendar-item">
+                    <div class="calendar-date">
+                        <span class="calendar-day">${e.day}</span>
+                        <span class="calendar-month">${e.month}</span>
+                    </div>
+                    <div class="calendar-info">
+                        <div class="calendar-title">${e.title}</div>
+                        <div class="calendar-time">${e.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Actions
+        function openCase(id) {
+            alert(`Opening case ID: ${id}`);
+        }
+        
+        function newCase() {
+            alert('Opening new case intake form...');
+        }
+        
+        function viewAllCases() {
+            window.location.href = '/static/legal/cases.html';
+        }
+        
+        function viewWorkProduct() {
+            window.location.href = '/static/legal/work-product.html';
+        }
+        
+        function viewCalendar() {
+            window.location.href = '/static/legal/calendar.html';
+        }
+        
+        function runConflictCheck() {
+            const status = document.getElementById('conflictStatus');
+            status.innerHTML = '<span class="conflict-icon">🔄</span><span class="conflict-text">Running conflict check...</span>';
+            
+            setTimeout(() => {
+                status.innerHTML = '<span class="conflict-icon">✓</span><span class="conflict-text">No conflicts detected. Last check: Just now</span>';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

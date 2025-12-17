@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <title>Semptify - My Documents</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header-sub { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        
+        .main { padding: 16px; }
+        
+        /* Upload Area */
+        .upload-area {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 32px 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+        
+        .upload-icon { font-size: 48px; margin-bottom: 12px; }
+        .upload-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .upload-desc { color: var(--text-muted); font-size: 13px; }
+        
+        input[type="file"] { display: none; }
+        
+        /* Quick Upload Buttons */
+        .quick-uploads {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        
+        .quick-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .quick-btn:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+        
+        /* Document Categories */
+        .category-section { margin-bottom: 24px; }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .category-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-count {
+            background: var(--border);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        /* Document Grid */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .doc-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .doc-card:hover { transform: translateY(-2px); }
+        
+        .doc-preview {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            overflow: hidden;
+        }
+        
+        .doc-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .doc-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .doc-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .doc-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card);
+            border-radius: 16px;
+        }
+        
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .empty-desc { color: var(--text-muted); font-size: 14px; }
+        
+        /* Upload Progress Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal-overlay.show { display: flex; }
+        
+        .modal {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+        }
+        
+        .modal-icon { font-size: 48px; margin-bottom: 16px; }
+        .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .modal-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+        
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-muted);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(30, 64, 175, 0.1);
+        }
+        
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 11px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📄 My Documents</h1>
+        <div class="header-sub" id="docCount">Loading...</div>
+    </header>
+    
+    <main class="main">
+        <!-- Upload Area -->
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📸</div>
+            <div class="upload-title">Upload Evidence</div>
+            <div class="upload-desc">Tap to select or take a photo</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,application/pdf,.doc,.docx" multiple capture="environment">
+        
+        <!-- Quick Upload Types -->
+        <div class="quick-uploads">
+            <button class="quick-btn" onclick="uploadType('notice')">📋 Notice</button>
+            <button class="quick-btn" onclick="uploadType('lease')">📜 Lease</button>
+            <button class="quick-btn" onclick="uploadType('photo')">📷 Photo</button>
+            <button class="quick-btn" onclick="uploadType('receipt')">🧾 Receipt</button>
+            <button class="quick-btn" onclick="uploadType('letter')">✉️ Letter</button>
+        </div>
+        
+        <!-- Documents List -->
+        <div id="documentsList">
+            <div class="empty-state">
+                <div class="empty-icon">📁</div>
+                <div class="empty-title">No Documents Yet</div>
+                <div class="empty-desc">Upload photos and documents to build your evidence file</div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Upload Progress Modal -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <div class="modal-icon" id="modalIcon">📤</div>
+            <div class="modal-title" id="modalTitle">Uploading...</div>
+            <div class="modal-desc" id="modalDesc">Please wait</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <a href="/static/tenant/index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="/static/tenant/documents.html" class="nav-item active">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Docs</span>
+        </a>
+        <a href="/static/tenant/timeline.html" class="nav-item">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Timeline</span>
+        </a>
+        <a href="/static/tenant/help.html" class="nav-item">
+            <span class="nav-icon">🆘</span>
+            <span class="nav-label">Help</span>
+        </a>
+    </nav>
+    
+    <script>
+        let documents = [];
+        let currentUploadType = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadDocuments();
+            setupUpload();
+        });
+        
+        // Load documents
+        async function loadDocuments() {
+            try {
+                const resp = await fetch('/api/documents/list');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    documents = data.documents || [];
+                    renderDocuments();
+                }
+            } catch (e) {
+                console.error('Failed to load documents:', e);
+            }
+            
+            document.getElementById('docCount').textContent = 
+                documents.length > 0 ? `${documents.length} documents` : 'No documents yet';
+        }
+        
+        // Render documents by category
+        function renderDocuments() {
+            const container = document.getElementById('documentsList');
+            
+            if (documents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <div class="empty-title">No Documents Yet</div>
+                        <div class="empty-desc">Upload photos and documents to build your evidence file</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group by type
+            const categories = {
+                'notice': { icon: '📋', name: 'Notices', docs: [] },
+                'lease': { icon: '📜', name: 'Lease & Contracts', docs: [] },
+                'photo': { icon: '📷', name: 'Photos', docs: [] },
+                'receipt': { icon: '🧾', name: 'Receipts', docs: [] },
+                'letter': { icon: '✉️', name: 'Letters', docs: [] },
+                'other': { icon: '📄', name: 'Other', docs: [] }
+            };
+            
+            documents.forEach(doc => {
+                const type = doc.document_type || 'other';
+                if (categories[type]) {
+                    categories[type].docs.push(doc);
+                } else {
+                    categories.other.docs.push(doc);
+                }
+            });
+            
+            let html = '';
+            
+            for (const [key, cat] of Object.entries(categories)) {
+                if (cat.docs.length === 0) continue;
+                
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <span class="category-title">
+                                ${cat.icon} ${cat.name}
+                                <span class="category-count">${cat.docs.length}</span>
+                            </span>
+                        </div>
+                        <div class="doc-grid">
+                            ${cat.docs.map(doc => renderDocCard(doc)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Render single document card
+        function renderDocCard(doc) {
+            const isImage = doc.mime_type && doc.mime_type.startsWith('image/');
+            const icon = getDocIcon(doc.mime_type);
+            const date = new Date(doc.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            
+            return `
+                <div class="doc-card" onclick="viewDocument('${doc.id}')">
+                    <div class="doc-preview">
+                        ${isImage 
+                            ? `<img src="/api/documents/${doc.id}/thumbnail" alt="${doc.filename}" onerror="this.parentElement.innerHTML='📷'">`
+                            : icon
+                        }
+                    </div>
+                    <div class="doc-name">${doc.original_filename || doc.filename}</div>
+                    <div class="doc-meta">${date}</div>
+                    ${doc.certificate_path ? '<span class="doc-badge">✓ Certified</span>' : ''}
+                </div>
+            `;
+        }
+        
+        // Get icon for file type
+        function getDocIcon(mimeType) {
+            if (!mimeType) return '📄';
+            if (mimeType.startsWith('image/')) return '📷';
+            if (mimeType.includes('pdf')) return '📕';
+            if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
+            return '📄';
+        }
+        
+        // Setup file upload
+        function setupUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+                e.target.value = ''; // Reset for next upload
+            });
+        }
+        
+        // Handle file upload
+        async function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            showModal('📤', 'Uploading...', `${files.length} file(s)`);
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                updateProgress((i / files.length) * 100);
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                if (currentUploadType) {
+                    formData.append('document_type', currentUploadType);
+                }
+                
+                try {
+                    const resp = await fetch('/api/documents/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!resp.ok) throw new Error('Upload failed');
+                } catch (e) {
+                    console.error('Upload error:', e);
+                }
+            }
+            
+            updateProgress(100);
+            showModal('✅', 'Upload Complete!', `${files.length} file(s) uploaded`);
+            
+            setTimeout(() => {
+                hideModal();
+                loadDocuments();
+            }, 1500);
+            
+            currentUploadType = null;
+        }
+        
+        // Quick upload with type
+        function uploadType(type) {
+            currentUploadType = type;
+            document.getElementById('fileInput').click();
+        }
+        
+        // View document
+        function viewDocument(docId) {
+            window.location.href = `/api/documents/${docId}/view`;
+        }
+        
+        // Modal helpers
+        function showModal(icon, title, desc) {
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            document.getElementById('uploadModal').classList.add('show');
+        }
+        
+        function hideModal() {
+            document.getElementById('uploadModal').classList.remove('show');
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+    </script>
+</body>
+</html>

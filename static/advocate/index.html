@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#059669">
+    <title>Semptify - Advocate Dashboard</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #10b981;
+            --primary-dark: #047857;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --info: #2563eb;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .sidebar-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            margin-bottom: 24px;
+        }
+        
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover { background: var(--bg); }
+        .nav-link.active { background: rgba(5, 150, 105, 0.1); color: var(--primary); font-weight: 600; }
+        
+        .nav-icon { font-size: 18px; }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        /* Main Content */
+        .main {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        
+        /* Top Bar */
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .topbar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .topbar-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover { background: var(--primary-dark); }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover { background: var(--bg); }
+        
+        /* Content Area */
+        .content {
+            padding: 24px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .stat-change.up { color: var(--primary); }
+        .stat-change.down { color: var(--danger); }
+        
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+        
+        /* Card */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .card-action {
+            color: var(--primary);
+            font-size: 13px;
+            text-decoration: none;
+        }
+        
+        .card-body { padding: 16px 20px; }
+        
+        /* Client List */
+        .client-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .client-item:last-child { border-bottom: none; }
+        
+        .client-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .client-info { flex: 1; }
+        
+        .client-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .client-case {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .client-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .client-status.urgent { background: #fef2f2; color: #991b1b; }
+        .client-status.active { background: #fef3c7; color: #92400e; }
+        .client-status.stable { background: #d1fae5; color: #065f46; }
+        
+        /* Queue Item */
+        .queue-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .queue-item:last-child { border-bottom: none; }
+        
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .queue-type {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .queue-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .queue-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .queue-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .queue-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Calendar Preview */
+        .calendar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .calendar-item:last-child { border-bottom: none; }
+        
+        .calendar-date {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-day { font-size: 18px; font-weight: 700; }
+        .calendar-month { font-size: 10px; text-transform: uppercase; }
+        
+        .calendar-info { flex: 1; }
+        .calendar-title { font-weight: 600; font-size: 14px; }
+        .calendar-time { font-size: 12px; color: var(--text-muted); }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🤝 Semptify</div>
+            <div class="sidebar-role">Advocate Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/advocate/index.html" class="nav-link active">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/advocate/queue.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Case Queue
+                    <span class="nav-badge" id="queueCount">3</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/static/advocate/clients.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    My Clients
+                </a>
+                <a href="/static/advocate/intake.html" class="nav-link">
+                    <span class="nav-icon">➕</span>
+                    New Intake
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="/static/advocate/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Resources
+                </a>
+                <a href="/static/dashboard.html" class="nav-link">
+                    <span class="nav-icon">🔧</span>
+                    Full Tools
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">Dashboard</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="goToIntake()">➕ New Client</button>
+                <button class="btn btn-primary" onclick="goToQueue()">View Queue</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Active Clients</div>
+                    <div class="stat-value" id="activeClients">--</div>
+                    <div class="stat-change up">↑ 2 this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cases in Queue</div>
+                    <div class="stat-value" id="casesInQueue">--</div>
+                    <div class="stat-change">Awaiting assignment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Urgent Actions</div>
+                    <div class="stat-value" id="urgentActions">--</div>
+                    <div class="stat-change down">Deadlines within 48hrs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cases Resolved</div>
+                    <div class="stat-value" id="resolvedCases">--</div>
+                    <div class="stat-change up">This month</div>
+                </div>
+            </div>
+            
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Active Clients -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">👥 Active Clients</span>
+                        <a href="/static/advocate/clients.html" class="card-action">View All →</a>
+                    </div>
+                    <div class="card-body" id="clientsList">
+                        <p style="color: var(--text-muted); text-align: center; padding: 20px;">Loading clients...</p>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div>
+                    <!-- Case Queue Preview -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header">
+                            <span class="card-title">📋 Incoming Cases</span>
+                            <a href="/static/advocate/queue.html" class="card-action">View All →</a>
+                        </div>
+                        <div class="card-body" id="queueList">
+                            <p style="color: var(--text-muted); text-align: center; padding: 20px;">Loading queue...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Dates -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📅 Upcoming Dates</span>
+                            <a href="/static/advocate/calendar.html" class="card-action">Calendar →</a>
+                        </div>
+                        <div class="card-body" id="calendarList">
+                            <p style="color: var(--text-muted); text-align: center; padding: 20px;">Loading calendar...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadStats();
+            await loadClients();
+            await loadQueue();
+            await loadCalendar();
+        });
+        
+        // Load stats (mock for now)
+        async function loadStats() {
+            // In real implementation, fetch from API
+            document.getElementById('activeClients').textContent = '12';
+            document.getElementById('casesInQueue').textContent = '3';
+            document.getElementById('urgentActions').textContent = '2';
+            document.getElementById('resolvedCases').textContent = '8';
+            document.getElementById('queueCount').textContent = '3';
+        }
+        
+        // Load clients
+        async function loadClients() {
+            const container = document.getElementById('clientsList');
+            
+            // Mock data - replace with API call
+            const clients = [
+                { name: 'Maria G.', case: 'Eviction Defense', status: 'urgent', initials: '👩' },
+                { name: 'James W.', case: 'Habitability Complaint', status: 'active', initials: '👨' },
+                { name: 'Sarah M.', case: 'Lease Review', status: 'stable', initials: '👩' },
+                { name: 'Robert L.', case: 'Security Deposit', status: 'active', initials: '👨' }
+            ];
+            
+            container.innerHTML = clients.map(c => `
+                <div class="client-item" onclick="viewClient('${c.name}')">
+                    <div class="client-avatar">${c.initials}</div>
+                    <div class="client-info">
+                        <div class="client-name">${c.name}</div>
+                        <div class="client-case">${c.case}</div>
+                    </div>
+                    <span class="client-status ${c.status}">${c.status}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Load queue
+        async function loadQueue() {
+            const container = document.getElementById('queueList');
+            
+            // Mock data
+            const queue = [
+                { type: 'Help Request', title: 'Received eviction notice', desc: 'Dakota County • 14 days to respond', time: '2h ago' },
+                { type: 'New Intake', title: 'Security deposit dispute', desc: 'Minneapolis • Needs review', time: '5h ago' }
+            ];
+            
+            container.innerHTML = queue.map(q => `
+                <div class="queue-item">
+                    <div class="queue-header">
+                        <span class="queue-type">${q.type}</span>
+                        <span class="queue-time">${q.time}</span>
+                    </div>
+                    <div class="queue-title">${q.title}</div>
+                    <div class="queue-desc">${q.desc}</div>
+                    <div class="queue-actions">
+                        <button class="btn btn-primary btn-sm">Accept</button>
+                        <button class="btn btn-outline btn-sm">View</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load calendar
+        async function loadCalendar() {
+            const container = document.getElementById('calendarList');
+            
+            // Mock data
+            const events = [
+                { day: '18', month: 'Dec', title: 'Court Hearing - Maria G.', time: '9:00 AM' },
+                { day: '20', month: 'Dec', title: 'Client Meeting - James W.', time: '2:00 PM' }
+            ];
+            
+            container.innerHTML = events.map(e => `
+                <div class="calendar-item">
+                    <div class="calendar-date">
+                        <span class="calendar-day">${e.day}</span>
+                        <span class="calendar-month">${e.month}</span>
+                    </div>
+                    <div class="calendar-info">
+                        <div class="calendar-title">${e.title}</div>
+                        <div class="calendar-time">${e.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Navigation
+        function goToIntake() {
+            window.location.href = '/static/advocate/intake.html';
+        }
+        
+        function goToQueue() {
+            window.location.href = '/static/advocate/queue.html';
+        }
+        
+        function viewClient(name) {
+            alert(`Opening client: ${name}`);
+        }
+    </script>
+</body>
+</html>

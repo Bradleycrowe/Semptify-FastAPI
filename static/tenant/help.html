@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <title>Semptify - Get Help</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .header h1 { font-size: 20px; font-weight: 600; }
+        
+        .main { padding: 16px; }
+        
+        /* Emergency Section */
+        .emergency-card {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .emergency-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .emergency-desc {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        
+        .emergency-btn {
+            background: white;
+            color: #dc2626;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        /* Help Options */
+        .help-section {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .help-card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .help-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .help-item:last-child { border-bottom: none; }
+        .help-item:hover { background: var(--bg); }
+        
+        .help-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: rgba(30, 64, 175, 0.1);
+        }
+        
+        .help-icon.phone { background: rgba(5, 150, 105, 0.1); }
+        .help-icon.chat { background: rgba(30, 64, 175, 0.1); }
+        .help-icon.legal { background: rgba(217, 119, 6, 0.1); }
+        
+        .help-content { flex: 1; }
+        
+        .help-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        
+        .help-desc {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        .help-arrow {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+        
+        /* Hotlines */
+        .hotline-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+        }
+        
+        .hotline-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .hotline-desc {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        
+        .hotline-number {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-muted);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(30, 64, 175, 0.1);
+        }
+        
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 11px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="back-btn" onclick="history.back()">←</button>
+        <h1>🆘 Get Help</h1>
+    </header>
+    
+    <main class="main">
+        <!-- Emergency -->
+        <div class="emergency-card">
+            <div class="emergency-title">🚨 Need Immediate Help?</div>
+            <div class="emergency-desc">
+                If you've received an eviction notice or have a court date coming up, get help now.
+            </div>
+            <button class="emergency-btn" onclick="startEmergencyWizard()">
+                Start Emergency Wizard
+            </button>
+        </div>
+        
+        <!-- Self-Help Options -->
+        <div class="help-section">
+            <div class="section-title">Self-Help Tools</div>
+            <div class="help-card">
+                <div class="help-item" onclick="goTo('/static/tenant/copilot.html')">
+                    <div class="help-icon chat">🤖</div>
+                    <div class="help-content">
+                        <div class="help-title">AI Assistant</div>
+                        <div class="help-desc">Get answers to your questions 24/7</div>
+                    </div>
+                    <span class="help-arrow">→</span>
+                </div>
+                
+                <div class="help-item" onclick="goTo('/static/law_library.html')">
+                    <div class="help-icon">📚</div>
+                    <div class="help-content">
+                        <div class="help-title">Know Your Rights</div>
+                        <div class="help-desc">Minnesota tenant rights & laws</div>
+                    </div>
+                    <span class="help-arrow">→</span>
+                </div>
+                
+                <div class="help-item" onclick="goTo('/static/court_forms.html')">
+                    <div class="help-icon">📋</div>
+                    <div class="help-content">
+                        <div class="help-title">Court Forms</div>
+                        <div class="help-desc">Generate documents for your case</div>
+                    </div>
+                    <span class="help-arrow">→</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Get Human Help -->
+        <div class="help-section">
+            <div class="section-title">Talk to Someone</div>
+            <div class="help-card">
+                <div class="help-item" onclick="requestAdvocate()">
+                    <div class="help-icon legal">⚖️</div>
+                    <div class="help-content">
+                        <div class="help-title">Request an Advocate</div>
+                        <div class="help-desc">Connect with a housing counselor</div>
+                    </div>
+                    <span class="help-arrow">→</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hotlines -->
+        <div class="help-section">
+            <div class="section-title">Emergency Hotlines</div>
+            
+            <div class="hotline-card">
+                <div class="hotline-name">HOME Line</div>
+                <div class="hotline-desc">Free tenant hotline for Minnesota renters</div>
+                <a href="tel:612-728-5767" class="hotline-number">
+                    📞 612-728-5767
+                </a>
+            </div>
+            
+            <div class="hotline-card">
+                <div class="hotline-name">Legal Aid MN</div>
+                <div class="hotline-desc">Free legal help for low-income Minnesotans</div>
+                <a href="tel:1-888-543-5110" class="hotline-number">
+                    📞 1-888-543-5110
+                </a>
+            </div>
+            
+            <div class="hotline-card">
+                <div class="hotline-name">211 United Way</div>
+                <div class="hotline-desc">Emergency housing assistance & resources</div>
+                <a href="tel:211" class="hotline-number">
+                    📞 Dial 211
+                </a>
+            </div>
+        </div>
+    </main>
+    
+    <nav class="bottom-nav">
+        <a href="/static/tenant/index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="/static/tenant/documents.html" class="nav-item">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Docs</span>
+        </a>
+        <a href="/static/tenant/timeline.html" class="nav-item">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Timeline</span>
+        </a>
+        <a href="/static/tenant/help.html" class="nav-item active">
+            <span class="nav-icon">🆘</span>
+            <span class="nav-label">Help</span>
+        </a>
+    </nav>
+    
+    <script>
+        function goTo(url) {
+            window.location.href = url;
+        }
+        
+        function startEmergencyWizard() {
+            window.location.href = '/static/eviction_answer.html';
+        }
+        
+        function requestAdvocate() {
+            // Show a simple form or modal
+            if (confirm('Would you like to request help from a housing advocate? They will review your case and contact you.')) {
+                fetch('/api/mesh/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'request_advocate',
+                        priority: 'normal'
+                    })
+                }).then(() => {
+                    alert('✅ Request submitted! An advocate will review your case.');
+                }).catch(() => {
+                    alert('Request submitted. Please also call HOME Line at 612-728-5767 for faster help.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

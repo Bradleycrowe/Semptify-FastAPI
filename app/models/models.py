@@ -107,6 +107,11 @@ class LinkedProvider(Base):
 class Document(Base):
     """
     Document stored in the vault with certification.
+    
+    Privilege Levels:
+    - is_privileged=False: Normal tenant document (visible to tenant, advocate, attorney)
+    - is_privileged=True: Attorney-client privileged (visible ONLY to creating attorney + client)
+    - is_work_product=True: Attorney work product (protected from discovery)
     """
     __tablename__ = "documents"
     
@@ -128,6 +133,24 @@ class Document(Base):
     document_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # lease, notice, photo, etc.
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # comma-separated
+    
+    # ==========================================================================
+    # ATTORNEY-CLIENT PRIVILEGE FLAGS
+    # ==========================================================================
+    is_privileged: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    """Attorney-client privileged document. Only visible to creating attorney and the client."""
+    
+    is_work_product: Mapped[bool] = mapped_column(Boolean, default=False)
+    """Attorney work product. Protected from discovery even in litigation."""
+    
+    created_by_role: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    """Role of user who created this document (user, advocate, legal, admin)."""
+    
+    attorney_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    """If privileged, the attorney who created it (for privilege verification)."""
+    
+    privilege_waived: Mapped[bool] = mapped_column(Boolean, default=False)
+    """If True, client has explicitly waived privilege on this document."""
     
     # Timestamps
     uploaded_at: Mapped[datetime] = mapped_column(DateTimeTZ, default=utc_now)

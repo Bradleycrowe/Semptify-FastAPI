@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Intake - Semptify Advocate</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #10b981;
+            --primary-dark: #047857;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-logo { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .sidebar-role { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section { margin-bottom: 24px; }
+        .nav-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: 14px; }
+        .nav-link:hover { background: var(--bg); }
+        .nav-link.active { background: rgba(5, 150, 105, 0.1); color: var(--primary); font-weight: 600; }
+        .nav-icon { font-size: 18px; }
+        
+        .main { margin-left: 260px; min-height: 100vh; }
+        
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .topbar-title { font-size: 20px; font-weight: 600; }
+        
+        .content { padding: 24px; max-width: 900px; margin: 0 auto; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            margin-bottom: 32px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border);
+        }
+        
+        .progress-step:last-child::after { display: none; }
+        
+        .progress-step.active .step-number { background: var(--primary); color: white; }
+        .progress-step.completed .step-number { background: var(--primary-light); color: white; }
+        .progress-step.completed::after { background: var(--primary); }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-label { font-size: 12px; color: var(--text-muted); }
+        .progress-step.active .step-label { color: var(--primary); font-weight: 600; }
+        
+        /* Form */
+        .form-card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 32px;
+        }
+        
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+        
+        .form-textarea { min-height: 120px; resize: vertical; }
+        
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+        }
+        
+        .checkbox-label { font-size: 14px; }
+        
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .form-row { grid-template-columns: 1fr; }
+            .progress-bar { flex-direction: column; gap: 16px; }
+            .progress-step::after { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🤝 Semptify</div>
+            <div class="sidebar-role">Advocate Dashboard</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="/static/advocate/index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/static/advocate/queue.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Case Queue
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/static/advocate/clients.html" class="nav-link">
+                    <span class="nav-icon">👥</span>
+                    My Clients
+                </a>
+                <a href="/static/advocate/intake.html" class="nav-link active">
+                    <span class="nav-icon">➕</span>
+                    New Intake
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="/static/advocate/calendar.html" class="nav-link">
+                    <span class="nav-icon">📅</span>
+                    Calendar
+                </a>
+                <a href="/static/law_library.html" class="nav-link">
+                    <span class="nav-icon">📚</span>
+                    Resources
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <div class="topbar">
+            <h1 class="topbar-title">➕ New Client Intake</h1>
+        </div>
+        
+        <div class="content">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step active" id="step1">
+                    <span class="step-number">1</span>
+                    <div class="step-label">Client Info</div>
+                </div>
+                <div class="progress-step" id="step2">
+                    <span class="step-number">2</span>
+                    <div class="step-label">Case Details</div>
+                </div>
+                <div class="progress-step" id="step3">
+                    <span class="step-number">3</span>
+                    <div class="step-label">Documents</div>
+                </div>
+                <div class="progress-step" id="step4">
+                    <span class="step-number">4</span>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+            
+            <!-- Form Step 1: Client Info -->
+            <div class="form-card" id="form-step-1">
+                <h2 class="form-title">Client Information</h2>
+                <p class="form-subtitle">Basic contact and demographic information</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" class="form-input" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" class="form-input" id="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-input" id="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="email">
+                        <p class="form-hint">Optional, but helpful for document sharing</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Rental Address *</label>
+                    <input type="text" class="form-input" id="address" placeholder="Street address">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">City *</label>
+                        <input type="text" class="form-input" id="city">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">County *</label>
+                        <select class="form-select" id="county">
+                            <option value="">Select county...</option>
+                            <option value="hennepin">Hennepin</option>
+                            <option value="ramsey">Ramsey</option>
+                            <option value="dakota">Dakota</option>
+                            <option value="anoka">Anoka</option>
+                            <option value="washington">Washington</option>
+                            <option value="scott">Scott</option>
+                            <option value="carver">Carver</option>
+                            <option value="other">Other MN County</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Preferred Language</label>
+                    <select class="form-select" id="language">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="hmong">Hmong</option>
+                        <option value="somali">Somali</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="cancelIntake()">Cancel</button>
+                    <button class="btn btn-primary" onclick="nextStep(2)">Continue →</button>
+                </div>
+            </div>
+            
+            <!-- Form Step 2: Case Details -->
+            <div class="form-card" id="form-step-2" style="display: none;">
+                <h2 class="form-title">Case Details</h2>
+                <p class="form-subtitle">Information about the housing issue</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Case Type *</label>
+                    <select class="form-select" id="caseType">
+                        <option value="">Select case type...</option>
+                        <option value="eviction">Eviction Defense</option>
+                        <option value="habitability">Habitability / Repairs</option>
+                        <option value="deposit">Security Deposit</option>
+                        <option value="discrimination">Housing Discrimination</option>
+                        <option value="lease">Lease Issues</option>
+                        <option value="lockout">Illegal Lockout</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="evictionDetails" style="display: none;">
+                    <label class="form-label">Type of Eviction Notice</label>
+                    <select class="form-select" id="evictionType">
+                        <option value="">Select type...</option>
+                        <option value="pay-quit">Pay or Quit (Nonpayment)</option>
+                        <option value="cure-quit">Cure or Quit (Lease Violation)</option>
+                        <option value="unconditional">Unconditional Quit</option>
+                        <option value="end-tenancy">End of Tenancy / Holdover</option>
+                        <option value="summons">Summons & Complaint</option>
+                        <option value="unsure">Not Sure</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Urgency Level</label>
+                    <select class="form-select" id="urgency">
+                        <option value="low">Low - No immediate deadline</option>
+                        <option value="medium">Medium - Deadline within 2 weeks</option>
+                        <option value="high">High - Deadline within 7 days</option>
+                        <option value="critical">Critical - Court date within 48 hours</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Court Date (if known)</label>
+                    <input type="date" class="form-input" id="courtDate">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Case Summary *</label>
+                    <textarea class="form-textarea" id="summary" placeholder="Describe the situation in detail..."></textarea>
+                    <p class="form-hint">Include timeline of events, any communications with landlord, and client's goals</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Income Level (for referral purposes)</label>
+                    <select class="form-select" id="income">
+                        <option value="">Prefer not to say</option>
+                        <option value="under-30">Under 30% AMI</option>
+                        <option value="30-50">30-50% AMI</option>
+                        <option value="50-80">50-80% AMI</option>
+                        <option value="over-80">Over 80% AMI</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="prevStep(1)">← Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">Continue →</button>
+                </div>
+            </div>
+            
+            <!-- Form Step 3: Documents -->
+            <div class="form-card" id="form-step-3" style="display: none;">
+                <h2 class="form-title">Supporting Documents</h2>
+                <p class="form-subtitle">Upload any relevant documents (optional but helpful)</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Available Documents</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-lease">
+                            <span class="checkbox-label">Lease Agreement</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-notice">
+                            <span class="checkbox-label">Eviction Notice / Notice to Vacate</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-summons">
+                            <span class="checkbox-label">Court Summons & Complaint</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-photos">
+                            <span class="checkbox-label">Photos of Property Conditions</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-comms">
+                            <span class="checkbox-label">Communications with Landlord</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="doc-receipts">
+                            <span class="checkbox-label">Rent Payment Receipts</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Upload Documents</label>
+                    <input type="file" class="form-input" id="fileUpload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                    <p class="form-hint">Accepted formats: PDF, JPG, PNG, DOC. Max 10MB per file.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes About Documents</label>
+                    <textarea class="form-textarea" id="docNotes" placeholder="Any additional notes about documents or what's missing..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="prevStep(2)">← Back</button>
+                    <button class="btn btn-primary" onclick="nextStep(4)">Continue →</button>
+                </div>
+            </div>
+            
+            <!-- Form Step 4: Review -->
+            <div class="form-card" id="form-step-4" style="display: none;">
+                <h2 class="form-title">Review & Submit</h2>
+                <p class="form-subtitle">Please review the intake information before submitting</p>
+                
+                <div id="reviewContent">
+                    <!-- Will be populated by JS -->
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="confirm-accurate" required>
+                        <span class="checkbox-label">I confirm that the information provided is accurate to the best of my knowledge</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="confirm-consent">
+                        <span class="checkbox-label">Client has consented to intake and case management</span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="prevStep(3)">← Back</button>
+                    <button class="btn btn-primary" onclick="submitIntake()">✓ Submit Intake</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        let currentStep = 1;
+        
+        // Case type change handler
+        document.getElementById('caseType').addEventListener('change', function() {
+            const evictionDetails = document.getElementById('evictionDetails');
+            evictionDetails.style.display = this.value === 'eviction' ? 'block' : 'none';
+        });
+        
+        function nextStep(step) {
+            // Hide current step
+            document.getElementById(`form-step-${currentStep}`).style.display = 'none';
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${currentStep}`).classList.add('completed');
+            
+            // Show next step
+            currentStep = step;
+            document.getElementById(`form-step-${step}`).style.display = 'block';
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // If review step, populate review content
+            if (step === 4) {
+                populateReview();
+            }
+        }
+        
+        function prevStep(step) {
+            document.getElementById(`form-step-${currentStep}`).style.display = 'none';
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            currentStep = step;
+            document.getElementById(`form-step-${step}`).style.display = 'block';
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`step${step}`).classList.remove('completed');
+        }
+        
+        function populateReview() {
+            const firstName = document.getElementById('firstName').value || 'Not provided';
+            const lastName = document.getElementById('lastName').value || 'Not provided';
+            const phone = document.getElementById('phone').value || 'Not provided';
+            const address = document.getElementById('address').value || 'Not provided';
+            const city = document.getElementById('city').value || 'Not provided';
+            const caseType = document.getElementById('caseType').value || 'Not specified';
+            const urgency = document.getElementById('urgency').value || 'Not specified';
+            const summary = document.getElementById('summary').value || 'None provided';
+            
+            document.getElementById('reviewContent').innerHTML = `
+                <div style="background: var(--bg); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px;">Client Information</h4>
+                    <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                    <p><strong>Phone:</strong> ${phone}</p>
+                    <p><strong>Address:</strong> ${address}, ${city}</p>
+                </div>
+                <div style="background: var(--bg); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px;">Case Details</h4>
+                    <p><strong>Case Type:</strong> ${caseType}</p>
+                    <p><strong>Urgency:</strong> ${urgency}</p>
+                    <p><strong>Summary:</strong></p>
+                    <p style="color: var(--text-muted); font-size: 14px;">${summary}</p>
+                </div>
+            `;
+        }
+        
+        function cancelIntake() {
+            if (confirm('Are you sure you want to cancel? All entered data will be lost.')) {
+                window.location.href = '/static/advocate/index.html';
+            }
+        }
+        
+        function submitIntake() {
+            if (!document.getElementById('confirm-accurate').checked) {
+                alert('Please confirm that the information is accurate');
+                return;
+            }
+            
+            alert('Intake submitted successfully!\nClient has been added to your caseload.');
+            window.location.href = '/static/advocate/clients.html';
+        }
+    </script>
+</body>
+</html>

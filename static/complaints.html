@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#6366f1">
     <title>Complaint Builder - Semptify</title>
     <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <!-- Case Context Manager - Central case data service -->
+    <script src="/static/js/case-context.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -2127,6 +2129,39 @@
 
         // Initialize
         loadAgencies();
+        
+        // Auto-fill from CaseContext if active case exists
+        setTimeout(() => {
+            const activeCase = CaseContext.getActiveCase();
+            if (activeCase) {
+                console.log('📋 Auto-filling complaint form from active case:', activeCase.case_number);
+                
+                // Fill respondent info from plaintiff (landlord)
+                const plaintiffName = activeCase.plaintiff?.name || activeCase.plaintiff_name;
+                if (plaintiffName) {
+                    const respNameEl = document.getElementById('respondent-name');
+                    if (respNameEl && !respNameEl.value) respNameEl.value = plaintiffName;
+                }
+                
+                // Fill property address
+                if (activeCase.property_address) {
+                    const respAddrEl = document.getElementById('respondent-address');
+                    if (respAddrEl && !respAddrEl.value) respAddrEl.value = activeCase.property_address;
+                }
+                
+                // Fill plaintiff contact if available
+                if (activeCase.plaintiff?.phone) {
+                    const respPhoneEl = document.getElementById('respondent-phone');
+                    if (respPhoneEl && !respPhoneEl.value) respPhoneEl.value = activeCase.plaintiff.phone;
+                }
+                
+                // Fill company name if different from name
+                if (activeCase.plaintiff?.company) {
+                    const respCompEl = document.getElementById('respondent-company');
+                    if (respCompEl && !respCompEl.value) respCompEl.value = activeCase.plaintiff.company;
+                }
+            }
+        }, 500);
     </script>
 
     <!-- Site-Wide Help System -->

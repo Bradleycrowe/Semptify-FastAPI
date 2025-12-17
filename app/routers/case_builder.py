@@ -705,6 +705,155 @@ async def create_case(case: CaseCreate, user: StorageUser = Depends(require_user
     return {"success": True, "case_number": case.case_number, "case": case_data}
 
 
+# =============================================================================
+# SIMPLE INTAKE - CREATE CASE FROM COMPLAINT DOCUMENT
+# =============================================================================
+
+class ComplaintIntake(BaseModel):
+    """Simple complaint intake - minimal fields to start a case."""
+    case_number: str
+    court: str = "Dakota County District Court"
+    property_address: str
+    plaintiff_name: str  # Landlord/property manager
+    defendant_name: str  # You (tenant)
+    complaint_type: str = "eviction"  # eviction, unlawful_detainer, rent_nonpayment
+    filing_date: Optional[str] = None
+    hearing_date: Optional[str] = None
+    answer_deadline: Optional[str] = None
+    rent_amount: Optional[float] = 0
+    amount_claimed: Optional[float] = 0
+    document_id: Optional[str] = None  # Link to uploaded document
+    notes: Optional[str] = None
+
+
+@router.post("/intake/complaint")
+async def intake_complaint(intake: ComplaintIntake, user: StorageUser = Depends(require_user)):
+    """
+    SIMPLE INTAKE: Create a case from a complaint document.
+    
+    This is the starting point - upload info from a summons/complaint
+    and it creates a full case with auto-calculated deadlines.
+    """
+    user_id = user.user_id
+    
+    # Calculate deadlines
+    from datetime import datetime, timedelta
+    today = datetime.now()
+    
+    # Parse filing date
+    filing_date = None
+    if intake.filing_date:
+        try:
+            filing_date = datetime.fromisoformat(intake.filing_date.replace('Z', '+00:00'))
+        except:
+            filing_date = today
+    else:
+        filing_date = today
+    
+    # Answer deadline is typically 7 days from service for eviction
+    answer_deadline = None
+    if intake.answer_deadline:
+        answer_deadline = intake.answer_deadline
+    else:
+        # Default: 7 days from filing for eviction actions
+        answer_date = filing_date + timedelta(days=7)
+        answer_deadline = answer_date.strftime("%Y-%m-%d")
+    
+    # Create the case
+    case_data = {
+        "user_id": user_id,
+        "case_number": intake.case_number,
+        "case_type": f"eviction_defense_{intake.complaint_type}",
+        "status": "active",
+        "court": intake.court,
+        "property_address": intake.property_address,
+        "rent_amount": intake.rent_amount or 0,
+        "amount_claimed": intake.amount_claimed or 0,
+        "security_deposit": 0,
+        
+        "plaintiff": {
+            "name": intake.plaintiff_name,
+            "role": "plaintiff",
+            "type": "landlord"
+        },
+        "defendant": {
+            "name": intake.defendant_name,
+            "role": "defendant", 
+            "is_pro_se": True,
+            "type": "tenant"
+        },
+        
+        "dates": {
+            "filing_date": filing_date.strftime("%Y-%m-%d"),
+            "answer_deadline": answer_deadline,
+            "hearing_date": intake.hearing_date
+        },
+        "hearing_date": intake.hearing_date,
+        
+        # Initialize case components
+        "timeline": [{
+            "id": f"evt_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "date": filing_date.strftime("%Y-%m-%d"),
+            "title": "Complaint Filed",
+            "description": f"Eviction complaint filed: {intake.complaint_type}",
+            "category": "court",
+            "importance": "critical",
+            "source": "intake"
+        }],
+        "evidence": [],
+        "counterclaims": [],
+        "motions": [],
+        "defenses": [],
+        "documents": [intake.document_id] if intake.document_id else [],
+        
+        # Auto-calculated deadlines
+        "deadlines": [
+            {
+                "id": "dl_answer",
+                "title": "Answer Due",
+                "deadline": answer_deadline,
+                "description": "File answer to complaint",
+                "priority": "critical",
+                "status": "pending"
+            }
+        ],
+        
+        "notes": [intake.notes] if intake.notes else [],
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "source": "complaint_intake"
+    }
+    
+    # Add hearing deadline if provided
+    if intake.hearing_date:
+        case_data["deadlines"].append({
+            "id": "dl_hearing",
+            "title": "Court Hearing",
+            "deadline": intake.hearing_date,
+            "description": "Appear at court hearing",
+            "priority": "critical",
+            "status": "pending"
+        })
+    
+    # Save the case
+    save_case(intake.case_number, case_data, user_id)
+    
+    logger.info(f"Case created from complaint intake: {intake.case_number} for user {user_id}")
+    
+    return {
+        "success": True,
+        "case_number": intake.case_number,
+        "message": f"Case created from complaint. Answer due: {answer_deadline}",
+        "case": case_data,
+        "next_steps": [
+            f"1. File your ANSWER by {answer_deadline}",
+            "2. Gather evidence (photos, texts, emails, receipts)",
+            "3. Review potential defenses",
+            "4. Consider counterclaims"
+        ]
+    }
+
+
 @router.put("/cases/{case_id}")
 async def update_case(case_id: str, updates: Dict[str, Any] = Body(...), user: StorageUser = Depends(require_user)):
     """Update a case belonging to the authenticated user."""

@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Semptify - My Case</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="/static/favicon.ico">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        /* Top Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .header-sub {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        /* Emergency Banner */
+        .emergency-banner {
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        
+        .emergency-banner:hover {
+            background: linear-gradient(90deg, #b91c1c, #991b1b);
+        }
+        
+        .emergency-icon {
+            font-size: 24px;
+        }
+        
+        .emergency-text {
+            flex: 1;
+        }
+        
+        .emergency-text strong {
+            display: block;
+            font-size: 14px;
+        }
+        
+        .emergency-text span {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .emergency-arrow {
+            font-size: 20px;
+        }
+        
+        /* Main Content */
+        .main {
+            padding: 16px;
+        }
+        
+        /* Status Card */
+        .status-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .status-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.active {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-badge.safe {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .case-summary {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .case-detail {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        /* Progress Steps */
+        .progress-section {
+            margin-top: 20px;
+        }
+        
+        .progress-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .progress-steps {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .progress-step {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+        }
+        
+        .progress-step.done {
+            background: var(--success);
+        }
+        
+        .progress-step.current {
+            background: var(--warning);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .action-btn {
+            background: var(--card);
+            border: none;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(0,0,0,0.15);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .action-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Feature: Full-width action */
+        .action-btn.full {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+            padding: 16px 20px;
+        }
+        
+        .action-btn.full .action-icon {
+            margin-bottom: 0;
+            font-size: 28px;
+        }
+        
+        .action-btn.full .action-content {
+            flex: 1;
+        }
+        
+        /* Upcoming Deadlines */
+        .deadlines-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        
+        .deadline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .deadline-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .deadline-see-all {
+            color: var(--primary);
+            font-size: 13px;
+            text-decoration: none;
+        }
+        
+        .deadline-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .deadline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .deadline-date {
+            background: var(--danger);
+            color: white;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            min-width: 50px;
+        }
+        
+        .deadline-date.soon {
+            background: var(--warning);
+        }
+        
+        .deadline-date.later {
+            background: var(--primary);
+        }
+        
+        .deadline-day {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .deadline-month {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        
+        .deadline-info {
+            flex: 1;
+        }
+        
+        .deadline-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .deadline-desc {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(30, 64, 175, 0.1);
+        }
+        
+        .nav-icon {
+            font-size: 22px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        /* Help Button (Floating) */
+        .help-fab {
+            position: fixed;
+            bottom: 90px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            z-index: 99;
+        }
+        
+        .help-fab:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .empty-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>🏠 My Case</h1>
+        <div class="header-sub" id="userName">Loading...</div>
+    </header>
+    
+    <!-- Emergency Banner (shown if eviction in progress) -->
+    <div class="emergency-banner" id="emergencyBanner" style="display: none;" onclick="goToEmergency()">
+        <span class="emergency-icon">🚨</span>
+        <div class="emergency-text">
+            <strong>Eviction Action Detected</strong>
+            <span>Tap here to see your options</span>
+        </div>
+        <span class="emergency-arrow">→</span>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="main" id="mainContent">
+        <div class="loading" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>Loading your case...</p>
+        </div>
+    </main>
+    
+    <!-- Floating Help Button -->
+    <button class="help-fab" onclick="openHelp()" title="Get Help">
+        💬
+    </button>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/static/tenant/index.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="/static/tenant/documents.html" class="nav-item">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Docs</span>
+        </a>
+        <a href="/static/tenant/timeline.html" class="nav-item">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Timeline</span>
+        </a>
+        <a href="/static/tenant/help.html" class="nav-item">
+            <span class="nav-icon">🆘</span>
+            <span class="nav-label">Help</span>
+        </a>
+    </nav>
+    
+    <script>
+        // State
+        let userData = null;
+        let caseData = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadCaseData();
+            renderDashboard();
+        });
+        
+        // Load user info
+        async function loadUserData() {
+            try {
+                const resp = await fetch('/ui/role-info');
+                userData = await resp.json();
+                
+                if (userData.authenticated) {
+                    document.getElementById('userName').textContent = 
+                        `Welcome back${userData.display_name ? ', ' + userData.display_name : ''}`;
+                } else {
+                    // Redirect to login
+                    window.location.href = '/static/welcome.html';
+                }
+            } catch (e) {
+                console.error('Failed to load user:', e);
+            }
+        }
+        
+        // Load case data
+        async function loadCaseData() {
+            try {
+                // Try to load from eviction defense module
+                const resp = await fetch('/api/eviction/case/current');
+                if (resp.ok) {
+                    caseData = await resp.json();
+                }
+            } catch (e) {
+                console.log('No active case found');
+            }
+        }
+        
+        // Render dashboard
+        function renderDashboard() {
+            const main = document.getElementById('mainContent');
+            
+            // Check if user has an active eviction case
+            if (caseData && caseData.status === 'active') {
+                document.getElementById('emergencyBanner').style.display = 'flex';
+            }
+            
+            main.innerHTML = `
+                <!-- Case Status Card -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="status-title">Case Status</span>
+                        <span class="status-badge ${caseData ? 'active' : 'safe'}">
+                            ${caseData ? '⚠️ Active Case' : '✅ No Active Issues'}
+                        </span>
+                    </div>
+                    <div class="case-summary">
+                        ${caseData ? caseData.summary || 'Eviction Defense Case' : 'You\'re in good standing'}
+                    </div>
+                    <div class="case-detail">
+                        ${caseData 
+                            ? `Started ${formatDate(caseData.created_at)} • ${caseData.documents_count || 0} documents`
+                            : 'No pending actions required'}
+                    </div>
+                    ${caseData ? `
+                    <div class="progress-section">
+                        <div class="progress-title">Defense Progress</div>
+                        <div class="progress-steps">
+                            <div class="progress-step done"></div>
+                            <div class="progress-step done"></div>
+                            <div class="progress-step current"></div>
+                            <div class="progress-step"></div>
+                            <div class="progress-step"></div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="goToUpload()">
+                        <div class="action-icon">📸</div>
+                        <div class="action-label">Upload Photo</div>
+                        <div class="action-sub">Add evidence</div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="goToTimeline()">
+                        <div class="action-icon">📝</div>
+                        <div class="action-label">Log Event</div>
+                        <div class="action-sub">Record what happened</div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="goToForms()">
+                        <div class="action-icon">📋</div>
+                        <div class="action-label">Court Forms</div>
+                        <div class="action-sub">Generate documents</div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="goToLawLibrary()">
+                        <div class="action-icon">📚</div>
+                        <div class="action-label">Know Rights</div>
+                        <div class="action-sub">MN tenant laws</div>
+                    </button>
+                    
+                    <button class="action-btn full" onclick="goToCopilot()">
+                        <div class="action-icon">🤖</div>
+                        <div class="action-content">
+                            <div class="action-label">AI Assistant</div>
+                            <div class="action-sub">Get personalized help with your situation</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- Upcoming Deadlines -->
+                <div class="deadlines-card">
+                    <div class="deadline-header">
+                        <span class="deadline-title">📅 Upcoming Deadlines</span>
+                        <a href="/static/tenant/calendar.html" class="deadline-see-all">See All</a>
+                    </div>
+                    <div id="deadlinesList">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load deadlines
+            loadDeadlines();
+        }
+        
+        // Load upcoming deadlines
+        async function loadDeadlines() {
+            const container = document.getElementById('deadlinesList');
+            
+            try {
+                const resp = await fetch('/api/calendar/upcoming?limit=3');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    
+                    if (data.events && data.events.length > 0) {
+                        container.innerHTML = data.events.map(event => {
+                            const date = new Date(event.start_datetime);
+                            const daysUntil = Math.ceil((date - new Date()) / (1000 * 60 * 60 * 24));
+                            
+                            let urgencyClass = 'later';
+                            if (daysUntil <= 3) urgencyClass = '';
+                            else if (daysUntil <= 7) urgencyClass = 'soon';
+                            
+                            return `
+                                <div class="deadline-item">
+                                    <div class="deadline-date ${urgencyClass}">
+                                        <div class="deadline-day">${date.getDate()}</div>
+                                        <div class="deadline-month">${date.toLocaleString('en', {month: 'short'})}</div>
+                                    </div>
+                                    <div class="deadline-info">
+                                        <div class="deadline-name">${event.title}</div>
+                                        <div class="deadline-desc">${event.description || (daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">✨</div>
+                                <div class="empty-desc">No upcoming deadlines</div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <div class="empty-desc">Could not load deadlines</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper: Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        
+        // Navigation functions
+        function goToEmergency() {
+            window.location.href = '/static/eviction_answer.html';
+        }
+        
+        function goToUpload() {
+            window.location.href = '/static/tenant/documents.html?action=upload';
+        }
+        
+        function goToTimeline() {
+            window.location.href = '/static/tenant/timeline.html?action=add';
+        }
+        
+        function goToForms() {
+            window.location.href = '/static/court_forms.html';
+        }
+        
+        function goToLawLibrary() {
+            window.location.href = '/static/law_library.html';
+        }
+        
+        function goToCopilot() {
+            window.location.href = '/static/tenant/copilot.html';
+        }
+        
+        function openHelp() {
+            window.location.href = '/static/tenant/help.html';
+        }
+    </script>
+</body>
+</html>

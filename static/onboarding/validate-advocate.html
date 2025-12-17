@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Housing Advocate - Semptify</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            color: #fff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .back-link {
+            color: #a7f3d0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .back-link:hover { color: #fff; }
+        
+        .step-indicator {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        /* Title */
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .page-title h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: #a7f3d0;
+        }
+        
+        /* Info Box */
+        .info-box {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            color: #93c5fd;
+            margin-bottom: 0.8rem;
+        }
+        
+        .info-box p {
+            color: #bfdbfe;
+            font-size: 0.95rem;
+        }
+        
+        /* Verification Section */
+        .verification-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a7f3d0;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1.2rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.4);
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        
+        .form-hint {
+            font-size: 0.85rem;
+            color: #6ee7b7;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Result Message */
+        .result-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+            text-align: center;
+        }
+        
+        .result-message.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            display: block;
+        }
+        
+        .result-message.pending {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            display: block;
+        }
+        
+        .result-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            display: block;
+        }
+        
+        /* Partner Orgs */
+        .partner-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .partner-title {
+            font-size: 1rem;
+            color: #6ee7b7;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .partner-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .partner-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #d1fae5;
+        }
+        
+        /* Contact Section */
+        .contact-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+        }
+        
+        .contact-section h3 {
+            color: #fde68a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-section p {
+            color: #fef3c7;
+            font-size: 0.9rem;
+        }
+        
+        .contact-section a {
+            color: #fbbf24;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Not an advocate link */
+        .not-advocate {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .not-advocate a {
+            color: #a7f3d0;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .not-advocate a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            .page-title h1 { font-size: 1.4rem; }
+            .form-group input { font-size: 1rem; letter-spacing: 1px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="/static/onboarding/select-role.html" class="back-link">
+                ← Change Role
+            </a>
+            <span class="step-indicator">Step 2 of 3</span>
+        </div>
+        
+        <!-- Title -->
+        <div class="page-title">
+            <h1>🤝 Housing Advocate Verification</h1>
+            <p class="page-subtitle">
+                Enter your organization's invite code to access advocate features
+            </p>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <div class="info-box-title">
+                ℹ️ Invite Code Required
+            </div>
+            <p>
+                Housing advocate access is currently available through partner organizations only. 
+                If you work for a housing advocacy organization, contact your supervisor or 
+                organization administrator for an invite code.
+            </p>
+        </div>
+        
+        <!-- Invite Code Entry -->
+        <div class="verification-section">
+            <h3 class="section-title">🎟️ Enter Invite Code</h3>
+            
+            <div class="form-group">
+                <label for="inviteCode">Partner Organization Code</label>
+                <input type="text" id="inviteCode" placeholder="Enter code here" autocomplete="off">
+                <div class="form-hint">Code provided by your organization</div>
+            </div>
+            
+            <button class="submit-btn" onclick="verifyInviteCode()" id="submitBtn">
+                <span id="btnText">Verify & Continue</span>
+            </button>
+            
+            <div class="result-message" id="result"></div>
+        </div>
+        
+        <!-- Partner Organizations -->
+        <div class="partner-section">
+            <div class="partner-title">🏢 Partner Organizations</div>
+            <div class="partner-list">
+                <span class="partner-badge">HOME Line</span>
+                <span class="partner-badge">Legal Aid MN</span>
+                <span class="partner-badge">SMRLS</span>
+                <span class="partner-badge">HousingLink</span>
+                <span class="partner-badge">Mid-MN Legal Aid</span>
+                <span class="partner-badge">Volunteer Lawyers Network</span>
+            </div>
+        </div>
+        
+        <!-- Contact for Code -->
+        <div class="contact-section">
+            <h3>📞 Don't have a code?</h3>
+            <p>
+                Contact your organization's administrator or reach out to 
+                <a href="mailto:partners@semptify.org">partners@semptify.org</a> 
+                to request partner access for your organization.
+            </p>
+        </div>
+        
+        <!-- Not an advocate -->
+        <div class="not-advocate">
+            <a href="/static/onboarding/select-role.html?role=user">
+                ← I'm a tenant, not an advocate
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Allow Enter key to submit
+        document.getElementById('inviteCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyInviteCode();
+            }
+        });
+        
+        async function verifyInviteCode() {
+            const code = document.getElementById('inviteCode').value.trim();
+            
+            if (!code) {
+                showResult('error', 'Please enter an invite code');
+                return;
+            }
+            
+            setLoading(true);
+            
+            try {
+                const response = await fetch('/api/roles/upgrade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        requested_role: 'advocate',
+                        invite_code: code
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('success', '✅ Code verified! Redirecting to storage setup...');
+                    setTimeout(() => {
+                        window.location.href = '/storage/providers?role=advocate&from=onboarding&verified=true';
+                    }, 1500);
+                } else if (data.status === 'pending') {
+                    showResult('pending', '⏳ ' + data.message);
+                } else {
+                    showResult('error', '❌ Invalid invite code. Please check and try again.');
+                }
+            } catch (err) {
+                showResult('error', '⚠️ Network error. Please try again.');
+            }
+            
+            setLoading(false);
+        }
+        
+        function showResult(type, message) {
+            const el = document.getElementById('result');
+            el.className = 'result-message ' + type;
+            el.innerHTML = message;
+        }
+        
+        function setLoading(loading) {
+            const btn = document.getElementById('submitBtn');
+            const text = document.getElementById('btnText');
+            
+            if (loading) {
+                btn.disabled = true;
+                text.innerHTML = '<span class="spinner"></span> Verifying...';
+            } else {
+                btn.disabled = false;
+                text.textContent = 'Verify & Continue';
+            }
+        }
+    </script>
+</body>
+</html>

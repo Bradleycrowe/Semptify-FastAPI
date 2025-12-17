@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tell Us Your Story - Semptify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1e1e2e;
+            --darker: #181825;
+            --light: #cdd6f4;
+            --muted: #6c7086;
+            --surface: #313244;
+            --overlay: #45475a;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--dark);
+            border-bottom: 1px solid var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 6px;
+            background: var(--surface);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Conversation Container */
+        .conversation {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 2rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+
+        .message.guide .message-avatar {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+        }
+
+        .message.user .message-avatar {
+            background: var(--success);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-sender {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message-text {
+            background: var(--surface);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message.user .message-text {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message-text p {
+            margin-bottom: 0.75rem;
+        }
+
+        .message-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-text strong {
+            color: var(--success);
+        }
+
+        .message.user .message-text strong {
+            color: #a5f3fc;
+        }
+
+        /* Quick Responses */
+        .quick-responses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-btn {
+            background: var(--overlay);
+            border: 1px solid var(--surface);
+            padding: 0.625rem 1rem;
+            border-radius: 20px;
+            color: var(--light);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .quick-btn.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Input Area */
+        .input-area {
+            background: var(--dark);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid var(--surface);
+        }
+
+        .input-hint {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .text-input {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--overlay);
+            border-radius: 12px;
+            padding: 0.875rem 1rem;
+            color: var(--light);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .text-input::placeholder {
+            color: var(--muted);
+        }
+
+        /* Input buttons row */
+        .input-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .upload-btn {
+            background: var(--surface);
+            border: 1px solid var(--overlay);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            color: var(--light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: var(--info);
+            border-color: var(--info);
+            color: white;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Document Upload Area */
+        .upload-drop-zone {
+            border: 2px dashed var(--overlay);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 0.75rem;
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        .upload-drop-zone.visible {
+            display: block;
+        }
+
+        .upload-drop-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-drop-zone-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-drop-zone-text {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-drop-zone-hint {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .browse-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Uploaded Files List */
+        .uploaded-files {
+            margin-top: 0.75rem;
+        }
+
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--surface);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .uploaded-file-icon {
+            font-size: 1.5rem;
+        }
+
+        .uploaded-file-info {
+            flex: 1;
+        }
+
+        .uploaded-file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .uploaded-file-status {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .uploaded-file-status.processing {
+            color: var(--warning);
+        }
+
+        .uploaded-file-status.complete {
+            color: var(--success);
+        }
+
+        .uploaded-file-status.error {
+            color: var(--danger);
+        }
+
+        .uploaded-file-remove {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+        }
+
+        .uploaded-file-remove:hover {
+            color: var(--danger);
+        }
+
+        /* Document Extracted Info */
+        .extracted-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .extracted-info-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .extracted-info-content {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .extracted-field {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .extracted-field-label {
+            color: var(--muted);
+            min-width: 100px;
+        }
+
+        .extracted-field-value {
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        /* Processing Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Document attachment in message */
+        .message-attachment {
+            background: var(--overlay);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .message-attachment-icon {
+            font-size: 1.5rem;
+        }
+
+        .message-attachment-info {
+            flex: 1;
+        }
+
+        .message-attachment-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .message-attachment-extracted {
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-top: 0.25rem;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        /* Category Cards */
+        .category-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .category-card {
+            background: var(--surface);
+            border: 2px solid var(--overlay);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .category-card.selected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-desc {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        /* Date Input Styling */
+        .date-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .date-input {
+            background: var(--surface);
+            border: 1px solid var(--overlay);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Timeline visualization */
+        .timeline-preview {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--overlay);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--primary);
+            min-width: 80px;
+        }
+
+        .timeline-event {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        /* Save/Skip Footer */
+        .action-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--surface);
+        }
+
+        .skip-btn {
+            background: transparent;
+            border: 1px solid var(--surface);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .skip-btn:hover {
+            border-color: var(--muted);
+            color: var(--light);
+        }
+
+        .continue-btn {
+            background: var(--success);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .continue-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .continue-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Safety Notice */
+        .safety-notice {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .safety-notice-icon {
+            color: var(--danger);
+            font-size: 1.25rem;
+        }
+
+        .safety-notice-text {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .safety-notice a {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* Info callout */
+        .info-callout {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1rem;
+        }
+
+        .info-callout-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-callout-text {
+            font-size: 0.875rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">⚖️</div>
+            <span class="logo-text">Semptify</span>
+        </div>
+        <div class="progress-indicator">
+            <span id="progressText">Getting Started</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="conversation" id="conversation">
+            <!-- Messages will be added here -->
+        </div>
+
+        <div class="input-area" id="inputArea">
+            <div class="input-hint" id="inputHint">
+                💡 Take your time - there are no wrong answers. You can also upload documents with 📎
+            </div>
+            <div class="input-wrapper">
+                <textarea 
+                    class="text-input" 
+                    id="userInput" 
+                    placeholder="Type your response..."
+                    rows="1"
+                ></textarea>
+                <div class="input-buttons">
+                    <button class="upload-btn" id="uploadBtn" onclick="toggleUploadZone()" title="Upload a document">
+                        📎
+                    </button>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Drop zone for file upload -->
+            <div class="upload-drop-zone" id="uploadDropZone">
+                <div class="upload-drop-zone-icon">📄</div>
+                <div class="upload-drop-zone-text">
+                    Drag & drop files here or <span class="browse-link" onclick="document.getElementById('fileInput').click()">browse</span>
+                </div>
+                <div class="upload-drop-zone-hint">
+                    Supports: PDF, images (JPG, PNG), Word docs • We'll extract key info automatically
+                </div>
+                <input type="file" id="fileInput" class="upload-input" multiple 
+                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt" 
+                       onchange="handleFileSelect(event)">
+            </div>
+
+            <!-- Uploaded files list -->
+            <div class="uploaded-files" id="uploadedFiles"></div>
+        </div>
+    </main>
+
+    <script>
+        // Conversation state
+        let currentStep = 0;
+        let uploadedDocuments = [];
+        let extractedData = {};
+        let intakeData = {
+            primaryConcern: null,
+            situation: null,
+            timeline: [],
+            urgency: null,
+            housing: {},
+            documents: [],
+            uploadedDocs: [],
+            extractedInfo: {},
+            goals: null,
+            additionalInfo: null
+        };
+
+        // File upload handling
+        function toggleUploadZone() {
+            const zone = document.getElementById('uploadDropZone');
+            zone.classList.toggle('visible');
+        }
+
+        // Setup drag and drop on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('uploadDropZone');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', handleDrop, false);
+        });
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+        }
+
+        async function handleFiles(files) {
+            for (let file of files) {
+                await uploadAndProcessFile(file);
+            }
+        }
+
+        async function uploadAndProcessFile(file) {
+            const fileId = 'file_' + Date.now();
+            const fileInfo = {
+                id: fileId,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                status: 'uploading',
+                extractedType: null,
+                extractedData: {}
+            };
+            
+            uploadedDocuments.push(fileInfo);
+            renderUploadedFiles();
+
+            try {
+                // Upload to server
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('context', 'intake');
+
+                // Update status to processing
+                updateFileStatus(fileId, 'processing', 'Analyzing document...');
+
+                const response = await fetch('/api/intake/process', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Store extracted data
+                    fileInfo.extractedType = result.document_type || 'document';
+                    fileInfo.extractedData = result.extracted || {};
+                    
+                    // Merge into global extracted data
+                    Object.assign(extractedData, result.extracted || {});
+                    
+                    updateFileStatus(fileId, 'complete', `✓ ${result.document_type || 'Document'} analyzed`);
+                    
+                    // Show extracted info
+                    if (result.extracted && Object.keys(result.extracted).length > 0) {
+                        showExtractedInfo(fileId, result.extracted);
+                    }
+                } else {
+                    // Fallback - mark as saved for later processing
+                    await processFileLocally(file, fileId);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                // Fallback local processing
+                await processFileLocally(file, fileId);
+            }
+        }
+
+        async function processFileLocally(file, fileId) {
+            // Basic local processing
+            if (file.type.startsWith('image/')) {
+                updateFileStatus(fileId, 'complete', '✓ Photo saved (will analyze later)');
+                const doc = uploadedDocuments.find(d => d.id === fileId);
+                if (doc) doc.extractedType = 'photo';
+            } else if (file.type === 'application/pdf') {
+                updateFileStatus(fileId, 'complete', '✓ PDF saved (will analyze later)');
+                const doc = uploadedDocuments.find(d => d.id === fileId);
+                if (doc) doc.extractedType = 'document';
+            } else {
+                updateFileStatus(fileId, 'complete', '✓ File saved');
+            }
+        }
+
+        function updateFileStatus(fileId, status, message) {
+            const doc = uploadedDocuments.find(d => d.id === fileId);
+            if (doc) {
+                doc.status = status;
+                doc.statusMessage = message;
+            }
+            renderUploadedFiles();
+        }
+
+        function renderUploadedFiles() {
+            const container = document.getElementById('uploadedFiles');
+            container.innerHTML = uploadedDocuments.map(doc => `
+                <div class="uploaded-file">
+                    <div class="uploaded-file-icon">${getFileIcon(doc.type)}</div>
+                    <div class="uploaded-file-info">
+                        <div class="uploaded-file-name">${doc.name}</div>
+                        <div class="uploaded-file-status ${doc.status}">
+                            ${doc.status === 'processing' ? '<span class="spinner"></span>' : ''}
+                            ${doc.statusMessage || doc.status}
+                        </div>
+                    </div>
+                    <button class="uploaded-file-remove" onclick="removeFile('${doc.id}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function showExtractedInfo(fileId, extracted) {
+            const container = document.getElementById('uploadedFiles');
+            const fields = Object.entries(extracted)
+                .filter(([k, v]) => v)
+                .map(([key, value]) => `
+                    <div class="extracted-field">
+                        <span class="extracted-field-label">${formatFieldName(key)}:</span>
+                        <span class="extracted-field-value">${value}</span>
+                    </div>
+                `).join('');
+
+            if (fields) {
+                container.innerHTML += `
+                    <div class="extracted-info">
+                        <div class="extracted-info-title">🔍 Information Found</div>
+                        <div class="extracted-info-content">${fields}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function formatFieldName(key) {
+            return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function getFileIcon(mimeType) {
+            if (mimeType?.startsWith('image/')) return '🖼️';
+            if (mimeType === 'application/pdf') return '📄';
+            if (mimeType?.includes('word')) return '📝';
+            return '📎';
+        }
+
+        function removeFile(fileId) {
+            uploadedDocuments = uploadedDocuments.filter(d => d.id !== fileId);
+            renderUploadedFiles();
+        }
+
+        // Conversation flow - designed like an attorney/advocate intake
+        const conversationFlow = [
+            // Step 0: Warm Welcome
+            {
+                type: 'guide',
+                messages: [
+                    `<p>👋 <strong>Welcome! I'm here to listen and help.</strong></p>
+                     <p>Before we dive in, I want you to know that <strong>everything you share here is private</strong> - stored only in your own cloud storage that you control.</p>
+                     <p>My job is to understand your situation so we can figure out the best way to protect your rights as a tenant in Minnesota.</p>`,
+                    `<p>Let's start simple:</p>
+                     <p><strong>What's going on with your housing situation?</strong></p>
+                     <p>Don't worry about legal terms or getting it "right" - just tell me in your own words what's happening.</p>
+                     <p><em>💡 Tip: If you have any documents related to your situation (like a notice from your landlord), click the 📎 button to upload them - I can read and understand them to help you better.</em></p>`
+                ],
+                inputType: 'textWithUpload',
+                placeholder: 'For example: "My landlord is trying to evict me" or "I have mold in my apartment"...',
+                field: 'situation',
+                progress: 10
+            },
+
+            // Step 1: Acknowledge and Dig Deeper
+            {
+                type: 'guide',
+                dynamic: true,
+                getMessage: (data) => {
+                    let docContext = '';
+                    if (Object.keys(extractedData).length > 0) {
+                        docContext = `<p>📄 <em>I've reviewed the document${uploadedDocuments.length > 1 ? 's' : ''} you uploaded - that's very helpful!</em></p>`;
+                    }
+                    return `${docContext}
+                            <p>Thank you for sharing that. I can hear this is stressful, and <strong>you're not alone</strong>.</p>
+                            <p>To make sure I understand correctly and can find the right resources for you:</p>
+                            <p><strong>What would you say is your #1 concern right now?</strong></p>`;
+                },
+                inputType: 'category',
+                categories: [
+                    { id: 'eviction', icon: '🚪', title: 'Eviction Notice', desc: 'Received papers or threats to leave' },
+                    { id: 'repairs', icon: '🔧', title: 'Repairs/Conditions', desc: 'Mold, heat, water, safety issues' },
+                    { id: 'rent', icon: '💰', title: 'Rent Issues', desc: 'Increases, late fees, deposits' },
+                    { id: 'harassment', icon: '😰', title: 'Landlord Behavior', desc: 'Harassment, illegal entry, threats' },
+                    { id: 'lease', icon: '📄', title: 'Lease Questions', desc: 'Renewals, terms, breaking lease' },
+                    { id: 'other', icon: '❓', title: 'Something Else', desc: 'Not sure / multiple issues' }
+                ],
+                field: 'primaryConcern',
+                progress: 25
+            },
+
+            // Step 2: Timeline - When did this start?
+            {
+                type: 'guide',
+                dynamic: true,
+                getMessage: (data) => {
+                    const concernText = {
+                        'eviction': 'the eviction situation',
+                        'repairs': 'the repair/condition issues',
+                        'rent': 'the rent issues',
+                        'harassment': 'the problems with your landlord',
+                        'lease': 'the lease concerns',
+                        'other': 'this situation'
+                    };
+                    return `<p>Understanding the timeline is really important for knowing your rights.</p>
+                            <p><strong>When did ${concernText[data.primaryConcern] || 'this'} first start?</strong></p>
+                            <p>Even a rough estimate helps - "about 2 months ago" or "since I moved in" is totally fine.</p>`;
+                },
+                inputType: 'text',
+                placeholder: 'When did this first become a problem?',
+                field: 'timelineStart',
+                progress: 35
+            },
+
+            // Step 3: Urgency Check
+            {
+                type: 'guide',
+                messages: [
+                    `<p>I want to make sure we address anything urgent first.</p>
+                     <p><strong>Do you have any upcoming deadlines or court dates?</strong></p>`
+                ],
+                inputType: 'quickResponse',
+                options: [
+                    { id: 'court_soon', text: '⚠️ Yes, I have a court date coming up', urgent: true },
+                    { id: 'deadline', text: '📅 I have a deadline to respond to something', urgent: true },
+                    { id: 'move_out', text: '🏠 I\'ve been told to move out by a date', urgent: true },
+                    { id: 'no_deadline', text: '✓ No immediate deadlines', urgent: false },
+                    { id: 'unsure', text: '❓ I\'m not sure', urgent: false }
+                ],
+                field: 'urgency',
+                progress: 45
+            },
+
+            // Step 4: Urgent Path (conditional)
+            {
+                type: 'guide',
+                condition: (data) => data.urgency && ['court_soon', 'deadline', 'move_out'].includes(data.urgency),
+                messages: [
+                    `<p>⚠️ <strong>Let's make sure you don't miss anything important.</strong></p>
+                     <p>What is the date? (Even if approximate)</p>`
+                ],
+                inputType: 'date',
+                field: 'urgentDate',
+                progress: 50
+            },
+
+            // Step 5: Housing Details
+            {
+                type: 'guide',
+                messages: [
+                    `<p>A few quick questions about your housing - this helps me find the specific laws that apply to your situation.</p>
+                     <p><strong>What type of housing do you live in?</strong></p>`
+                ],
+                inputType: 'quickResponse',
+                options: [
+                    { id: 'apartment', text: '🏢 Apartment building' },
+                    { id: 'house', text: '🏠 House or duplex' },
+                    { id: 'subsidized', text: '🏘️ Section 8 / Subsidized housing' },
+                    { id: 'mobile', text: '🚐 Mobile home' },
+                    { id: 'room', text: '🛏️ Renting a room' },
+                    { id: 'other', text: '📍 Other' }
+                ],
+                field: 'housingType',
+                progress: 55
+            },
+
+            // Step 6: Lease Status
+            {
+                type: 'guide',
+                messages: [
+                    `<p><strong>Do you have a written lease?</strong></p>`
+                ],
+                inputType: 'quickResponse',
+                options: [
+                    { id: 'yes_current', text: '📄 Yes, and it\'s current' },
+                    { id: 'yes_expired', text: '📋 Yes, but it expired' },
+                    { id: 'month_to_month', text: '📅 Month-to-month' },
+                    { id: 'verbal', text: '🗣️ Verbal agreement only' },
+                    { id: 'unsure', text: '❓ Not sure' }
+                ],
+                field: 'leaseStatus',
+                progress: 65
+            },
+
+            // Step 7: Documentation Check
+            {
+                type: 'guide',
+                messages: [
+                    `<p>Documentation can be powerful evidence. Don't worry if you don't have much - we'll work with what you have.</p>
+                     <p><strong>Do you have any of these?</strong> (Select all that apply)</p>`
+                ],
+                inputType: 'multiSelect',
+                options: [
+                    { id: 'lease', text: '📄 Copy of your lease' },
+                    { id: 'notices', text: '✉️ Notices from landlord' },
+                    { id: 'photos', text: '📸 Photos of problems' },
+                    { id: 'messages', text: '💬 Text messages or emails' },
+                    { id: 'receipts', text: '🧾 Rent receipts or records' },
+                    { id: 'none', text: '📭 I don\'t have any documents' }
+                ],
+                field: 'documents',
+                progress: 75
+            },
+
+            // Step 8: What They Want
+            {
+                type: 'guide',
+                messages: [
+                    `<p>Last question - and this is important:</p>
+                     <p><strong>In an ideal world, what outcome are you hoping for?</strong></p>
+                     <p>There's no wrong answer. Understanding your goals helps us find the right path forward.</p>`
+                ],
+                inputType: 'text',
+                placeholder: 'What would make this situation better for you?',
+                field: 'goals',
+                progress: 85
+            },
+
+            // Step 9: Anything Else
+            {
+                type: 'guide',
+                messages: [
+                    `<p>Is there anything else you think I should know?</p>
+                     <p>Sometimes the details that seem small end up being important. But if you've covered everything, that's okay too!</p>`
+                ],
+                inputType: 'text',
+                placeholder: 'Anything else? (Optional - you can skip this)',
+                field: 'additionalInfo',
+                optional: true,
+                progress: 95
+            },
+
+            // Step 10: Summary & Next Steps
+            {
+                type: 'guide',
+                dynamic: true,
+                getMessage: (data) => {
+                    // Build document summary
+                    let docSummary = '';
+                    const allDocs = data.uploadedDocs || [];
+                    if (allDocs.length > 0) {
+                        docSummary = `<p><strong>Documents analyzed:</strong> ${allDocs.length} file${allDocs.length > 1 ? 's' : ''}</p>`;
+                        
+                        // Show key extracted info
+                        const allExtracted = data.extractedInfo || extractedData || {};
+                        if (Object.keys(allExtracted).length > 0) {
+                            docSummary += '<div class="extracted-info" style="margin: 0.75rem 0;"><div class="extracted-info-title">🔍 Key Information Found</div><div class="extracted-info-content">';
+                            if (allExtracted.landlord_name) docSummary += `<div class="extracted-field"><span class="extracted-field-label">Landlord:</span><span class="extracted-field-value">${allExtracted.landlord_name}</span></div>`;
+                            if (allExtracted.property_address) docSummary += `<div class="extracted-field"><span class="extracted-field-label">Property:</span><span class="extracted-field-value">${allExtracted.property_address}</span></div>`;
+                            if (allExtracted.rent_amount) docSummary += `<div class="extracted-field"><span class="extracted-field-label">Rent:</span><span class="extracted-field-value">${allExtracted.rent_amount}</span></div>`;
+                            if (allExtracted.deadline) docSummary += `<div class="extracted-field"><span class="extracted-field-label">⚠️ Deadline:</span><span class="extracted-field-value">${allExtracted.deadline}</span></div>`;
+                            if (allExtracted.notice_type) docSummary += `<div class="extracted-field"><span class="extracted-field-label">Notice Type:</span><span class="extracted-field-value">${allExtracted.notice_type}</span></div>`;
+                            if (allExtracted.notice_date) docSummary += `<div class="extracted-field"><span class="extracted-field-label">Notice Date:</span><span class="extracted-field-value">${allExtracted.notice_date}</span></div>`;
+                            docSummary += '</div></div>';
+                        }
+                    }
+
+                    return `<p>✅ <strong>Thank you for sharing your story.</strong></p>
+                            <p>Here's what I understand:</p>
+                            <div class="info-callout">
+                                <div class="info-callout-title">📋 Your Situation</div>
+                                <div class="info-callout-text">
+                                    <strong>Main concern:</strong> ${getConcernText(data.primaryConcern)}<br>
+                                    <strong>Housing:</strong> ${getHousingText(data.housingType)}<br>
+                                    <strong>Lease:</strong> ${getLeaseText(data.leaseStatus)}<br>
+                                    ${data.urgency && ['court_soon', 'deadline', 'move_out'].includes(data.urgency) ? 
+                                        `<strong style="color: var(--warning);">⚠️ Urgent deadline noted</strong><br>` : ''}
+                                    <strong>Goal:</strong> ${data.goals || 'To be discussed'}
+                                </div>
+                            </div>
+                            ${docSummary}
+                            <p style="margin-top: 1rem;"><strong>What happens next:</strong></p>
+                            <p>1. Your information is saved securely<br>
+                               2. We'll analyze Minnesota laws that apply<br>
+                               3. You'll get personalized guidance and tools</p>`;
+                },
+                inputType: 'complete',
+                progress: 100
+            }
+        ];
+
+        // Helper functions for summary
+        function getConcernText(concern) {
+            const map = {
+                'eviction': 'Eviction/being forced to leave',
+                'repairs': 'Repairs and living conditions',
+                'rent': 'Rent-related issues',
+                'harassment': 'Landlord behavior concerns',
+                'lease': 'Lease questions',
+                'other': 'Multiple or other concerns'
+            };
+            return map[concern] || 'Not specified';
+        }
+
+        function getHousingText(type) {
+            const map = {
+                'apartment': 'Apartment building',
+                'house': 'House or duplex',
+                'subsidized': 'Section 8 / Subsidized',
+                'mobile': 'Mobile home',
+                'room': 'Room rental',
+                'other': 'Other'
+            };
+            return map[type] || 'Not specified';
+        }
+
+        function getLeaseText(status) {
+            const map = {
+                'yes_current': 'Written lease (current)',
+                'yes_expired': 'Written lease (expired)',
+                'month_to_month': 'Month-to-month',
+                'verbal': 'Verbal agreement',
+                'unsure': 'Unknown'
+            };
+            return map[status] || 'Not specified';
+        }
+
+        // Initialize conversation
+        document.addEventListener('DOMContentLoaded', function() {
+            showStep(0);
+            
+            // Auto-resize textarea
+            const textarea = document.getElementById('userInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+
+            // Enter to send (shift+enter for new line)
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+
+        // Show current step
+        function showStep(stepIndex) {
+            const step = conversationFlow[stepIndex];
+            if (!step) return;
+
+            // Check condition
+            if (step.condition && !step.condition(intakeData)) {
+                currentStep++;
+                showStep(currentStep);
+                return;
+            }
+
+            // Update progress
+            document.getElementById('progressFill').style.width = step.progress + '%';
+            updateProgressText(step.progress);
+
+            // Get message content
+            let messageContent;
+            if (step.dynamic && step.getMessage) {
+                messageContent = step.getMessage(intakeData);
+            } else if (step.messages) {
+                messageContent = step.messages.join('');
+            }
+
+            // Show typing indicator then message
+            showTyping(() => {
+                addGuideMessage(messageContent);
+                showInputForStep(step);
+            });
+        }
+
+        function updateProgressText(progress) {
+            const text = document.getElementById('progressText');
+            if (progress <= 25) text.textContent = 'Getting Started';
+            else if (progress <= 50) text.textContent = 'Understanding Your Situation';
+            else if (progress <= 75) text.textContent = 'Gathering Details';
+            else if (progress < 100) text.textContent = 'Almost Done';
+            else text.textContent = 'Complete!';
+        }
+
+        function showTyping(callback) {
+            const conversation = document.getElementById('conversation');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message guide';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            conversation.appendChild(typingDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+
+            setTimeout(() => {
+                typingDiv.remove();
+                callback();
+            }, 800 + Math.random() * 400);
+        }
+
+        function addGuideMessage(content) {
+            const conversation = document.getElementById('conversation');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message guide';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="message-sender">Semptify Guide</div>
+                    <div class="message-text">${content}</div>
+                </div>
+            `;
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function addUserMessage(content, attachments = []) {
+            const conversation = document.getElementById('conversation');
+            
+            let attachmentHtml = '';
+            if (attachments && attachments.length > 0) {
+                attachmentHtml = attachments.map(doc => `
+                    <div class="message-attachment">
+                        <div class="message-attachment-icon">${getFileIcon(doc.type)}</div>
+                        <div class="message-attachment-info">
+                            <div class="message-attachment-name">${doc.name}</div>
+                            ${doc.extractedType ? `<div class="message-attachment-extracted">📋 ${doc.extractedType} analyzed</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-sender">You</div>
+                    <div class="message-text">
+                        ${content || ''}
+                        ${attachmentHtml}
+                    </div>
+                </div>
+                <div class="message-avatar">👤</div>
+            `;
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showInputForStep(step) {
+            const inputArea = document.getElementById('inputArea');
+            const userInput = document.getElementById('userInput');
+            const inputHint = document.getElementById('inputHint');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            // Hide upload zone when changing steps
+            document.getElementById('uploadDropZone').classList.remove('visible');
+
+            switch (step.inputType) {
+                case 'text':
+                case 'textWithUpload':
+                    inputArea.style.display = 'block';
+                    userInput.placeholder = step.placeholder || 'Type your response...';
+                    userInput.value = '';
+                    userInput.focus();
+                    uploadBtn.style.display = step.inputType === 'textWithUpload' ? 'flex' : 'none';
+                    inputHint.innerHTML = step.optional ? 
+                        '💡 This is optional - press Skip or Continue if you\'d like to move on' :
+                        '💡 Take your time - you can also upload relevant documents with 📎';
+                    break;
+
+                case 'category':
+                    inputArea.style.display = 'none';
+                    showCategoryCards(step.categories);
+                    break;
+
+                case 'quickResponse':
+                    inputArea.style.display = 'none';
+                    showQuickResponses(step.options);
+                    break;
+
+                case 'multiSelect':
+                    inputArea.style.display = 'none';
+                    showMultiSelect(step.options);
+                    break;
+
+                case 'date':
+                    inputArea.style.display = 'none';
+                    showDateInput();
+                    break;
+
+                case 'complete':
+                    inputArea.style.display = 'none';
+                    showCompletionActions();
+                    break;
+            }
+        }
+
+        function showCategoryCards(categories) {
+            const conversation = document.getElementById('conversation');
+            const cardsDiv = document.createElement('div');
+            cardsDiv.className = 'category-cards';
+            cardsDiv.id = 'inputCards';
+
+            categories.forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.innerHTML = `
+                    <div class="category-icon">${cat.icon}</div>
+                    <div class="category-title">${cat.title}</div>
+                    <div class="category-desc">${cat.desc}</div>
+                `;
+                card.onclick = () => selectCategory(cat.id, cat.title);
+                cardsDiv.appendChild(card);
+            });
+
+            conversation.appendChild(cardsDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showQuickResponses(options) {
+            const conversation = document.getElementById('conversation');
+            const responsesDiv = document.createElement('div');
+            responsesDiv.className = 'quick-responses';
+            responsesDiv.id = 'inputCards';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-btn';
+                btn.textContent = opt.text;
+                btn.onclick = () => selectQuickResponse(opt.id, opt.text);
+                responsesDiv.appendChild(btn);
+            });
+
+            conversation.appendChild(responsesDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showMultiSelect(options) {
+            const conversation = document.getElementById('conversation');
+            const container = document.createElement('div');
+            container.id = 'inputCards';
+
+            const responsesDiv = document.createElement('div');
+            responsesDiv.className = 'quick-responses';
+            responsesDiv.id = 'multiSelectOptions';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-btn';
+                btn.textContent = opt.text;
+                btn.dataset.id = opt.id;
+                btn.onclick = () => toggleMultiSelect(btn);
+                responsesDiv.appendChild(btn);
+            });
+
+            const footer = document.createElement('div');
+            footer.className = 'action-footer';
+            footer.innerHTML = `
+                <button class="skip-btn" onclick="skipMultiSelect()">None of these</button>
+                <button class="continue-btn" onclick="submitMultiSelect()">Continue →</button>
+            `;
+
+            container.appendChild(responsesDiv);
+            container.appendChild(footer);
+            conversation.appendChild(container);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function toggleMultiSelect(btn) {
+            btn.classList.toggle('selected');
+            // If "none" is selected, deselect others
+            if (btn.dataset.id === 'none' && btn.classList.contains('selected')) {
+                document.querySelectorAll('#multiSelectOptions .quick-btn').forEach(b => {
+                    if (b !== btn) b.classList.remove('selected');
+                });
+            } else if (btn.dataset.id !== 'none') {
+                document.querySelector('#multiSelectOptions .quick-btn[data-id="none"]')?.classList.remove('selected');
+            }
+        }
+
+        function submitMultiSelect() {
+            const selected = [...document.querySelectorAll('#multiSelectOptions .quick-btn.selected')]
+                .map(btn => ({ id: btn.dataset.id, text: btn.textContent }));
+            
+            if (selected.length === 0) {
+                skipMultiSelect();
+                return;
+            }
+
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = selected.map(s => s.id);
+            
+            addUserMessage(selected.map(s => s.text).join('<br>'));
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function skipMultiSelect() {
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = ['none'];
+            
+            addUserMessage("I don't have any documents right now");
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function showDateInput() {
+            const conversation = document.getElementById('conversation');
+            const container = document.createElement('div');
+            container.id = 'inputCards';
+            container.innerHTML = `
+                <div class="date-input-group">
+                    <input type="date" class="date-input" id="dateInput" />
+                    <input type="text" class="date-input" id="dateApprox" placeholder="Or type: 'about 2 weeks', 'next Monday', etc." style="flex: 1;" />
+                </div>
+                <div class="action-footer">
+                    <button class="skip-btn" onclick="skipDate()">I'm not sure</button>
+                    <button class="continue-btn" onclick="submitDate()">Continue →</button>
+                </div>
+            `;
+            conversation.appendChild(container);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function submitDate() {
+            const dateInput = document.getElementById('dateInput').value;
+            const approxInput = document.getElementById('dateApprox').value;
+            const value = dateInput || approxInput || 'Not specified';
+            
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = value;
+            
+            addUserMessage(value);
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function skipDate() {
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = 'unsure';
+            
+            addUserMessage("I'm not sure of the exact date");
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function showCompletionActions() {
+            const conversation = document.getElementById('conversation');
+            const container = document.createElement('div');
+            container.id = 'inputCards';
+            container.innerHTML = `
+                <div class="action-footer" style="border-top: none; margin-top: 0;">
+                    <button class="skip-btn" onclick="startOver()">↺ Start Over</button>
+                    <button class="continue-btn" onclick="goToDashboard()">Go to My Dashboard →</button>
+                </div>
+            `;
+            conversation.appendChild(container);
+            conversation.scrollTop = conversation.scrollHeight;
+
+            // Save intake data
+            saveIntakeData();
+        }
+
+        function selectCategory(id, title) {
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = id;
+            
+            addUserMessage(title);
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function selectQuickResponse(id, text) {
+            const step = conversationFlow[currentStep];
+            intakeData[step.field] = id;
+            
+            addUserMessage(text);
+            document.getElementById('inputCards').remove();
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            const step = conversationFlow[currentStep];
+            
+            // Get pending uploads (completed status)
+            const pendingDocs = uploadedDocuments.filter(d => d.status === 'complete');
+            
+            if (!message && pendingDocs.length === 0 && !step.optional) {
+                userInput.classList.add('shake');
+                setTimeout(() => userInput.classList.remove('shake'), 500);
+                return;
+            }
+
+            // Store data
+            intakeData[step.field] = message || null;
+            
+            // Store document references
+            if (pendingDocs.length > 0) {
+                intakeData.uploadedDocs = [...(intakeData.uploadedDocs || []), ...pendingDocs.map(d => ({
+                    name: d.name,
+                    type: d.extractedType,
+                    extracted: d.extractedData
+                }))];
+            }
+
+            // Show user message with attachments
+            addUserMessage(message || (pendingDocs.length > 0 ? '(Documents uploaded)' : '(Skipped)'), pendingDocs);
+            
+            // Clear inputs
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            uploadedDocuments = uploadedDocuments.filter(d => d.status !== 'complete');
+            renderUploadedFiles();
+            document.getElementById('uploadDropZone').classList.remove('visible');
+            
+            currentStep++;
+            setTimeout(() => showStep(currentStep), 300);
+        }
+
+        async function saveIntakeData() {
+            // Store extracted data with intake
+            intakeData.extractedInfo = extractedData;
+            
+            try {
+                // Save to user's cloud storage via API
+                const response = await fetch('/api/guided-intake/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        intake_data: intakeData,
+                        completed_at: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('Intake data saved successfully');
+                } else {
+                    // Store locally as backup
+                    localStorage.setItem('semptify_intake', JSON.stringify(intakeData));
+                    console.log('Saved to local storage as backup');
+                }
+            } catch (error) {
+                localStorage.setItem('semptify_intake', JSON.stringify(intakeData));
+                console.log('Saved to local storage:', error);
+            }
+        }
+
+        function startOver() {
+            if (confirm('Start over? Your current responses will be cleared.')) {
+                intakeData = {
+                    primaryConcern: null,
+                    situation: null,
+                    timeline: [],
+                    urgency: null,
+                    housing: {},
+                    documents: [],
+                    uploadedDocs: [],
+                    extractedInfo: {},
+                    goals: null,
+                    additionalInfo: null
+                };
+                uploadedDocuments = [];
+                extractedData = {};
+                currentStep = 0;
+                document.getElementById('conversation').innerHTML = '';
+                document.getElementById('uploadedFiles').innerHTML = '';
+                showStep(0);
+            }
+        }
+
+        function goToDashboard() {
+            window.location.href = '/dashboard';
+        }
+    </script>
+</body>
+</html>
