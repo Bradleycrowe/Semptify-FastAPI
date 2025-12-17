@@ -1745,22 +1745,21 @@
             document.getElementById('onboarding-overlay').classList.remove('hidden');
         }
 
-        // Onboarding - Storage is REQUIRED
+        // Onboarding - Storage is OPTIONAL (user can connect later)
         async function checkOnboarding() {
             console.log('🔍 checkOnboarding called');
             const storageStatus = await checkStorageStatus();
             console.log('📊 Storage status:', storageStatus);
             
-            // Storage is required - show onboarding if not connected
-            if (!storageStatus.authenticated) {
-                console.log('❌ Not authenticated, showing overlay');
-                document.getElementById('onboarding-overlay').classList.remove('hidden');
-                isNewUser = true;
-            } else {
-                console.log('✅ Authenticated, hiding overlay');
-                document.getElementById('onboarding-overlay').classList.add('hidden');
+            // Storage is now optional - don't block the user
+            if (storageStatus.authenticated) {
+                console.log('✅ Authenticated');
                 isNewUser = false;
                 showToast(`Connected to ${storageProvider}`, 'success');
+            } else {
+                console.log('ℹ️ No storage connected - user can connect later');
+                isNewUser = true;
+                // Don't show overlay - let user use the app
             }
         }
 

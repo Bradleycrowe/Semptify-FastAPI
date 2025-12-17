@@ -1627,23 +1627,11 @@ All errors return JSON with `detail` field. Rate limit errors include `retry_aft
 
     @app.get("/", response_class=HTMLResponse)
     async def root():
-        """Serve the unified dashboard - main user-facing page."""
-        # Try simplified welcome page first (best user experience)
-        simple_path = Path("static/index-simple.html")
-        if simple_path.exists():
-            return HTMLResponse(content=simple_path.read_text(encoding="utf-8"))
-        # Try enterprise dashboard (premium UI)
-        enterprise_path = Path("static/enterprise-dashboard.html")
-        if enterprise_path.exists():
-            return HTMLResponse(content=enterprise_path.read_text(encoding="utf-8"))
-        # Fallback to standard dashboard
+        """Serve the dashboard directly - no welcome screens, no setup, just the app."""
+        # Go straight to dashboard - no welcome, no roles, no storage setup
         dashboard_path = Path("static/dashboard.html")
         if dashboard_path.exists():
             return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
-        # Fallback to documents page
-        documents_path = BASE_PATH / "static" / "documents.html"
-        if documents_path.exists():
-            return HTMLResponse(content=documents_path.read_text(encoding="utf-8"))
         # Fallback JSON response if no frontend
         return JSONResponse(content={
             "name": settings.app_name,
