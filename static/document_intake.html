@@ -1725,6 +1725,7 @@
     <script src="/static/js/notification-toast.js"></script>
     <script src="/static/js/confetti.js"></script>
     <script src="/static/js/emotion-integration.js"></script>
+    <script src="/static/js/reminders.js"></script>
 
     <script>
         // =====================================================================
@@ -2252,6 +2253,11 @@
                 
                 renderQueue();
                 showToast(`${file.name} uploaded successfully`, 'success');
+                
+                // Mark document uploaded for reminder system
+                if (typeof markDocumentUploaded === 'function') {
+                    markDocumentUploaded();
+                }
                 
                 // Celebrate document upload with emotion engine
                 if (typeof EmotionEngine !== 'undefined') {

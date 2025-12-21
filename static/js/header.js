@@ -146,3 +146,101 @@
         insertHeader();
     }
 })();
+
+// =============================================================================
+// QUICK DOCUMENT FAB - Always visible on all pages
+// Philosophy: "Document Everything First" - Make documenting frictionless
+// =============================================================================
+(function() {
+    // Skip if already added or on document intake page
+    if (document.querySelector('.quick-document-fab')) return;
+    if (window.location.pathname.includes('document_intake.html')) return;
+
+    // Quick Document FAB HTML
+    const fab = document.createElement('a');
+    fab.href = '/static/document_intake.html?quick=true';
+    fab.className = 'quick-document-fab';
+    fab.innerHTML = '📸 Document';
+    fab.title = 'Quick Document - Upload photo, receipt, or screenshot';
+    fab.setAttribute('aria-label', 'Quick document upload');
+
+    // FAB Styles
+    const fabStyle = document.createElement('style');
+    fabStyle.id = 'quick-document-fab-styles';
+    fabStyle.textContent = `
+        .quick-document-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #3B5998 0%, #2d4a7c 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            box-shadow: 0 4px 12px rgba(59, 89, 152, 0.4);
+            z-index: 1000;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+        .quick-document-fab:hover {
+            background: linear-gradient(135deg, #2d4a7c 0%, #1e3a5f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 89, 152, 0.5);
+            color: white;
+            text-decoration: none;
+        }
+        .quick-document-fab:active {
+            transform: translateY(0);
+        }
+        /* Pulse animation to draw attention initially */
+        @keyframes fab-pulse {
+            0%, 100% { box-shadow: 0 4px 12px rgba(59, 89, 152, 0.4); }
+            50% { box-shadow: 0 4px 20px rgba(59, 89, 152, 0.7); }
+        }
+        .quick-document-fab.pulse {
+            animation: fab-pulse 2s ease-in-out 3;
+        }
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .quick-document-fab {
+                bottom: 16px;
+                right: 16px;
+                padding: 14px 18px;
+                font-size: 0.9rem;
+                min-width: auto;
+            }
+        }
+        /* When sidebar nav is pinned open, move FAB to avoid overlap */
+        body.nav-pinned .quick-document-fab {
+            right: calc(260px + 24px);
+        }
+    `;
+
+    // Insert FAB when DOM is ready
+    function insertFab() {
+        if (!document.getElementById('quick-document-fab-styles')) {
+            document.head.appendChild(fabStyle);
+        }
+        document.body.appendChild(fab);
+        
+        // Add pulse animation for first-time users
+        const hasSeenFab = localStorage.getItem('semptify_seen_fab');
+        if (!hasSeenFab) {
+            fab.classList.add('pulse');
+            localStorage.setItem('semptify_seen_fab', 'true');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', insertFab);
+    } else {
+        insertFab();
+    }
+})();
