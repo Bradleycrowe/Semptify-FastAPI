@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - My Journey</title>
+    <link rel="stylesheet" href="/static/css/help-system.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --success-light: #34d399;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        #semptify-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem 2rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            text-align: left;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Storage Status Indicator */
+        .storage-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .storage-status:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .storage-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            transition: background 0.3s;
+        }
+
+        .storage-dot.disconnected {
+            background: var(--danger);
+        }
+
+        .storage-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Vertical Timeline */
+        .timeline {
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        /* The vertical line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--accent), var(--success));
+            border-radius: 2px;
+        }
+
+        /* Timeline Item */
+        .timeline-item {
+            position: relative;
+            padding-left: 65px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* The dot on the timeline */
+        .timeline-dot {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .timeline-item.active .timeline-dot {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .timeline-item.not-started .timeline-dot {
+            background: var(--bg);
+            border-color: var(--border);
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Timeline Card */
+        .timeline-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .timeline-card:hover {
+            transform: translateX(6px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border-color: var(--accent-light);
+        }
+
+        .timeline-item.completed .timeline-card {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        }
+
+        .timeline-item.active .timeline-card {
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.12);
+        }
+
+        .timeline-item.not-started .timeline-card {
+            opacity: 0.85;
+            cursor: pointer;
+        }
+
+        .timeline-item.not-started .timeline-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .card-status {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .card-status.todo {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .card-status.done {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .card-status.not-started {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* Wizard Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .wizard-modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wizard-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .wizard-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .wizard-progress {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 1rem;
+            background: var(--bg);
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        .progress-dot.done {
+            background: var(--success);
+        }
+
+        .wizard-body {
+            padding: 1.5rem;
+            min-height: 280px;
+            overflow-y: auto;
+        }
+
+        .wizard-step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Step Styles */
+        .step-question {
+            font-size: 1.15rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .step-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: #f0f9ff;
+            transform: translateX(6px);
+        }
+
+        .option-btn .icon {
+            font-size: 1.75rem;
+        }
+
+        .option-btn .text h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .option-btn .text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 3px dashed var(--border);
+            border-radius: 14px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background: #f0f9ff;
+        }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-zone h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-zone p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .uploaded-file {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #d1fae5;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Document Preview */
+        .doc-preview {
+            margin-top: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .doc-preview-header {
+            background: var(--bg);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .doc-preview-header span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .doc-preview-content {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+
+        .doc-preview-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .doc-preview-content .pdf-icon {
+            font-size: 4rem;
+            color: var(--danger);
+        }
+
+        .doc-preview-content .doc-icon {
+            font-size: 4rem;
+            color: var(--accent);
+        }
+
+        .doc-preview-info {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .doc-preview-info .file-name-edit {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .doc-preview-info .file-name-edit input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .doc-preview-info .file-name-edit input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .doc-preview-info .file-name-edit .edit-icon {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .doc-preview-info .file-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .doc-preview-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .doc-preview-actions .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .doc-preview-actions .btn-change {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .doc-preview-actions .btn-change:hover {
+            background: var(--bg);
+        }
+
+        .doc-preview-actions .btn-confirm {
+            background: var(--success);
+            color: white;
+            flex: 1;
+        }
+
+        .doc-preview-actions .btn-confirm:hover {
+            background: #059669;
+        }
+
+        .doc-preview-actions .btn-skip {
+            background: #f1f5f9;
+            color: #64748b;
+            flex: 0.8;
+        }
+
+        .doc-preview-actions .btn-skip:hover {
+            background: #e2e8f0;
+        }
+
+        /* Info Callout */
+        .info-callout {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            border-left: 4px solid var(--warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-callout h4 {
+            font-size: 0.85rem;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-callout ul {
+            margin-left: 1rem;
+            font-size: 0.8rem;
+            color: #78350f;
+        }
+
+        .info-callout li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Checkboxes */
+        .checkbox-list {
+            margin-top: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            background: var(--bg);
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-item label strong {
+            display: block;
+        }
+
+        .checkbox-item label span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Processing */
+        .processing-view {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .spinner-container {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .spinner {
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .processing-steps {
+            text-align: left;
+            max-width: 250px;
+            margin: 1rem auto;
+        }
+
+        .proc-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .proc-step.done { color: var(--success); }
+        .proc-step.active { color: var(--accent); font-weight: 500; }
+
+        /* Success View */
+        .success-view {
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+            animation: bounceIn 0.4s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .success-view h3 {
+            font-size: 1.25rem;
+            color: var(--success);
+            margin-bottom: 0.25rem;
+        }
+
+        .success-view > p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Property Insights */
+        .insights-card {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+            border: 2px solid var(--accent-light);
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .insights-header .icon {
+            font-size: 1.75rem;
+        }
+
+        .insights-header h4 {
+            font-size: 0.95rem;
+            color: var(--primary);
+        }
+
+        .insights-header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .insight-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .insight-item .value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .insight-item .label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .insight-item.good .value { color: var(--success); }
+        .insight-item.warning .value { color: var(--warning); }
+
+        .insights-footer {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insights-footer.good { color: var(--success); }
+        .insights-footer.warning { color: var(--warning); }
+
+        /* Next Steps */
+        .next-steps {
+            background: #fef3c7;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .next-steps h4 {
+            font-size: 0.85rem;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+
+        .next-steps ul {
+            list-style: none;
+            font-size: 0.8rem;
+            color: #78350f;
+        }
+
+        .next-steps li {
+            padding: 0.3rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .next-steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #d97706;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Wizard Footer */
+        .wizard-footer {
+            padding: 1rem;
+            background: var(--bg);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            flex: 0;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); }
+
+        @media (max-width: 500px) {
+            .container { padding: 1rem 0.75rem; }
+            .timeline::before { left: 18px; }
+            .timeline-item { padding-left: 55px; }
+            .timeline-dot { left: 4px; width: 32px; height: 32px; }
+            .insights-grid { grid-template-columns: 1fr 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="header-top">
+            <div class="header-title">
+                <h1>📋 My Tenancy Journey</h1>
+                <p>Your rental story, documented step by step</p>
+            </div>
+            <div class="storage-status" id="storageStatus" onclick="toggleStorageConnection()">
+                <span class="storage-dot disconnected"></span>
+                <span class="storage-text">Not Connected</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Vertical Timeline -->
+        <div class="timeline" id="timeline">
+            <div class="timeline-item active" data-step="application" onclick="openWizard('application')">
+                <div class="timeline-dot">📝</div>
+                <div class="timeline-card">
+                    <div class="card-title">Application for Rental</div>
+                    <p class="card-description">Application fee & screening</p>
+                    <span class="card-status todo">Click to Start</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="lease" onclick="openWizard('lease')">
+                <div class="timeline-dot">📄</div>
+                <div class="timeline-card">
+                    <div class="card-title">Lease Agreement</div>
+                    <p class="card-description">Sign your rental contract</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="movein" onclick="openWizard('movein')">
+                <div class="timeline-dot">🏠</div>
+                <div class="timeline-card">
+                    <div class="card-title">Move-In</div>
+                    <p class="card-description">Keys, inspection & deposit</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="tenancy" onclick="openWizard('tenancy')">
+                <div class="timeline-dot">🔧</div>
+                <div class="timeline-card">
+                    <div class="card-title">During Tenancy</div>
+                    <p class="card-description">Rent, repairs & communications</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="notices" onclick="openWizard('notices')">
+                <div class="timeline-dot">📬</div>
+                <div class="timeline-card">
+                    <div class="card-title">Notices Received</div>
+                    <p class="card-description">Rent increases or violations</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="moveout" onclick="openWizard('moveout')">
+                <div class="timeline-dot">🚪</div>
+                <div class="timeline-card">
+                    <div class="card-title">Move-Out</div>
+                    <p class="card-description">Final inspection & key return</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+
+            <div class="timeline-item not-started" data-step="deposit" onclick="openWizard('deposit')">
+                <div class="timeline-dot">💰</div>
+                <div class="timeline-card">
+                    <div class="card-title">Deposit Return</div>
+                    <p class="card-description">Get your money back</p>
+                    <span class="card-status not-started">Not Started</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Wizard Modal -->
+    <div class="modal-overlay" id="wizardModal">
+        <div class="wizard-modal">
+            <div class="wizard-header">
+                <h2 id="wizardTitle">Application for Rental</h2>
+            </div>
+            
+            <div class="wizard-progress" id="wizardProgress"></div>
+
+            <div class="wizard-body" id="wizardBody"></div>
+
+            <div class="wizard-footer" id="wizardFooter">
+                <button class="btn btn-secondary" onclick="closeWizard()">✕</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Continue →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // State
+        let currentWizard = null;
+        let currentStep = 0;
+        let wizardData = {};
+        let journeyData = JSON.parse(localStorage.getItem('semptify_journey') || '{}');
+
+        // Wizard configs
+        const wizards = {
+            application: {
+                title: 'Application for Rental',
+                steps: [
+                    { id: 'has_receipt', type: 'question', question: 'Do you have a receipt for your application fee?',
+                      options: [
+                        { value: 'yes', icon: '✅', title: 'Yes, I have it', desc: 'Upload to auto-fill details' },
+                        { value: 'no', icon: '📝', title: 'No receipt', desc: 'I\'ll enter manually' }
+                      ]
+                    },
+                    { id: 'upload_or_manual', type: 'conditional' },
+                    { id: 'legal_info', type: 'info_checkboxes',
+                      info: { title: '⚖️ Know Your Rights', items: [
+                        'Fee only if unit available', 'Written receipt required',
+                        'Criteria disclosed upfront', 'Refund if not screened'
+                      ]},
+                      checkboxes: [
+                        { id: 'got_receipt', label: 'Got receipt', desc: 'Required by law' },
+                        { id: 'got_criteria', label: 'Criteria disclosed', desc: 'Before paying' },
+                        { id: 'unit_available', label: 'Unit was available', desc: 'Not collecting fees only' }
+                      ]
+                    },
+                    { id: 'processing', type: 'processing', steps: ['Saving details', 'Looking up property', 'Checking complaints', 'Generating insights'] },
+                    { id: 'success', type: 'success' }
+                ]
+            }
+        };
+
+        function openWizard(step) {
+            const item = document.querySelector(`[data-step="${step}"]`);
+            // All steps are now accessible - no lock check needed
+            currentWizard = step;
+            currentStep = 0;
+            wizardData = {};
+            
+            const config = wizards[step] || wizards.application;
+            document.getElementById('wizardTitle').textContent = config.title;
+            
+            // Setup progress dots
+            const progress = document.getElementById('wizardProgress');
+            progress.innerHTML = config.steps.map((_, i) => `<div class="progress-dot"></div>`).join('');
+            
+            renderStep();
+            document.getElementById('wizardModal').classList.add('active');
+        }
+
+        function closeWizard() {
+            document.getElementById('wizardModal').classList.remove('active');
+        }
+
+        function renderStep() {
+            const config = wizards[currentWizard] || wizards.application;
+            let step = config.steps[currentStep];
+            
+            if (step.type === 'conditional') {
+                step = wizardData.has_receipt === 'yes' 
+                    ? { id: 'upload', type: 'upload' }
+                    : { id: 'manual', type: 'manual' };
+            }
+
+            // Update progress
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.className = 'progress-dot' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
+            });
+
+            const body = document.getElementById('wizardBody');
+            const footer = document.getElementById('wizardFooter');
+            const nextBtn = document.getElementById('nextBtn');
+            footer.style.display = 'flex';
+            nextBtn.style.display = 'block';
+            nextBtn.textContent = 'Continue →';
+            nextBtn.className = 'btn btn-primary';
+            nextBtn.onclick = nextStep;
+
+            switch (step.type) {
+                case 'question': renderQuestion(step); nextBtn.style.display = 'none'; break;
+                case 'upload': renderUpload(); break;
+                case 'manual': renderManual(); break;
+                case 'info_checkboxes': renderInfoCheckboxes(step); break;
+                case 'processing': renderProcessing(step); footer.style.display = 'none'; break;
+                case 'success': renderSuccess(); nextBtn.textContent = '✓ Done'; nextBtn.className = 'btn btn-success'; nextBtn.onclick = completeWizard; break;
+            }
+        }
+
+        function renderQuestion(step) {
+            document.getElementById('wizardBody').innerHTML = `
+                <p class="step-question">${step.question}</p>
+                <div class="step-options">
+                    ${step.options.map(o => `
+                        <button class="option-btn" onclick="selectOption('${step.id}','${o.value}')">
+                            <span class="icon">${o.icon}</span>
+                            <span class="text"><h4>${o.title}</h4><p>${o.desc}</p></span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectOption(id, val) { wizardData[id] = val; nextStep(); }
+
+        function renderUpload() {
+            document.getElementById('wizardBody').innerHTML = `
+                <p class="step-question">Upload your receipt</p>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="icon">📄</div>
+                    <h4>Drop file here</h4>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept=".pdf,.jpg,.png,.jpeg" onchange="handleFile(this.files[0])">
+                </div>
+                <div id="docPreview" class="doc-preview" style="display:none">
+                    <div class="doc-preview-header">
+                        <span>📎 Document Preview</span>
+                        <span id="fileType">PDF</span>
+                    </div>
+                    <div class="doc-preview-content" id="previewContent">
+                        <span class="pdf-icon">📄</span>
+                    </div>
+                    <div class="doc-preview-info">
+                        <div class="file-name-edit">
+                            <span class="edit-icon">✏️</span>
+                            <input type="text" id="fileNameInput" placeholder="Document name" onchange="wizardData.fileName = this.value">
+                        </div>
+                        <div class="file-meta">
+                            <span id="fileSize">0 KB</span>
+                            <span id="fileDate"></span>
+                        </div>
+                    </div>
+                    <div class="doc-preview-actions">
+                        <button class="btn-sm btn-change" onclick="changeFile()">🔄 Change</button>
+                        <button class="btn-sm btn-skip" onclick="skipPreview()">⏩ Skip</button>
+                        <button class="btn-sm btn-confirm" onclick="confirmFile()">✓ Looks Good</button>
+                    </div>
+                </div>
+            `;
+            setupDragDrop();
+        }
+
+        function setupDragDrop() {
+            setTimeout(() => {
+                const zone = document.getElementById('uploadZone');
+                if (!zone) return;
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+                zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+            }, 100);
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            
+            // Store original file info
+            wizardData.originalFile = file;
+            wizardData.file = file.name;
+            
+            // Get file extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+            
+            // Hide upload zone, show preview
+            document.getElementById('uploadZone').style.display = 'none';
+            const preview = document.getElementById('docPreview');
+            preview.style.display = 'block';
+            
+            // Set file type badge
+            document.getElementById('fileType').textContent = ext.toUpperCase();
+            
+            // Set editable file name (without extension)
+            const nameInput = document.getElementById('fileNameInput');
+            nameInput.value = nameWithoutExt;
+            wizardData.fileName = nameWithoutExt;
+            wizardData.fileExt = ext;
+            
+            // Set file size
+            const size = file.size;
+            let sizeText = size < 1024 ? size + ' B' : size < 1024*1024 ? (size/1024).toFixed(1) + ' KB' : (size/(1024*1024)).toFixed(1) + ' MB';
+            document.getElementById('fileSize').textContent = sizeText;
+            
+            // Set date
+            document.getElementById('fileDate').textContent = new Date().toLocaleDateString();
+            
+            // Show preview based on file type
+            const previewContent = document.getElementById('previewContent');
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewContent.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else if (ext === 'pdf') {
+                previewContent.innerHTML = `<span class="pdf-icon">📕</span>`;
+            } else {
+                previewContent.innerHTML = `<span class="doc-icon">📄</span>`;
+            }
+        }
+
+        function changeFile() {
+            document.getElementById('uploadZone').style.display = 'block';
+            document.getElementById('docPreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            wizardData.file = null;
+            wizardData.fileName = null;
+        }
+
+        function confirmFile() {
+            // Update the final file name with extension
+            const newName = document.getElementById('fileNameInput').value || 'document';
+            wizardData.file = newName + '.' + wizardData.fileExt;
+            wizardData.fileConfirmed = true;
+            showToast('✓ Document ready', 'success');
+        }
+
+        function skipPreview() {
+            // Skip preview and use original filename
+            if (wizardData.originalFile) {
+                wizardData.file = wizardData.originalFile.name;
+                wizardData.fileConfirmed = true;
+                showToast('⏩ Preview skipped - using original filename', 'info');
+                nextStep();
+            } else {
+                showToast('Please select a file first', 'error');
+            }
+        }
+
+        function renderManual() {
+            document.getElementById('wizardBody').innerHTML = `
+                <p class="step-question">Enter application details</p>
+                <div class="form-row">
+                    <div class="form-group"><label>Date Applied</label><input type="date" onchange="wizardData.date=this.value"></div>
+                    <div class="form-group"><label>Fee Amount</label><input type="text" placeholder="$50" onchange="wizardData.fee=this.value"></div>
+                </div>
+                <div class="form-group"><label>Property Address</label><input type="text" placeholder="123 Main St, Eagan MN" onchange="wizardData.address=this.value"></div>
+                <div class="form-group"><label>Landlord/Company</label><input type="text" placeholder="ABC Properties" onchange="wizardData.landlord=this.value"></div>
+            `;
+        }
+
+        function renderInfoCheckboxes(step) {
+            document.getElementById('wizardBody').innerHTML = `
+                <div class="info-callout">
+                    <h4>${step.info.title}</h4>
+                    <ul>${step.info.items.map(i => `<li>${i}</li>`).join('')}</ul>
+                </div>
+                <p style="font-weight:500;margin-bottom:0.5rem">Check all that apply:</p>
+                <div class="checkbox-list">
+                    ${step.checkboxes.map(c => `
+                        <div class="checkbox-item" onclick="document.getElementById('${c.id}').click()">
+                            <input type="checkbox" id="${c.id}" onchange="wizardData['${c.id}']=this.checked">
+                            <label><strong>${c.label}</strong><span>${c.desc}</span></label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderProcessing(step) {
+            document.getElementById('wizardBody').innerHTML = `
+                <div class="processing-view">
+                    <div class="spinner-container"><div class="spinner"></div><div class="spinner-icon">🔍</div></div>
+                    <h3>Processing...</h3>
+                    <div class="processing-steps">
+                        ${step.steps.map((s,i) => `<div class="proc-step" id="ps${i}"><span>○</span>${s}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+            step.steps.forEach((_, i) => {
+                setTimeout(() => {
+                    const el = document.getElementById(`ps${i}`);
+                    el.classList.add('active');
+                    el.querySelector('span').textContent = '◐';
+                    setTimeout(() => { el.classList.remove('active'); el.classList.add('done'); el.querySelector('span').textContent = '✓'; }, 700);
+                }, i * 900);
+            });
+            setTimeout(() => { currentStep++; renderStep(); }, step.steps.length * 900 + 400);
+        }
+
+        function renderSuccess() {
+            const insights = { complaints: '2', responseTime: '24hrs', avgRent: '$1,250', built: '2015', rating: 'good', icon: '👍', msg: 'Great choice! Very low complaint rate.' };
+            document.getElementById('wizardBody').innerHTML = `
+                <div class="success-view">
+                    <div class="success-icon">✓</div>
+                    <h3>Added to Timeline!</h3>
+                    <p>Your application is documented</p>
+                    <div class="insights-card">
+                        <div class="insights-header">
+                            <span class="icon">🏢</span>
+                            <div><h4>Property Insights</h4><p>${wizardData.address || '123 Main St, Eagan MN'}</p></div>
+                        </div>
+                        <div class="insights-grid">
+                            <div class="insight-item good"><div class="value">${insights.complaints}</div><div class="label">Complaints</div></div>
+                            <div class="insight-item good"><div class="value">${insights.responseTime}</div><div class="label">Avg Response</div></div>
+                            <div class="insight-item"><div class="value">${insights.avgRent}</div><div class="label">Area Rent</div></div>
+                            <div class="insight-item"><div class="value">${insights.built}</div><div class="label">Built</div></div>
+                        </div>
+                        <div class="insights-footer good">${insights.icon} ${insights.msg}</div>
+                    </div>
+                    <div class="next-steps">
+                        <h4>📌 What's Next</h4>
+                        <ul>
+                            <li><strong>Approved?</strong> Sign lease - we'll help review it</li>
+                            <li><strong>Denied?</strong> Request written reason (14 days in Minneapolis)</li>
+                            <li><strong>No response?</strong> Follow up after 5 days</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function nextStep() {
+            currentStep++;
+            const config = wizards[currentWizard] || wizards.application;
+            if (currentStep >= config.steps.length) completeWizard();
+            else renderStep();
+        }
+
+        function completeWizard() {
+            journeyData[currentWizard] = { completed: true, data: wizardData, at: new Date().toISOString() };
+            localStorage.setItem('semptify_journey', JSON.stringify(journeyData));
+            updateTimeline();
+            closeWizard();
+            showToast('✓ Added to timeline!', 'success');
+        }
+
+        function updateTimeline() {
+            const steps = ['application','lease','movein','tenancy','notices','moveout','deposit'];
+            steps.forEach(step => {
+                const item = document.querySelector(`[data-step="${step}"]`);
+                const status = item.querySelector('.card-status');
+                if (journeyData[step]?.completed) {
+                    item.className = 'timeline-item completed';
+                    status.textContent = '✓ Done';
+                    status.className = 'card-status done';
+                } else {
+                    // All incomplete steps are accessible - no sequential lock
+                    item.className = 'timeline-item not-started';
+                    status.textContent = 'Click to Start';
+                    status.className = 'card-status todo';
+                }
+            });
+        }
+
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast active ' + type;
+            setTimeout(() => t.classList.remove('active'), 2500);
+        }
+
+        document.getElementById('wizardModal').addEventListener('click', e => {
+            if (e.target.classList.contains('modal-overlay')) closeWizard();
+        });
+
+        // Storage connection state and functions
+        let storageConnected = false;
+
+        async function checkStorageStatus() {
+            try {
+                const response = await fetch('/storage/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    storageConnected = data.authenticated;
+                    updateStorageUI();
+                }
+            } catch (e) {
+                console.log('Storage status check failed, using toggle mode');
+            }
+        }
+
+        function updateStorageUI() {
+            const dot = document.querySelector('.storage-dot');
+            const text = document.querySelector('.storage-text');
+            
+            if (storageConnected) {
+                dot.classList.remove('disconnected');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.add('disconnected');
+                text.textContent = 'Not Connected';
+            }
+        }
+
+        function toggleStorageConnection() {
+            if (!storageConnected) {
+                // Not connected - redirect to storage setup page
+                window.location.href = '/static/storage_setup.html';
+            } else {
+                // Already connected - show status or offer to disconnect
+                showToast('✅ Storage is connected!', 'success');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTimeline();
+            checkStorageStatus();
+        });
+    </script>
+    
+    <!-- Help System -->
+    <script src="/static/js/help-system.js"></script>
+    <script src="/static/js/semptify-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof SemptifyHelp !== 'undefined') {
+                SemptifyHelp.init('journey');
+            }
+        });
+    </script>
+</body>
+</html>

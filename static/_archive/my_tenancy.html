@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - My Tenancy Timeline</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <link rel="stylesheet" href="/static/css/help-system.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --incomplete: #fef3c7;
+            --complete: #d1fae5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        #semptify-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-content h1 {
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.15);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+        }
+
+        .progress-bar-container {
+            width: 150px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .instructions h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instructions ol {
+            margin-left: 1.5rem;
+            color: var(--text);
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Timeline Stages */
+        .timeline-stage {
+            background: var(--card);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .timeline-stage.complete {
+            border-color: var(--success);
+        }
+
+        .timeline-stage.in-progress {
+            border-color: var(--warning);
+        }
+
+        /* Stage Header */
+        .stage-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .stage-header:hover {
+            background: var(--bg);
+        }
+
+        .stage-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .timeline-stage.complete .stage-number {
+            background: var(--success);
+            color: white;
+        }
+
+        .timeline-stage.in-progress .stage-number {
+            background: var(--warning);
+            color: white;
+        }
+
+        .stage-info {
+            flex: 1;
+        }
+
+        .stage-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stage-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stage-status {
+            padding: 0.4rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .stage-status.incomplete {
+            background: var(--incomplete);
+            color: #92400e;
+        }
+
+        .stage-status.complete {
+            background: var(--complete);
+            color: #065f46;
+        }
+
+        .stage-status.in-progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .expand-icon {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .timeline-stage.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Stage Content */
+        .stage-content {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .timeline-stage.expanded .stage-content {
+            display: block;
+        }
+
+        /* Checklist Items */
+        .checklist {
+            margin-top: 1rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            border: 2px dashed var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            border-color: var(--accent);
+            background: #f0f9ff;
+        }
+
+        .checklist-item.has-document {
+            border-style: solid;
+            border-color: var(--success);
+            background: var(--complete);
+        }
+
+        .checklist-item.has-document:hover {
+            background: #bbf7d0;
+        }
+
+        .item-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .checklist-item.has-document .item-checkbox {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .item-description {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Auto-filled Fields */
+        .item-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .field label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field input, .field select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .field input:focus, .field select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .field input.auto-filled {
+            background: #ecfdf5;
+            border-color: var(--success);
+        }
+
+        /* Document Link */
+        .document-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            margin-top: 0.5rem;
+        }
+
+        .document-link:hover {
+            background: #2563eb;
+        }
+
+        /* Upload Prompt */
+        .upload-prompt {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Legal Reference */
+        .legal-ref {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fef3c7;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legal-ref h4 {
+            font-size: 0.8rem;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legal-ref a {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Upload Zone in Modal */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background: #f0f9ff;
+        }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        /* Processing Status */
+        .processing-status {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .processing-status.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Extracted Data Preview */
+        .extracted-data {
+            display: none;
+            text-align: left;
+        }
+
+        .extracted-data.active {
+            display: block;
+        }
+
+        .extracted-data h4 {
+            margin-bottom: 1rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .extracted-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .extracted-field .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .extracted-field .value {
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+
+            .item-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="has-nav">
+    <!-- Shared Navigation Component -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1>📋 My Tenancy Timeline</h1>
+            <div class="progress-summary">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <span class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> items complete</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Instructions -->
+        <div class="instructions">
+            <h2>💡 How to Use This Timeline</h2>
+            <ol>
+                <li><strong>Click any checklist item</strong> to add a document</li>
+                <li><strong>Upload your document</strong> (lease, notice, receipt, etc.)</li>
+                <li><strong>Fields auto-fill</strong> from the document's extracted data</li>
+                <li><strong>Review & confirm</strong> the information</li>
+                <li><strong>Track your progress</strong> as you build your case timeline</li>
+            </ol>
+        </div>
+
+        <!-- Timeline Stages -->
+        <div id="timelineContainer">
+            <!-- Stage 1: Application -->
+            <div class="timeline-stage" data-stage="1">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-number">1</div>
+                    <div class="stage-info">
+                        <h3>Application & Move-In</h3>
+                        <p>Application fees, screening, and lease signing</p>
+                    </div>
+                    <span class="stage-status incomplete">Not Started</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="stage-content">
+                    <div class="checklist">
+                        <!-- Application Fee Receipt -->
+                        <div class="checklist-item" data-item="application_fee" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    📝 Application Fee Receipt
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Receipt showing application/screening fee paid</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Paid</label>
+                                        <input type="date" data-field="date_paid" placeholder="Auto-filled from document">
+                                    </div>
+                                    <div class="field">
+                                        <label>Amount</label>
+                                        <input type="text" data-field="amount" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Paid To</label>
+                                        <input type="text" data-field="paid_to" placeholder="Landlord/Company name">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signed Lease -->
+                        <div class="checklist-item" data-item="signed_lease" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    📄 Signed Lease Agreement
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Your rental agreement/lease contract</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Lease Start Date</label>
+                                        <input type="date" data-field="lease_start">
+                                    </div>
+                                    <div class="field">
+                                        <label>Lease End Date</label>
+                                        <input type="date" data-field="lease_end">
+                                    </div>
+                                    <div class="field">
+                                        <label>Monthly Rent</label>
+                                        <input type="text" data-field="monthly_rent" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Security Deposit</label>
+                                        <input type="text" data-field="security_deposit" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Landlord Name</label>
+                                        <input type="text" data-field="landlord_name">
+                                    </div>
+                                    <div class="field">
+                                        <label>Property Address</label>
+                                        <input type="text" data-field="property_address">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Move-In Inspection -->
+                        <div class="checklist-item" data-item="movein_inspection" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    🔍 Move-In Inspection Report
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Condition checklist signed at move-in</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Inspection Date</label>
+                                        <input type="date" data-field="inspection_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Issues Noted</label>
+                                        <input type="text" data-field="issues_noted" placeholder="Pre-existing damage">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="legal-ref">
+                        <h4>⚖️ Legal Reference</h4>
+                        <p>Application fees regulated by <a href="https://www.revisor.mn.gov/statutes/cite/504B.173" target="_blank">Minn. Stat. §504B.173</a>. Landlord must provide written receipt and disclose screening criteria.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 2: During Tenancy -->
+            <div class="timeline-stage" data-stage="2">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-number">2</div>
+                    <div class="stage-info">
+                        <h3>During Tenancy</h3>
+                        <p>Rent payments, service requests, and communications</p>
+                    </div>
+                    <span class="stage-status incomplete">Not Started</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="stage-content">
+                    <div class="checklist">
+                        <!-- Rent Payment Records -->
+                        <div class="checklist-item" data-item="rent_payments" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    💰 Rent Payment Records
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Bank statements, receipts, or payment confirmations</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Payment Period</label>
+                                        <input type="text" data-field="payment_period" placeholder="e.g., Jan 2024 - Dec 2024">
+                                    </div>
+                                    <div class="field">
+                                        <label>Payment Method</label>
+                                        <select data-field="payment_method">
+                                            <option value="">Select...</option>
+                                            <option value="check">Check</option>
+                                            <option value="ach">ACH/Bank Transfer</option>
+                                            <option value="cash">Cash</option>
+                                            <option value="money_order">Money Order</option>
+                                            <option value="online">Online Portal</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Request -->
+                        <div class="checklist-item" data-item="service_request" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    🔧 Service/Repair Requests
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Written requests for repairs or maintenance</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Requested</label>
+                                        <input type="date" data-field="request_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Issue Type</label>
+                                        <input type="text" data-field="issue_type" placeholder="e.g., Heating, Plumbing">
+                                    </div>
+                                    <div class="field">
+                                        <label>Date Resolved</label>
+                                        <input type="date" data-field="resolved_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Days to Resolve</label>
+                                        <input type="text" data-field="days_to_resolve" placeholder="Auto-calculated">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Communications -->
+                        <div class="checklist-item" data-item="communications" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    ✉️ Landlord Communications
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Emails, letters, or texts with landlord</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date</label>
+                                        <input type="date" data-field="comm_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Subject/Topic</label>
+                                        <input type="text" data-field="comm_subject">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="legal-ref">
+                        <h4>⚖️ Legal Reference</h4>
+                        <p>Landlord must maintain habitable premises per <a href="https://www.revisor.mn.gov/statutes/cite/504B.161" target="_blank">Minn. Stat. §504B.161</a>. Document all repair requests in writing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 3: Notices Received -->
+            <div class="timeline-stage" data-stage="3">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-number">3</div>
+                    <div class="stage-info">
+                        <h3>Notices & Changes</h3>
+                        <p>Rent increases, lease violations, or termination notices</p>
+                    </div>
+                    <span class="stage-status incomplete">Not Started</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="stage-content">
+                    <div class="checklist">
+                        <!-- Rent Increase Notice -->
+                        <div class="checklist-item" data-item="rent_increase" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    📈 Rent Increase Notice
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Written notice of rent increase</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Notice Date</label>
+                                        <input type="date" data-field="notice_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Effective Date</label>
+                                        <input type="date" data-field="effective_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Old Rent</label>
+                                        <input type="text" data-field="old_rent" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>New Rent</label>
+                                        <input type="text" data-field="new_rent" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Increase %</label>
+                                        <input type="text" data-field="increase_pct" placeholder="Auto-calculated">
+                                    </div>
+                                    <div class="field">
+                                        <label>Days Notice Given</label>
+                                        <input type="text" data-field="days_notice" placeholder="Auto-calculated">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Violation Notice -->
+                        <div class="checklist-item" data-item="violation_notice" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    ⚠️ Lease Violation Notice
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Notice of alleged lease violation</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Notice Date</label>
+                                        <input type="date" data-field="violation_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Alleged Violation</label>
+                                        <input type="text" data-field="violation_type">
+                                    </div>
+                                    <div class="field">
+                                        <label>Cure Deadline</label>
+                                        <input type="date" data-field="cure_deadline">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pay or Quit Notice -->
+                        <div class="checklist-item" data-item="pay_quit_notice" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    🚨 14-Day Pay or Quit Notice
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Notice for nonpayment of rent</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Notice Date</label>
+                                        <input type="date" data-field="payquit_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Amount Claimed Owed</label>
+                                        <input type="text" data-field="amount_owed" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Deadline to Pay</label>
+                                        <input type="date" data-field="pay_deadline">
+                                    </div>
+                                    <div class="field">
+                                        <label>Service Method</label>
+                                        <select data-field="service_method">
+                                            <option value="">Select...</option>
+                                            <option value="personal">Personal Service</option>
+                                            <option value="posted">Posted on Door</option>
+                                            <option value="mail">Mailed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Termination Notice -->
+                        <div class="checklist-item" data-item="termination_notice" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    🚪 Termination/Eviction Notice
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Notice to vacate or eviction summons</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Notice Date</label>
+                                        <input type="date" data-field="term_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Vacate By Date</label>
+                                        <input type="date" data-field="vacate_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Reason Given</label>
+                                        <input type="text" data-field="term_reason">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="legal-ref">
+                        <h4>⚖️ Legal Reference</h4>
+                        <p>14-day notice required for nonpayment per <a href="https://www.revisor.mn.gov/statutes/cite/504B.291" target="_blank">Minn. Stat. §504B.291</a>. Rent increase notice per <a href="https://www.revisor.mn.gov/statutes/cite/504B.177" target="_blank">§504B.177</a>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: Move-Out & Deposit -->
+            <div class="timeline-stage" data-stage="4">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-number">4</div>
+                    <div class="stage-info">
+                        <h3>Move-Out & Deposit Return</h3>
+                        <p>Final inspection, move-out, and security deposit</p>
+                    </div>
+                    <span class="stage-status incomplete">Not Started</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="stage-content">
+                    <div class="checklist">
+                        <!-- Move-Out Notice -->
+                        <div class="checklist-item" data-item="moveout_notice" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    📤 Move-Out Notice (Your Notice to Landlord)
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Your written notice of intent to vacate</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Sent</label>
+                                        <input type="date" data-field="moveout_sent">
+                                    </div>
+                                    <div class="field">
+                                        <label>Move-Out Date</label>
+                                        <input type="date" data-field="moveout_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Forwarding Address</label>
+                                        <input type="text" data-field="forwarding_address">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Move-Out Inspection -->
+                        <div class="checklist-item" data-item="moveout_inspection" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    🔍 Move-Out Inspection / Photos
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Photos/video of unit condition at move-out</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Taken</label>
+                                        <input type="date" data-field="photos_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Number of Photos</label>
+                                        <input type="number" data-field="photo_count">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deposit Return -->
+                        <div class="checklist-item" data-item="deposit_return" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    💵 Security Deposit Return
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Check or letter showing deposit return</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Received</label>
+                                        <input type="date" data-field="deposit_received">
+                                    </div>
+                                    <div class="field">
+                                        <label>Original Deposit</label>
+                                        <input type="text" data-field="original_deposit" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Amount Returned</label>
+                                        <input type="text" data-field="returned_amount" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Deductions</label>
+                                        <input type="text" data-field="deductions" placeholder="$0.00">
+                                    </div>
+                                    <div class="field">
+                                        <label>Days After Move-Out</label>
+                                        <input type="text" data-field="days_after" placeholder="Auto-calculated (must be ≤21)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deduction Dispute -->
+                        <div class="checklist-item" data-item="deduction_dispute" onclick="openUploadModal(this)">
+                            <div class="item-checkbox"></div>
+                            <div class="item-content">
+                                <div class="item-label">
+                                    ⚖️ Deposit Dispute Letter
+                                    <span class="upload-prompt">+ Click to add document</span>
+                                </div>
+                                <p class="item-description">Your demand letter disputing deductions</p>
+                                <div class="item-fields">
+                                    <div class="field">
+                                        <label>Date Sent</label>
+                                        <input type="date" data-field="dispute_sent">
+                                    </div>
+                                    <div class="field">
+                                        <label>Amount Disputed</label>
+                                        <input type="text" data-field="disputed_amount" placeholder="$0.00">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="legal-ref">
+                        <h4>⚖️ Legal Reference</h4>
+                        <p>Security deposit must be returned within 21 days per <a href="https://www.revisor.mn.gov/statutes/cite/504B.178" target="_blank">Minn. Stat. §504B.178</a>. Landlord must provide itemized deductions. Normal wear and tear cannot be deducted.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Document</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="icon">📄</div>
+                    <h4>Drop your document here</h4>
+                    <p>or click to browse</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">PDF, JPG, PNG, DOC accepted</p>
+                    <input type="file" id="modalFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                </div>
+
+                <!-- Processing Status -->
+                <div class="processing-status" id="processingStatus">
+                    <div class="spinner"></div>
+                    <h4>Processing Document...</h4>
+                    <p>Extracting information from your document</p>
+                </div>
+
+                <!-- Extracted Data Preview -->
+                <div class="extracted-data" id="extractedData">
+                    <h4>✅ Data Extracted Successfully</h4>
+                    <div id="extractedFields"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-success" id="confirmBtn" onclick="confirmUpload()" style="display: none;">✓ Confirm & Link Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // State
+        let currentItem = null;
+        let extractedDocData = null;
+        let timelineData = JSON.parse(localStorage.getItem('semptify_timeline') || '{}');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
+            updateProgress();
+            setupUploadZone();
+        });
+
+        // Toggle stage expand/collapse
+        function toggleStage(header) {
+            const stage = header.closest('.timeline-stage');
+            stage.classList.toggle('expanded');
+        }
+
+        // Open upload modal
+        function openUploadModal(item) {
+            event.stopPropagation();
+            currentItem = item;
+            const itemName = item.dataset.item;
+            const label = item.querySelector('.item-label').textContent.split('+')[0].trim();
+            
+            document.getElementById('modalTitle').textContent = 'Add: ' + label;
+            document.getElementById('uploadZone').style.display = 'block';
+            document.getElementById('processingStatus').classList.remove('active');
+            document.getElementById('extractedData').classList.remove('active');
+            document.getElementById('confirmBtn').style.display = 'none';
+            document.getElementById('modalFileInput').value = '';
+            
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+            currentItem = null;
+            extractedDocData = null;
+        }
+
+        // Setup upload zone
+        function setupUploadZone() {
+            const zone = document.getElementById('uploadZone');
+            const input = document.getElementById('modalFileInput');
+
+            zone.addEventListener('click', () => input.click());
+            
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    processFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    processFile(e.target.files[0]);
+                }
+            });
+        }
+
+        // Process uploaded file
+        async function processFile(file) {
+            document.getElementById('uploadZone').style.display = 'none';
+            document.getElementById('processingStatus').classList.add('active');
+
+            // Simulate document processing (in real app, this would call your API)
+            await simulateProcessing(file);
+        }
+
+        // Simulate document processing
+        async function simulateProcessing(file) {
+            // In production, this would call your document processing API
+            // For now, we'll simulate extracted data based on item type
+            
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+
+            const itemType = currentItem.dataset.item;
+            extractedDocData = generateMockExtractedData(itemType, file);
+
+            document.getElementById('processingStatus').classList.remove('active');
+            document.getElementById('extractedData').classList.add('active');
+            document.getElementById('confirmBtn').style.display = 'inline-flex';
+
+            // Show extracted fields
+            const fieldsContainer = document.getElementById('extractedFields');
+            fieldsContainer.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(extractedDocData.fields)) {
+                if (value) {
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'extracted-field';
+                    fieldDiv.innerHTML = `
+                        <span class="label">${formatFieldLabel(key)}</span>
+                        <span class="value">${value}</span>
+                    `;
+                    fieldsContainer.appendChild(fieldDiv);
+                }
+            }
+        }
+
+        // Generate mock extracted data based on document type
+        function generateMockExtractedData(itemType, file) {
+            const mockData = {
+                signed_lease: {
+                    fields: {
+                        lease_start: '2024-01-01',
+                        lease_end: '2024-12-31',
+                        monthly_rent: '$1,200.00',
+                        security_deposit: '$1,200.00',
+                        landlord_name: 'ABC Properties LLC',
+                        property_address: '123 Main St, Eagan, MN 55121'
+                    }
+                },
+                rent_increase: {
+                    fields: {
+                        notice_date: '2024-10-15',
+                        effective_date: '2025-01-01',
+                        old_rent: '$1,200.00',
+                        new_rent: '$1,350.00',
+                        increase_pct: '12.5%',
+                        days_notice: '77 days'
+                    }
+                },
+                pay_quit_notice: {
+                    fields: {
+                        payquit_date: '2024-11-01',
+                        amount_owed: '$1,200.00',
+                        pay_deadline: '2024-11-15',
+                        service_method: 'Posted on Door'
+                    }
+                },
+                deposit_return: {
+                    fields: {
+                        deposit_received: '2025-01-21',
+                        original_deposit: '$1,200.00',
+                        returned_amount: '$800.00',
+                        deductions: '$400.00',
+                        days_after: '20 days'
+                    }
+                }
+            };
+
+            return {
+                fileName: file.name,
+                fileSize: file.size,
+                fields: mockData[itemType]?.fields || {
+                    date: new Date().toISOString().split('T')[0],
+                    document_type: itemType
+                }
+            };
+        }
+
+        // Format field label
+        function formatFieldLabel(key) {
+            return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        // Confirm upload and link document
+        function confirmUpload() {
+            if (!currentItem || !extractedDocData) return;
+
+            const itemName = currentItem.dataset.item;
+
+            // Update UI
+            currentItem.classList.add('has-document');
+            currentItem.querySelector('.item-checkbox').textContent = '✓';
+            
+            // Hide upload prompt
+            const uploadPrompt = currentItem.querySelector('.upload-prompt');
+            if (uploadPrompt) uploadPrompt.style.display = 'none';
+
+            // Add document link
+            const existingLink = currentItem.querySelector('.document-link');
+            if (!existingLink) {
+                const link = document.createElement('a');
+                link.href = '#';
+                link.className = 'document-link';
+                link.innerHTML = '📎 ' + extractedDocData.fileName;
+                currentItem.querySelector('.item-content').appendChild(link);
+            }
+
+            // Auto-fill fields
+            const fields = currentItem.querySelectorAll('.item-fields input, .item-fields select');
+            fields.forEach(field => {
+                const fieldName = field.dataset.field;
+                if (extractedDocData.fields[fieldName]) {
+                    field.value = extractedDocData.fields[fieldName];
+                    field.classList.add('auto-filled');
+                }
+            });
+
+            // Save to localStorage
+            timelineData[itemName] = {
+                completed: true,
+                document: extractedDocData.fileName,
+                fields: extractedDocData.fields,
+                uploadedAt: new Date().toISOString()
+            };
+            localStorage.setItem('semptify_timeline', JSON.stringify(timelineData));
+
+            // Update progress
+            updateProgress();
+
+            // Close modal
+            closeModal();
+
+            // Show success toast
+            showToast('Document linked successfully!', 'success');
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            for (const [itemName, data] of Object.entries(timelineData)) {
+                const item = document.querySelector(`[data-item="${itemName}"]`);
+                if (item && data.completed) {
+                    item.classList.add('has-document');
+                    item.querySelector('.item-checkbox').textContent = '✓';
+                    
+                    const uploadPrompt = item.querySelector('.upload-prompt');
+                    if (uploadPrompt) uploadPrompt.style.display = 'none';
+
+                    // Add document link
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.className = 'document-link';
+                    link.innerHTML = '📎 ' + data.document;
+                    item.querySelector('.item-content').appendChild(link);
+
+                    // Fill fields
+                    if (data.fields) {
+                        const fields = item.querySelectorAll('.item-fields input, .item-fields select');
+                        fields.forEach(field => {
+                            const fieldName = field.dataset.field;
+                            if (data.fields[fieldName]) {
+                                field.value = data.fields[fieldName];
+                                field.classList.add('auto-filled');
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        // Update progress
+        function updateProgress() {
+            const allItems = document.querySelectorAll('.checklist-item');
+            const completedItems = document.querySelectorAll('.checklist-item.has-document');
+            
+            const total = allItems.length;
+            const completed = completedItems.length;
+            const pct = total > 0 ? (completed / total * 100) : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = pct + '%';
+
+            // Update stage statuses
+            document.querySelectorAll('.timeline-stage').forEach(stage => {
+                const stageItems = stage.querySelectorAll('.checklist-item');
+                const stageCompleted = stage.querySelectorAll('.checklist-item.has-document');
+                const statusEl = stage.querySelector('.stage-status');
+
+                if (stageCompleted.length === stageItems.length && stageItems.length > 0) {
+                    stage.classList.add('complete');
+                    stage.classList.remove('in-progress');
+                    statusEl.textContent = 'Complete';
+                    statusEl.className = 'stage-status complete';
+                } else if (stageCompleted.length > 0) {
+                    stage.classList.add('in-progress');
+                    stage.classList.remove('complete');
+                    statusEl.textContent = stageCompleted.length + '/' + stageItems.length + ' Done';
+                    statusEl.className = 'stage-status in-progress';
+                } else {
+                    stage.classList.remove('complete', 'in-progress');
+                    statusEl.textContent = 'Not Started';
+                    statusEl.className = 'stage-status incomplete';
+                }
+            });
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast active ' + type;
+            setTimeout(() => toast.classList.remove('active'), 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('uploadModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+    </script>
+    
+    <!-- Help System -->
+    <script src="/static/js/help-system.js"></script>
+    <script src="/static/js/semptify-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof SemptifyHelp !== 'undefined') {
+                SemptifyHelp.init('my_tenancy');
+            }
+        });
+    </script>
+</body>
+</html>

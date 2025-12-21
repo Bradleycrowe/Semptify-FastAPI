@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semptify Timeline - Track your case progress">
+  <meta name="theme-color" content="#3b82f6">
+  <link rel="manifest" href="/static/manifest.json">
+  <!-- <link rel="apple-touch-icon" href="/static/icons/icon-192.png"> -->
+  <title>Timeline - Semptify</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/design-system.css">
+  <link rel="stylesheet" href="/static/css/layouts.css">
+  <link rel="stylesheet" href="/static/css/help-system.css">
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+</head>
+<body>
+    <!-- Site-wide header -->
+    <script src="/static/js/header.js"></script>
+
+  <div id="toast-container" class="toast-container"></div>
+  <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <a href="/" class="sidebar-brand">
+            <div class="sidebar-logo-icon"><i class="fas fa-balance-scale"></i></div>
+            <span class="sidebar-brand-text">Semptify</span>
+          </a>
+          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <ul class="sidebar-menu">
+            <li class="sidebar-item">
+              <a href="/static/dashboard-v2.html" class="sidebar-link">
+                <i class="fas fa-home sidebar-icon"></i>
+                <span class="sidebar-text">Dashboard</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/documents-v2.html" class="sidebar-link">
+                <i class="fas fa-file-alt sidebar-icon"></i>
+                <span class="sidebar-text">Documents</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/timeline-v2.html" class="sidebar-link active" aria-current="page">
+                <i class="fas fa-stream sidebar-icon"></i>
+                <span class="sidebar-text">Timeline</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/timeline-builder.html" class="sidebar-link">
+                <i class="fas fa-bolt sidebar-icon"></i>
+                <span class="sidebar-text">Timeline Builder</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/calendar-v2.html" class="sidebar-link">
+                <i class="fas fa-calendar sidebar-icon"></i>
+                <span class="sidebar-text">Calendar</span>
+              </a>
+            </li>
+            <li class="sidebar-divider"></li>
+            <li class="sidebar-section"><span class="sidebar-section-title">Eviction Defense</span></li>
+            <li class="sidebar-item">
+              <a href="/eviction/" class="sidebar-link">
+                <i class="fas fa-route sidebar-icon"></i>
+                <span class="sidebar-text">Guided Flows</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/eviction/forms/library" class="sidebar-link">
+                <i class="fas fa-file-signature sidebar-icon"></i>
+                <span class="sidebar-text">Form Library</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-status" id="sync-status">
+            <span class="status-indicator status-offline" id="status-dot"></span>
+            <span class="sidebar-text" id="status-text">Offline</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-inner">
+          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle" title="Open menu" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="header-title">
+            <h1 class="page-title">Timeline</h1>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-icon" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+              <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main id="main-content" class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-title">
+            <div>
+              <h2 class="h2">Case Timeline</h2>
+              <p class="page-header-description">Track your eviction defense progress and important milestones.</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-secondary" id="filter-btn">
+                <i class="fas fa-filter"></i>
+                Filter
+              </button>
+              <button class="btn btn-primary" id="add-event-btn">
+                <i class="fas fa-plus"></i>
+                Add Event
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="card mb-6">
+          <div class="card-body">
+            <div class="progress-overview">
+              <div class="progress-stat">
+                <div class="progress-stat-value" id="total-events">0</div>
+                <div class="progress-stat-label">Total Events</div>
+              </div>
+              <div class="progress-stat">
+                <div class="progress-stat-value" id="completed-events">0</div>
+                <div class="progress-stat-label">Completed</div>
+              </div>
+              <div class="progress-stat">
+                <div class="progress-stat-value" id="pending-events">0</div>
+                <div class="progress-stat-label">Pending</div>
+              </div>
+              <div class="progress-stat">
+                <div class="progress-stat-value" id="days-remaining">--</div>
+                <div class="progress-stat-label">Days to Hearing</div>
+              </div>
+            </div>
+            <div class="progress-bar-container mt-4">
+              <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="progress-text">0% Complete</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-container">
+          <div class="timeline" id="timeline">
+            <!-- Timeline items rendered by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="card" hidden>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fas fa-stream"></i>
+            </div>
+            <h3 class="empty-state-title">No timeline events yet</h3>
+            <p class="empty-state-description">Add your first event to start tracking your case progress.</p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="document.getElementById('add-event-btn').click()">
+                <i class="fas fa-plus"></i>
+                Add Event
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-content">
+          <p>&copy; 2024 Semptify. All rights reserved.</p>
+          <p><span class="version-label">Version</span> <span class="version-number">5.0.0</span></p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Add/Edit Event Modal -->
+  <div class="modal-backdrop" id="event-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Add Timeline Event</h2>
+        <button class="modal-close" onclick="closeEventModal()" title="Close" aria-label="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="event-form">
+          <input type="hidden" id="event-id">
+          <div class="form-group">
+            <label class="form-label" for="event-title">Title *</label>
+            <input type="text" id="event-title" class="form-input" required placeholder="e.g., Filed Answer with Court">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-date">Date *</label>
+            <input type="date" id="event-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-type">Event Type</label>
+            <select id="event-type" class="form-select">
+              <option value="notice">Notice Received</option>
+              <option value="filing">Court Filing</option>
+              <option value="hearing">Hearing</option>
+              <option value="deadline">Deadline</option>
+              <option value="document">Document</option>
+              <option value="communication">Communication</option>
+              <option value="milestone">Milestone</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-status">Status</label>
+            <select id="event-status" class="form-select">
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="upcoming">Upcoming</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-description">Description</label>
+            <textarea id="event-description" class="form-textarea" rows="3" placeholder="Add any relevant details..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+        <button class="btn btn-primary" id="save-event-btn">
+          <i class="fas fa-save"></i>
+          Save Event
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Modal -->
+  <div class="modal-backdrop" id="filter-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Filter Timeline</h2>
+        <button class="modal-close" onclick="closeFilterModal()" title="Close" aria-label="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <div class="checkbox-group">
+            <label class="form-checkbox"><input type="checkbox" value="notice" checked><span class="checkmark"></span> Notice</label>
+            <label class="form-checkbox"><input type="checkbox" value="filing" checked><span class="checkmark"></span> Filing</label>
+            <label class="form-checkbox"><input type="checkbox" value="hearing" checked><span class="checkmark"></span> Hearing</label>
+            <label class="form-checkbox"><input type="checkbox" value="deadline" checked><span class="checkmark"></span> Deadline</label>
+            <label class="form-checkbox"><input type="checkbox" value="document" checked><span class="checkmark"></span> Document</label>
+            <label class="form-checkbox"><input type="checkbox" value="communication" checked><span class="checkmark"></span> Communication</label>
+            <label class="form-checkbox"><input type="checkbox" value="milestone" checked><span class="checkmark"></span> Milestone</label>
+            <label class="form-checkbox"><input type="checkbox" value="other" checked><span class="checkmark"></span> Other</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <div class="checkbox-group">
+            <label class="form-checkbox"><input type="checkbox" value="completed" checked><span class="checkmark"></span> Completed</label>
+            <label class="form-checkbox"><input type="checkbox" value="pending" checked><span class="checkmark"></span> Pending</label>
+            <label class="form-checkbox"><input type="checkbox" value="upcoming" checked><span class="checkmark"></span> Upcoming</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeFilterModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/modules/api.js"></script>
+  <script src="/static/js/modules/websocket.js"></script>
+  <script src="/static/js/modules/ui.js"></script>
+  <script src="/static/js/modules/state.js"></script>
+  <script src="/static/js/app.main.js"></script>
+
+  <style>
+    .sidebar-logo-icon {
+      width: 2rem;
+      height: 2rem;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .progress-overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 768px) {
+      .progress-overview {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .progress-stat {
+      text-align: center;
+      padding: var(--space-4);
+      background-color: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+    }
+
+    .progress-stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary-600);
+    }
+
+    .progress-stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+    }
+
+    .progress-bar-container {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background-color: var(--color-bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary-500), var(--color-success-500));
+      border-radius: var(--radius-full);
+      transition: width var(--transition-normal);
+    }
+
+    .progress-text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Timeline Styles */
+    .timeline-container {
+      padding: var(--space-4) 0;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: var(--space-8);
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--color-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: var(--space-6);
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      left: -25px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-sm);
+      z-index: 1;
+    }
+
+    .timeline-marker.notice { background-color: var(--color-danger-100); color: var(--color-danger-600); }
+    .timeline-marker.filing { background-color: var(--color-primary-100); color: var(--color-primary-600); }
+    .timeline-marker.hearing { background-color: var(--color-warning-100); color: var(--color-warning-600); }
+    .timeline-marker.deadline { background-color: var(--color-danger-100); color: var(--color-danger-600); }
+    .timeline-marker.document { background-color: var(--color-info-100); color: var(--color-info-600); }
+    .timeline-marker.communication { background-color: var(--color-success-100); color: var(--color-success-600); }
+    .timeline-marker.milestone { background-color: var(--color-primary-100); color: var(--color-primary-600); }
+    .timeline-marker.other { background-color: var(--color-bg-tertiary); color: var(--color-text-secondary); }
+
+    .timeline-marker.completed::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid var(--color-success-500);
+    }
+
+    .timeline-marker.pending::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px dashed var(--color-warning-500);
+    }
+
+    .timeline-card {
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .timeline-card:hover {
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .timeline-title {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+
+    .timeline-date {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .timeline-status {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .timeline-description {
+      margin-top: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .timeline-actions {
+      display: flex;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+      opacity: 0;
+      transition: var(--transition-fast);
+    }
+
+    .timeline-card:hover .timeline-actions {
+      opacity: 1;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+  </style>
+
+  <script>
+    (function() {
+      let events = [];
+      let editingEvent = null;
+      let filters = { types: [], statuses: [] };
+
+      window.addEventListener('semptify:ready', init);
+      if (window.app?.isReady?.()) init();
+
+      async function init() {
+        initSidebar();
+        initTheme();
+        initModals();
+        await loadEvents();
+      }
+
+      // Load Events
+      async function loadEvents() {
+        try {
+          const response = await api.get('/api/timeline/');
+          events = response.data?.events || getMockEvents();
+        } catch (error) {
+          console.log('Using mock events');
+          events = getMockEvents();
+        }
+        renderTimeline();
+        updateStats();
+      }
+
+      function getMockEvents() {
+        const today = new Date();
+        return [
+          { id: 1, title: 'Eviction Notice Received', date: formatDate(addDays(today, -14)), type: 'notice', status: 'completed', description: 'Received 5-day eviction notice from landlord' },
+          { id: 2, title: 'Legal Aid Consultation', date: formatDate(addDays(today, -12)), type: 'communication', status: 'completed', description: 'Initial consultation with legal aid attorney' },
+          { id: 3, title: 'Answer Filed', date: formatDate(addDays(today, -10)), type: 'filing', status: 'completed', description: 'Filed Answer and Counterclaim with court' },
+          { id: 4, title: 'Discovery Request Sent', date: formatDate(addDays(today, -7)), type: 'document', status: 'completed', description: 'Sent discovery requests to landlord' },
+          { id: 5, title: 'Discovery Deadline', date: formatDate(addDays(today, 3)), type: 'deadline', status: 'pending', description: 'Landlord must respond to discovery' },
+          { id: 6, title: 'Court Hearing', date: formatDate(addDays(today, 14)), type: 'hearing', status: 'upcoming', description: 'Initial hearing at District Court, Room 301' },
+        ];
+      }
+
+      // Render Timeline
+      function renderTimeline() {
+        const container = document.getElementById('timeline');
+        const emptyState = document.getElementById('empty-state');
+
+        const filteredEvents = events
+          .filter(e => {
+            if (filters.types.length && !filters.types.includes(e.type)) return false;
+            if (filters.statuses.length && !filters.statuses.includes(e.status)) return false;
+            return true;
+          })
+          .sort((a, b) => b.date.localeCompare(a.date));
+
+        if (filteredEvents.length === 0) {
+          container.innerHTML = '';
+          emptyState.hidden = events.length > 0;
+          return;
+        }
+
+        emptyState.hidden = true;
+        container.innerHTML = filteredEvents.map(event => `
+          <div class="timeline-item" data-id="${event.id}">
+            <div class="timeline-marker ${event.type} ${event.status}">
+              ${getTypeIcon(event.type)}
+            </div>
+            <div class="card timeline-card" onclick="editEvent(${event.id})">
+              <div class="card-body">
+                <div class="timeline-header">
+                  <div>
+                    <div class="timeline-title">${event.title}</div>
+                    <div class="timeline-date">${formatDisplayDate(new Date(event.date + 'T00:00:00'))}</div>
+                  </div>
+                  <div class="timeline-status">
+                    <span class="badge badge-${getStatusColor(event.status)}">${capitalizeFirst(event.status)}</span>
+                    <span class="badge badge-secondary">${capitalizeFirst(event.type)}</span>
+                  </div>
+                </div>
+                ${event.description ? `<div class="timeline-description">${event.description}</div>` : ''}
+                <div class="timeline-actions">
+                  ${event.status !== 'completed' ? `
+                    <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); markComplete(${event.id})">
+                      <i class="fas fa-check"></i> Complete
+                    </button>
+                  ` : ''}
+                  <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); editEvent(${event.id})">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="btn btn-ghost btn-sm text-danger" onclick="event.stopPropagation(); deleteEvent(${event.id})">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function getTypeIcon(type) {
+        const icons = {
+          notice: '<i class="fas fa-exclamation"></i>',
+          filing: '<i class="fas fa-gavel"></i>',
+          hearing: '<i class="fas fa-landmark"></i>',
+          deadline: '<i class="fas fa-clock"></i>',
+          document: '<i class="fas fa-file"></i>',
+          communication: '<i class="fas fa-comments"></i>',
+          milestone: '<i class="fas fa-flag"></i>',
+          other: '<i class="fas fa-circle"></i>'
+        };
+        return icons[type] || icons.other;
+      }
+
+      function getStatusColor(status) {
+        const colors = { completed: 'success', pending: 'warning', upcoming: 'info' };
+        return colors[status] || 'secondary';
+      }
+
+      // Update Stats
+      function updateStats() {
+        const total = events.length;
+        const completed = events.filter(e => e.status === 'completed').length;
+        const pending = events.filter(e => e.status === 'pending').length;
+
+        document.getElementById('total-events').textContent = total;
+        document.getElementById('completed-events').textContent = completed;
+        document.getElementById('pending-events').textContent = pending;
+
+        const hearing = events.find(e => e.type === 'hearing' && e.status !== 'completed');
+        if (hearing) {
+          const days = Math.ceil((new Date(hearing.date + 'T00:00:00') - new Date()) / (1000 * 60 * 60 * 24));
+          document.getElementById('days-remaining').textContent = days > 0 ? days : 'Past';
+        }
+
+        const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+        document.getElementById('progress-fill').style.width = progress + '%';
+        document.getElementById('progress-text').textContent = progress + '% Complete';
+      }
+
+      // Event Actions
+      window.markComplete = async function(id) {
+        const event = events.find(e => e.id === id);
+        if (event) {
+          event.status = 'completed';
+          toast.success('Event marked as complete');
+          renderTimeline();
+          updateStats();
+        }
+      };
+
+      window.editEvent = function(id) {
+        const event = events.find(e => e.id === id);
+        if (!event) return;
+
+        editingEvent = event;
+        document.getElementById('modal-title').textContent = 'Edit Event';
+        document.getElementById('event-id').value = event.id;
+        document.getElementById('event-title').value = event.title;
+        document.getElementById('event-date').value = event.date;
+        document.getElementById('event-type').value = event.type;
+        document.getElementById('event-status').value = event.status;
+        document.getElementById('event-description').value = event.description || '';
+        document.getElementById('event-modal').classList.add('active');
+      };
+
+      window.deleteEvent = async function(id) {
+        const confirmed = await modal.confirm({
+          title: 'Delete Event',
+          message: 'Are you sure you want to delete this event from your timeline?',
+          confirmText: 'Delete',
+          confirmVariant: 'danger'
+        });
+
+        if (confirmed) {
+          events = events.filter(e => e.id !== id);
+          toast.success('Event deleted');
+          renderTimeline();
+          updateStats();
+        }
+      };
+
+      // Modals
+      function initModals() {
+        document.getElementById('add-event-btn').addEventListener('click', () => {
+          editingEvent = null;
+          document.getElementById('modal-title').textContent = 'Add Timeline Event';
+          document.getElementById('event-form').reset();
+          document.getElementById('event-date').value = formatDate(new Date());
+          document.getElementById('event-modal').classList.add('active');
+        });
+
+        document.getElementById('filter-btn').addEventListener('click', () => {
+          document.getElementById('filter-modal').classList.add('active');
+        });
+
+        document.getElementById('save-event-btn').addEventListener('click', saveEvent);
+      }
+
+      async function saveEvent() {
+        const form = document.getElementById('event-form');
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const eventData = {
+          id: editingEvent?.id || Date.now(),
+          title: document.getElementById('event-title').value,
+          date: document.getElementById('event-date').value,
+          type: document.getElementById('event-type').value,
+          status: document.getElementById('event-status').value,
+          description: document.getElementById('event-description').value
+        };
+
+        if (editingEvent) {
+          const idx = events.findIndex(e => e.id === editingEvent.id);
+          if (idx >= 0) events[idx] = eventData;
+          toast.success('Event updated');
+        } else {
+          events.push(eventData);
+          toast.success('Event added');
+        }
+
+        closeEventModal();
+        renderTimeline();
+        updateStats();
+      }
+
+      window.closeEventModal = function() {
+        document.getElementById('event-modal').classList.remove('active');
+        editingEvent = null;
+      };
+
+      window.closeFilterModal = function() {
+        document.getElementById('filter-modal').classList.remove('active');
+      };
+
+      window.applyFilters = function() {
+        const typeCheckboxes = document.querySelectorAll('#filter-modal .checkbox-group:first-child input:checked');
+        const statusCheckboxes = document.querySelectorAll('#filter-modal .checkbox-group:last-child input:checked');
+
+        filters.types = Array.from(typeCheckboxes).map(cb => cb.value);
+        filters.statuses = Array.from(statusCheckboxes).map(cb => cb.value);
+
+        closeFilterModal();
+        renderTimeline();
+      };
+
+      // Utility Functions
+      function formatDate(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        return date.toISOString().split('T')[0];
+      }
+
+      function formatDisplayDate(date) {
+        if (!date || isNaN(date.getTime())) return 'Unknown date';
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function addDays(date, days) {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+      }
+
+      function capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      // Sidebar
+      function initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const mobile = document.getElementById('mobile-menu-toggle');
+
+        toggle?.addEventListener('click', () => {
+          sidebar.classList.toggle('collapsed');
+          localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+        });
+
+        mobile?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+          sidebar.classList.add('collapsed');
+        }
+      }
+
+      // Theme
+      function initTheme() {
+        const toggle = document.getElementById('theme-toggle');
+        const icon = document.getElementById('theme-icon');
+
+        const update = () => {
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+        };
+
+        toggle?.addEventListener('click', () => {
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          const theme = dark ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('semptify_theme', theme);
+          update();
+        });
+
+        update();
+      }
+    })();
+  </script>
+  <script src="/static/js/help-system.js"></script>
+  <script src="/static/js/pwa-init.js"></script>
+</body>
+</html>

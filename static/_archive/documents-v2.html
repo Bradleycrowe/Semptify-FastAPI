@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semptify Documents - Manage your legal documents">
+  <meta name="theme-color" content="#3b82f6">
+  <link rel="manifest" href="/static/manifest.json">
+  <!-- <link rel="apple-touch-icon" href="/static/icons/icon-192.png"> -->
+  <title>Documents - Semptify</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/design-system.css">
+  <link rel="stylesheet" href="/static/css/layouts.css">
+  <link rel="stylesheet" href="/static/css/help-system.css">
+  
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+</head>
+<body>
+    <!-- Site-wide header -->
+    <script src="/static/js/header.js"></script>
+
+  <div id="toast-container" class="toast-container"></div>
+  <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <a href="/" class="sidebar-brand">
+            <div class="sidebar-logo-icon"><i class="fas fa-balance-scale"></i></div>
+            <span class="sidebar-brand-text">Semptify</span>
+          </a>
+          <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <ul class="sidebar-menu">
+            <li class="sidebar-item">
+              <a href="/static/dashboard-v2.html" class="sidebar-link">
+                <i class="fas fa-home sidebar-icon"></i>
+                <span class="sidebar-text">Dashboard</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/documents-v2.html" class="sidebar-link active" aria-current="page">
+                <i class="fas fa-file-alt sidebar-icon"></i>
+                <span class="sidebar-text">Documents</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/timeline.html" class="sidebar-link">
+                <i class="fas fa-stream sidebar-icon"></i>
+                <span class="sidebar-text">Timeline</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/timeline-builder.html" class="sidebar-link">
+                <i class="fas fa-bolt sidebar-icon"></i>
+                <span class="sidebar-text">Timeline Builder</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/calendar.html" class="sidebar-link">
+                <i class="fas fa-calendar sidebar-icon"></i>
+                <span class="sidebar-text">Calendar</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/funding_search.html" class="sidebar-link">
+                <i class="fas fa-dollar-sign sidebar-icon"></i>
+                <span class="sidebar-text">Funding Search</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/campaign.html" class="sidebar-link">
+                <i class="fas fa-bullhorn sidebar-icon"></i>
+                <span class="sidebar-text">Campaign</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/research.html" class="sidebar-link">
+                <i class="fas fa-microscope sidebar-icon"></i>
+                <span class="sidebar-text">Research</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/static/research_module.html" class="sidebar-link">
+                <i class="fas fa-user-secret sidebar-icon"></i>
+                <span class="sidebar-text">Dossier</span>
+              </a>
+            </li>
+            <li class="sidebar-divider"></li>
+            <li class="sidebar-section"><span class="sidebar-section-title">Eviction Defense</span></li>
+            <li class="sidebar-item">
+              <a href="/eviction/" class="sidebar-link">
+                <i class="fas fa-route sidebar-icon"></i>
+                <span class="sidebar-text">Guided Flows</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="/eviction/forms/library" class="sidebar-link">
+                <i class="fas fa-file-signature sidebar-icon"></i>
+                <span class="sidebar-text">Form Library</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-status" id="sync-status">
+            <span class="status-indicator status-offline" id="status-dot"></span>
+            <span class="sidebar-text" id="status-text">Offline</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-inner">
+          <button class="header-menu-toggle btn btn-ghost btn-icon" id="mobile-menu-toggle" title="Open menu" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="header-title">
+            <h1 class="page-title">Documents</h1>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-icon" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+              <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main id="main-content" class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-title">
+            <div>
+              <h2 class="h2">Your Documents</h2>
+              <p class="page-header-description">Upload, organize, and analyze your legal documents.</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-primary" id="upload-btn">
+                <i class="fas fa-upload"></i>
+                Upload Document
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="card mb-6">
+          <div class="card-body">
+            <div class="filters-row">
+              <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="search" id="search-input" class="form-input search-input" placeholder="Search documents...">
+              </div>
+              <div class="filter-group">
+                <select id="filter-type" class="form-select" title="Filter by document type" aria-label="Filter by type">
+                  <option value="">All Types</option>
+                  <option value="pdf">PDF</option>
+                  <option value="doc">Word</option>
+                  <option value="image">Images</option>
+                </select>
+                <select id="filter-status" class="form-select" title="Filter by status" aria-label="Filter by status">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processed">Processed</option>
+                  <option value="analyzed">Analyzed</option>
+                </select>
+                <button class="btn btn-secondary btn-icon" id="view-toggle" title="Toggle view">
+                  <i class="fas fa-th-large" id="view-icon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents Grid/List -->
+        <div id="documents-container" class="documents-grid">
+          <!-- Loading state -->
+          <div class="card document-card skeleton-card">
+            <div class="skeleton skeleton-image"></div>
+            <div class="card-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text" style="width: 60%"></div>
+            </div>
+          </div>
+          <div class="card document-card skeleton-card">
+            <div class="skeleton skeleton-image"></div>
+            <div class="card-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text" style="width: 60%"></div>
+            </div>
+          </div>
+          <div class="card document-card skeleton-card">
+            <div class="skeleton skeleton-image"></div>
+            <div class="card-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text" style="width: 60%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="card" hidden>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <h3 class="empty-state-title">No documents yet</h3>
+            <p class="empty-state-description">Upload your first document to get started with AI-powered analysis.</p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="document.getElementById('upload-btn').click()">
+                <i class="fas fa-upload"></i>
+                Upload Document
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-content">
+          <p>&copy; 2024 Semptify. All rights reserved.</p>
+          <p><span class="version-label">Version</span> <span class="version-number">5.0.0</span></p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-backdrop" id="upload-modal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 class="modal-title">Upload Document</h2>
+        <button class="modal-close" onclick="closeUploadModal()" title="Close" aria-label="Close dialog"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-zone" id="upload-zone">
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
+          <p class="upload-text">Drag & drop files here</p>
+          <p class="upload-hint">or click to browse</p>
+          <p class="upload-formats">Supports: PDF, DOC, DOCX, JPG, PNG</p>
+          <label for="file-input" class="sr-only">Select files to upload</label>
+          <input type="file" id="file-input" class="sr-only" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" title="Select files to upload">
+        </div>
+        <div id="file-list" class="file-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
+        <button class="btn btn-primary" id="upload-submit" disabled>
+          <i class="fas fa-upload"></i>
+          Upload Files
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div class="modal-backdrop" id="preview-modal">
+    <div class="modal modal-xl">
+      <div class="modal-header">
+        <h2 class="modal-title" id="preview-title">Document</h2>
+        <button class="modal-close" onclick="closePreviewModal()" title="Close" aria-label="Close dialog"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body preview-body">
+        <div id="preview-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePreviewModal()">Close</button>
+        <button class="btn btn-primary" id="analyze-btn">
+          <i class="fas fa-brain"></i>
+          Analyze with AI
+        </button>
+        <button class="btn btn-primary" id="download-btn">
+          <i class="fas fa-download"></i>
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/modules/api.js"></script>
+  <script src="/static/js/modules/websocket.js"></script>
+  <script src="/static/js/modules/ui.js"></script>
+  <script src="/static/js/modules/state.js"></script>
+  <script src="/static/js/app.main.js"></script>
+
+  <style>
+    .sidebar-logo-icon {
+      width: 2rem;
+      height: 2rem;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .filters-row {
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+    }
+
+    .search-input {
+      padding-left: var(--space-10);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .documents-list .document-card {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .document-card {
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .document-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .document-preview {
+      height: 160px;
+      background-color: var(--color-bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .document-preview i {
+      font-size: 3rem;
+      color: var(--color-text-muted);
+    }
+
+    .document-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .document-info h4 {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      margin-bottom: var(--space-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .document-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .document-actions {
+      display: flex;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .skeleton-image {
+      height: 160px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    /* Upload Modal */
+    .upload-zone {
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--color-primary-500);
+      background-color: var(--color-primary-50);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-4);
+    }
+
+    .upload-text {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .upload-hint {
+      color: var(--color-text-muted);
+    }
+
+    .upload-formats {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-2);
+    }
+
+    .file-list {
+      margin-top: var(--space-4);
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background-color: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-2);
+    }
+
+    .file-item-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-item-info {
+      flex: 1;
+    }
+
+    .file-item-name {
+      font-weight: var(--font-weight-medium);
+    }
+
+    .file-item-size {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .file-item-remove {
+      color: var(--color-danger-500);
+    }
+
+    /* Preview Modal */
+    .preview-body {
+      min-height: 400px;
+      max-height: 70vh;
+      overflow: auto;
+    }
+
+    #preview-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+
+    #preview-content img {
+      max-width: 100%;
+      max-height: 60vh;
+    }
+
+    #preview-content iframe {
+      width: 100%;
+      height: 60vh;
+      border: none;
+    }
+  </style>
+
+  <script>
+    (function() {
+      let documents = [];
+      let selectedFiles = [];
+      let currentDocument = null;
+      let viewMode = 'grid';
+
+      window.addEventListener('semptify:ready', init);
+      if (window.app?.isReady?.()) init();
+
+      async function init() {
+        initSidebar();
+        initTheme();
+        initUpload();
+        initSearch();
+        initViewToggle();
+        await loadDocuments();
+      }
+
+      // Load Documents
+      async function loadDocuments() {
+        try {
+          const response = await api.get('/api/documents');
+          documents = response.data?.documents || [];
+          renderDocuments();
+        } catch (error) {
+          console.error('Failed to load documents:', error);
+          toast.error('Failed to load documents');
+          renderDocuments();
+        }
+      }
+
+      // Render Documents
+      function renderDocuments(filtered = null) {
+        const container = document.getElementById('documents-container');
+        const emptyState = document.getElementById('empty-state');
+        const docs = filtered || documents;
+
+        if (docs.length === 0) {
+          container.innerHTML = '';
+          emptyState.hidden = false;
+          return;
+        }
+
+        emptyState.hidden = true;
+        container.innerHTML = docs.map(doc => `
+          <div class="card document-card" data-id="${doc.id}" onclick="openDocument(${doc.id})">
+            <div class="document-preview">
+              ${getPreviewContent(doc)}
+            </div>
+            <div class="card-body">
+              <div class="document-info">
+                <h4 title="${doc.filename}">${doc.filename}</h4>
+                <div class="document-meta">
+                  <span>${formatFileSize(doc.file_size || 0)}</span>
+                  <span>${formatRelativeTime(doc.created_at)}</span>
+                </div>
+              </div>
+              <div class="document-actions">
+                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); analyzeDocument(${doc.id})" title="Analyze">
+                  <i class="fas fa-brain"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); downloadDocument(${doc.id}, '${doc.filename}')" title="Download">
+                  <i class="fas fa-download"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm text-danger" onclick="event.stopPropagation(); deleteDocument(${doc.id})" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function getPreviewContent(doc) {
+        const ext = doc.filename?.split('.').pop()?.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext) && doc.thumbnail_url) {
+          return `<img src="${doc.thumbnail_url}" alt="${doc.filename}">`;
+        }
+        const icons = { pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word' };
+        return `<i class="fas ${icons[ext] || 'fa-file'}"></i>`;
+      }
+
+      // Document Actions
+      window.openDocument = function(id) {
+        currentDocument = documents.find(d => d.id === id);
+        if (!currentDocument) return;
+
+        document.getElementById('preview-title').textContent = currentDocument.filename;
+        const content = document.getElementById('preview-content');
+        const ext = currentDocument.filename?.split('.').pop()?.toLowerCase();
+
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+          content.innerHTML = `<img src="/api/documents/${id}/file" alt="${currentDocument.filename}">`;
+        } else if (ext === 'pdf') {
+          content.innerHTML = `<iframe src="/api/documents/${id}/file"></iframe>`;
+        } else {
+          content.innerHTML = `<div class="text-center"><i class="fas fa-file fa-4x text-muted"></i><p class="mt-4">Preview not available</p></div>`;
+        }
+
+        document.getElementById('preview-modal').classList.add('active');
+      };
+
+      window.closePreviewModal = function() {
+        document.getElementById('preview-modal').classList.remove('active');
+        currentDocument = null;
+      };
+
+      window.analyzeDocument = async function(id) {
+        try {
+          toast.info('Starting AI analysis...');
+          await api.post(`/api/documents/${id}/analyze`);
+          toast.success('Analysis complete!');
+          await loadDocuments();
+        } catch (error) {
+          toast.error('Analysis failed: ' + error.message);
+        }
+      };
+
+      window.downloadDocument = async function(id, filename) {
+        try {
+          await api.download(`/api/documents/${id}/download`, filename);
+        } catch (error) {
+          toast.error('Download failed');
+        }
+      };
+
+      window.deleteDocument = async function(id) {
+        const confirmed = await modal.confirm({
+          title: 'Delete Document',
+          message: 'Are you sure you want to delete this document? This action cannot be undone.',
+          confirmText: 'Delete',
+          confirmVariant: 'danger'
+        });
+
+        if (confirmed) {
+          try {
+            await api.delete(`/api/documents/${id}`);
+            toast.success('Document deleted');
+            await loadDocuments();
+          } catch (error) {
+            toast.error('Delete failed: ' + error.message);
+          }
+        }
+      };
+
+      // Upload
+      function initUpload() {
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadModal = document.getElementById('upload-modal');
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const submitBtn = document.getElementById('upload-submit');
+
+        uploadBtn.addEventListener('click', () => uploadModal.classList.add('active'));
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+
+        uploadZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadZone.classList.remove('dragover');
+          addFiles(Array.from(e.dataTransfer.files));
+        });
+
+        fileInput.addEventListener('change', (e) => {
+          addFiles(Array.from(e.target.files));
+        });
+
+        submitBtn.addEventListener('click', uploadFiles);
+      }
+
+      function addFiles(files) {
+        selectedFiles = [...selectedFiles, ...files];
+        renderFileList();
+        document.getElementById('upload-submit').disabled = selectedFiles.length === 0;
+      }
+
+      function renderFileList() {
+        const container = document.getElementById('file-list');
+        container.innerHTML = selectedFiles.map((file, i) => `
+          <div class="file-item">
+            <div class="file-item-icon"><i class="fas fa-file"></i></div>
+            <div class="file-item-info">
+              <div class="file-item-name">${file.name}</div>
+              <div class="file-item-size">${formatFileSize(file.size)}</div>
+            </div>
+            <button class="btn btn-ghost btn-icon btn-sm file-item-remove" onclick="removeFile(${i})">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        renderFileList();
+        document.getElementById('upload-submit').disabled = selectedFiles.length === 0;
+      };
+
+      async function uploadFiles() {
+        const submitBtn = document.getElementById('upload-submit');
+        submitBtn.disabled = true;
+
+        for (const file of selectedFiles) {
+          try {
+            await api.upload('/api/documents/upload', file);
+            toast.success(`Uploaded: ${file.name}`);
+          } catch (error) {
+            toast.error(`Failed to upload ${file.name}`);
+          }
+        }
+
+        closeUploadModal();
+        await loadDocuments();
+      }
+
+      window.closeUploadModal = function() {
+        document.getElementById('upload-modal').classList.remove('active');
+        selectedFiles = [];
+        renderFileList();
+        document.getElementById('upload-submit').disabled = true;
+        document.getElementById('file-input').value = '';
+      };
+
+      // Search & Filter
+      function initSearch() {
+        const searchInput = document.getElementById('search-input');
+        const filterType = document.getElementById('filter-type');
+        const filterStatus = document.getElementById('filter-status');
+
+        const filter = debounce(() => {
+          const search = searchInput.value.toLowerCase();
+          const type = filterType.value;
+          const status = filterStatus.value;
+
+          const filtered = documents.filter(doc => {
+            const matchesSearch = !search || doc.filename.toLowerCase().includes(search);
+            const ext = doc.filename?.split('.').pop()?.toLowerCase();
+            const matchesType = !type || 
+              (type === 'pdf' && ext === 'pdf') ||
+              (type === 'doc' && ['doc', 'docx'].includes(ext)) ||
+              (type === 'image' && ['jpg', 'jpeg', 'png', 'gif'].includes(ext));
+            const matchesStatus = !status || doc.status === status;
+            return matchesSearch && matchesType && matchesStatus;
+          });
+
+          renderDocuments(filtered);
+        }, 300);
+
+        searchInput.addEventListener('input', filter);
+        filterType.addEventListener('change', filter);
+        filterStatus.addEventListener('change', filter);
+      }
+
+      // View Toggle
+      function initViewToggle() {
+        const toggle = document.getElementById('view-toggle');
+        const icon = document.getElementById('view-icon');
+        const container = document.getElementById('documents-container');
+
+        toggle.addEventListener('click', () => {
+          viewMode = viewMode === 'grid' ? 'list' : 'grid';
+          container.className = viewMode === 'grid' ? 'documents-grid' : 'documents-list';
+          icon.className = viewMode === 'grid' ? 'fas fa-th-large' : 'fas fa-list';
+        });
+      }
+
+      // Sidebar
+      function initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const mobile = document.getElementById('mobile-menu-toggle');
+
+        toggle?.addEventListener('click', () => {
+          sidebar.classList.toggle('collapsed');
+          localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+        });
+
+        mobile?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+          sidebar.classList.add('collapsed');
+        }
+      }
+
+      // Theme
+      function initTheme() {
+        const toggle = document.getElementById('theme-toggle');
+        const icon = document.getElementById('theme-icon');
+
+        const update = () => {
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+        };
+
+        toggle?.addEventListener('click', () => {
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          const theme = dark ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('semptify_theme', theme);
+          update();
+        });
+
+        update();
+      }
+    })();
+  </script>
+  <script src="/static/js/help-system.js"></script>
+  <script src="/static/js/voice-input.js"></script>
+  <script src="/static/js/pwa-init.js"></script>
+</body>
+</html>

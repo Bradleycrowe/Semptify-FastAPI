@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Semptify Dashboard - Pro Se Legal Assistant">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="manifest" href="/static/manifest.json">
+    <!-- <link rel="apple-touch-icon" href="/static/icons/icon-192.png"> -->
+    <title>Dashboard - Semptify</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { display: flex; align-items: center; gap: 1rem; }
+        .logo h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .logo .version {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+        
+        .header-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .header-btn:hover { background: var(--bg-hover); }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section h3 {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-item:hover { background: var(--bg-hover); }
+        .nav-item.active { background: var(--primary); }
+        .nav-item .icon { font-size: 1.25rem; width: 1.5rem; text-align: center; }
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+        .page-header h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p {
+            color: var(--text-muted);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+        }
+
+        .stat-card .icon-wrap {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+        .stat-card .icon-wrap.primary { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
+        .stat-card .icon-wrap.warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .stat-card .icon-wrap.success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .stat-card .icon-wrap.danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        .stat-card .label { color: var(--text-muted); font-size: 0.875rem; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; margin: 0.25rem 0; }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .card-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        .card-link:hover { text-decoration: underline; }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: var(--bg-hover);
+            border-radius: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .quick-action:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .quick-action .action-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+        }
+
+        .quick-action.danger .action-icon {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .quick-action span {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* List Items */
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .list-item:hover { background: var(--bg-hover); }
+
+        .list-item .item-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-hover);
+        }
+
+        .list-item .item-content { flex: 1; }
+        .list-item .item-title { font-weight: 500; }
+        .list-item .item-subtitle { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* AI Insights Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .alert.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .alert .alert-icon {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        .alert p { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* Footer */
+        .footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .main-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .sidebar.open { display: block; position: fixed; top: 70px; left: 0; bottom: 0; width: 280px; z-index: 100; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Site-wide header -->
+    <script src="/static/js/header.js"></script>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>
+                <i class="fas fa-balance-scale"></i>
+                Semptify
+            </h1>
+            <span class="version">v5.0</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+            <button class="header-btn" onclick="window.location.href='/static/command_center.html'">
+                <i class="fas fa-terminal"></i>
+                Command Center
+            </button>
+            <button class="header-btn" onclick="window.location.href='/static/help.html'" title="Help" aria-label="Help">
+                <i class="fas fa-question-circle"></i>
+                <span class="sr-only">Help</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="nav-section">
+                <h3>🏠 Tenant Journey</h3>
+                <a href="/static/document_intake.html?type=lease" class="nav-item">
+                    <span class="icon">📝</span>
+                    <span>1. Lease & Move-In</span>
+                </a>
+                <a href="/static/document_intake.html?type=payment" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>2. Rent Payments</span>
+                </a>
+                <a href="/static/document_intake.html?type=maintenance" class="nav-item">
+                    <span class="icon">🔧</span>
+                    <span>3. Maintenance</span>
+                </a>
+                <a href="/static/document_intake.html?type=notice" class="nav-item">
+                    <span class="icon">⚠️</span>
+                    <span>4. Notices</span>
+                </a>
+                <a href="/static/timeline.html" class="nav-item">
+                    <span class="icon">📅</span>
+                    <span>5. Timeline</span>
+                    <span class="badge" id="timelineCount">0</span>
+                </a>
+                <a href="/static/timeline-builder.html" class="nav-item">
+                    <span class="icon">⚡</span>
+                    <span>Timeline Builder</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>⚖️ Legal Defense</h3>
+                <a href="/law-library" class="nav-item">
+                    <span class="icon">📖</span>
+                    <span>6. Know Rights</span>
+                </a>
+                <a href="/eviction/answer" class="nav-item">
+                    <span class="icon">📝</span>
+                    <span>7. Answer Summons</span>
+                </a>
+                <a href="/eviction/counterclaim" class="nav-item">
+                    <span class="icon">⚔️</span>
+                    <span>8. Fight Back</span>
+                </a>
+                <a href="/eviction/zoom" class="nav-item">
+                    <span class="icon">💻</span>
+                    <span>9. Court Prep</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>📁 My Stuff</h3>
+                <a href="/static/documents.html" class="nav-item">
+                    <span class="icon">📁</span>
+                    <span>Document Vault</span>
+                </a>
+                <a href="/static/calendar.html" class="nav-item">
+                    <span class="icon">🗓️</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="/static/brain.html" class="nav-item">
+                    <span class="icon">🧠</span>
+                    <span>AI Assistant</span>
+                </a>
+                <a href="/static/legal_analysis.html" class="nav-item">
+                    <span class="icon">⚖️</span>
+                    <span>Legal Analysis</span>
+                </a>
+                <a href="/static/legal_trails.html" class="nav-item">
+                    <span class="icon">🔥</span>
+                    <span>Legal Trails</span>
+                </a>
+                <a href="/static/contacts.html" class="nav-item">
+                    <span class="icon">📇</span>
+                    <span>Contacts</span>
+                </a>
+                <a href="/static/funding_search.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Funding Search</span>
+                </a>
+                <a href="/static/research.html" class="nav-item">
+                    <span class="icon">🔬</span>
+                    <span>Research</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>🔧 Tools</h3>
+                <a href="/eviction/forms/library" class="nav-item">
+                    <span class="icon">📄</span>
+                    <span>Court Forms</span>
+                </a>
+                <a href="/static/complaints.html" class="nav-item">
+                    <span class="icon">📣</span>
+                    <span>File Complaint</span>
+                </a>
+                <a href="/static/storage_setup.html" class="nav-item">
+                    <span class="icon">☁️</span>
+                    <span>Cloud Storage</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>❓ Help</h3>
+                <a href="/static/help.html" class="nav-item">
+                    <span class="icon">📚</span>
+                    <span>Help & Resources</span>
+                </a>
+                <a href="/static/privacy.html" class="nav-item">
+                    <span class="icon">🔒</span>
+                    <span>Privacy Policy</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2>Welcome back!</h2>
+                <p>Here's an overview of your legal documents and upcoming deadlines.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon-wrap primary">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="label">Total Documents</div>
+                    <div class="value" id="stat-documents">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-wrap warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="label">Pending Review</div>
+                    <div class="value" id="stat-pending">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-wrap success">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="label">Upcoming Deadlines</div>
+                    <div class="value" id="stat-deadlines">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-wrap danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="label">Urgent Actions</div>
+                    <div class="value" id="stat-urgent">--</div>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="cards-grid">
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="/static/document_intake.html" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <span>Upload Doc</span>
+                            </a>
+                            <a href="/static/timeline.html" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-stream"></i>
+                                </div>
+                                <span>Timeline</span>
+                            </a>
+                            <a href="/law-library" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <span>Know Rights</span>
+                            </a>
+                            <a href="/eviction/answer" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-gavel"></i>
+                                </div>
+                                <span>Answer</span>
+                            </a>
+                            <a href="/static/legal_trails.html" class="quick-action danger">
+                                <div class="action-icon">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <span>Legal Trails</span>
+                            </a>
+                            <a href="/static/letter_builder.html" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <span>Letter Builder</span>
+                            </a>
+                            <a href="/static/brain.html" class="quick-action">
+                                <div class="action-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <span>AI Assistant</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-brain"></i> AI Insights</h3>
+                    </div>
+                    <div class="card-body" id="ai-insights">
+                        <div class="alert info">
+                            <div class="alert-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <p>Upload documents to receive AI-powered analysis and recommendations for your case.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Documents -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-folder-open"></i> Recent Documents</h3>
+                        <a href="/static/documents.html" class="card-link">View All</a>
+                    </div>
+                    <div class="card-body" id="recent-documents">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <p>No documents yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Upcoming Events</h3>
+                        <a href="/static/timeline.html" class="card-link">View Timeline</a>
+                    </div>
+                    <div class="card-body" id="upcoming-events">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <p>No upcoming events</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <span>&copy; 2025 Semptify. 100% Free - Donations Welcome.</span>
+        <span>Version 5.0.0</span>
+    </footer>
+
+    <script>
+        // API Helper
+        const api = {
+            async get(url) {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return { data: await response.json() };
+                } catch (error) {
+                    console.error('API Error:', error);
+                    return { data: null, error };
+                }
+            }
+        };
+
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Refresh dashboard
+        async function refreshDashboard() {
+            showToast('Refreshing dashboard...');
+            await Promise.all([loadStats(), loadRecentDocuments(), loadUpcomingEvents()]);
+            showToast('Dashboard refreshed!');
+        }
+
+        // Format relative time
+        function formatRelativeTime(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = (now - date) / 1000;
+            
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown';
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            } catch (e) {
+                return 'Unknown';
+            }
+        }
+
+        // Load Stats
+        async function loadStats() {
+            try {
+                const response = await api.get('/api/documents');
+                const docs = response.data?.documents || [];
+
+                document.getElementById('stat-documents').textContent = docs.length;
+                document.getElementById('stat-pending').textContent = docs.filter(d => d.status === 'pending').length;
+
+                // Load timeline for deadlines
+                const timelineResponse = await api.get('/api/timeline');
+                const events = timelineResponse.data?.events || [];
+                const upcoming = events.filter(e => new Date(e.date) > new Date()).length;
+                const urgent = events.filter(e => {
+                    const days = (new Date(e.date) - new Date()) / (1000 * 60 * 60 * 24);
+                    return days > 0 && days <= 7;
+                }).length;
+
+                document.getElementById('stat-deadlines').textContent = upcoming;
+                document.getElementById('stat-urgent').textContent = urgent;
+                document.getElementById('timelineCount').textContent = upcoming;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+                document.querySelectorAll('.stat-card .value').forEach(el => el.textContent = '0');
+            }
+        }
+
+        // Get file icon
+        function getFileIcon(filename) {
+            const ext = filename?.split('.').pop()?.toLowerCase();
+            const icons = { pdf: 'file-pdf', doc: 'file-word', docx: 'file-word', jpg: 'file-image', jpeg: 'file-image', png: 'file-image' };
+            return icons[ext] || 'file-alt';
+        }
+
+        // Load Recent Documents
+        async function loadRecentDocuments() {
+            const container = document.getElementById('recent-documents');
+            try {
+                const response = await api.get('/api/documents');
+                const docs = (response.data?.documents || []).slice(0, 5);
+
+                if (docs.length === 0) return;
+
+                container.innerHTML = docs.map(doc => `
+                    <a href="/static/documents.html?id=${doc.id}" class="list-item">
+                        <div class="item-icon">
+                            <i class="fas fa-${getFileIcon(doc.filename)}"></i>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">${doc.filename}</div>
+                            <div class="item-subtitle">${formatRelativeTime(doc.created_at)}</div>
+                        </div>
+                    </a>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load documents:', error);
+            }
+        }
+
+        // Load Upcoming Events
+        async function loadUpcomingEvents() {
+            const container = document.getElementById('upcoming-events');
+            try {
+                const response = await api.get('/api/timeline');
+                const events = (response.data?.events || [])
+                    .filter(e => new Date(e.date) > new Date())
+                    .slice(0, 5);
+
+                if (events.length === 0) return;
+
+                container.innerHTML = events.map(event => `
+                    <div class="list-item">
+                        <div class="item-icon" style="background: ${event.type === 'deadline' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)'}; color: ${event.type === 'deadline' ? 'var(--danger)' : 'var(--primary)'};">
+                            <i class="fas fa-${event.type === 'deadline' ? 'clock' : 'calendar'}"></i>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">${event.title}</div>
+                            <div class="item-subtitle">${formatDate(event.date)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load events:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadRecentDocuments();
+            loadUpcomingEvents();
+        });
+    </script>
+    <script src="/static/js/voice-input.js"></script>
+    <script src="/static/js/pwa-init.js"></script>
+</body>
+</html>

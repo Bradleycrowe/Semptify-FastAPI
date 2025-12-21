@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Build Timeline - Semptify</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <link rel="stylesheet" href="/static/css/help-system.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-dark: #2563eb; --success: #22c55e;
+            --warning: #f59e0b; --danger: #ef4444; --bg-dark: #0d1b2a;
+            --bg-card: #1e3a5f; --text: #ffffff; --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+            color: var(--text); min-height: 100vh;
+        }
+        .main-content { margin-left: 280px; padding: 2rem; max-width: 1200px; }
+        @media (max-width: 768px) { .main-content { margin-left: 0; padding: 1rem; } }
+        
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; margin-bottom: 0.5rem; }
+        .page-subtitle { color: var(--text-muted); }
+        
+        /* Sections */
+        .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Input methods */
+        .input-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .input-tab {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: var(--text-muted); transition: all 0.2s;
+        }
+        .input-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .input-tab:hover:not(.active) { background: rgba(255,255,255,0.1); }
+        
+        .input-panel { display: none; }
+        .input-panel.active { display: block; }
+        
+        /* Text input */
+        .text-input {
+            width: 100%; min-height: 300px; padding: 1rem;
+            background: rgba(0,0,0,0.3); border: 2px solid var(--border);
+            border-radius: 0.5rem; color: var(--text); font-family: inherit;
+            font-size: 0.95rem; line-height: 1.6; resize: vertical;
+        }
+        .text-input:focus { outline: none; border-color: var(--primary); }
+        .text-input::placeholder { color: var(--text-muted); }
+        
+        /* File upload */
+        .upload-zone {
+            border: 2px dashed var(--border); border-radius: 0.5rem;
+            padding: 3rem; text-align: center; cursor: pointer;
+            transition: all 0.2s; background: rgba(0,0,0,0.2);
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary); background: rgba(59, 130, 246, 0.1);
+        }
+        .upload-zone input { display: none; }
+        .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .upload-text { color: var(--text-muted); margin-bottom: 0.5rem; }
+        
+        /* Document selector */
+        .doc-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-height: 300px; overflow-y: auto; }
+        .doc-item {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border);
+            border-radius: 0.5rem; padding: 0.75rem; cursor: pointer; transition: all 0.2s;
+        }
+        .doc-item:hover { background: rgba(255,255,255,0.1); }
+        .doc-item.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.2); }
+        .doc-name { font-weight: 500; margin-bottom: 0.25rem; word-break: break-word; }
+        .doc-meta { font-size: 0.8rem; color: var(--text-muted); }
+        
+        /* Options */
+        .options-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+        .option-group { display: flex; align-items: center; gap: 0.5rem; }
+        .option-group label { color: var(--text-muted); }
+        .option-group select, .option-group input[type="text"] {
+            padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 0.25rem; color: var(--text);
+        }
+        
+        /* Checkbox */
+        .checkbox-group { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .checkbox-group input { width: 1.25rem; height: 1.25rem; accent-color: var(--primary); }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; border: none; display: inline-flex; align-items: center;
+            gap: 0.5rem; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+        
+        /* Results */
+        .results-container { display: none; }
+        .results-container.show { display: block; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card {
+            background: rgba(255,255,255,0.05); border-radius: 0.5rem;
+            padding: 1rem; text-align: center;
+        }
+        .stat-value { font-size: 2rem; font-weight: bold; color: var(--primary); }
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; }
+        
+        /* Timeline preview */
+        .timeline-preview { position: relative; padding-left: 2rem; }
+        .timeline-preview::before {
+            content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0;
+            width: 2px; background: var(--border);
+        }
+        .timeline-event {
+            position: relative; background: rgba(255,255,255,0.05);
+            border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;
+            border-left: 3px solid var(--primary);
+        }
+        .timeline-event::before {
+            content: ''; position: absolute; left: -1.75rem; top: 1.25rem;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--primary); border: 2px solid var(--bg-dark);
+        }
+        .timeline-event.deadline { border-left-color: var(--danger); }
+        .timeline-event.deadline::before { background: var(--danger); }
+        .timeline-event.payment { border-left-color: var(--success); }
+        .timeline-event.payment::before { background: var(--success); }
+        .timeline-event.notice { border-left-color: var(--warning); }
+        .timeline-event.notice::before { background: var(--warning); }
+        
+        .event-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+        .event-title { font-weight: 600; }
+        .event-date { color: var(--primary); font-size: 0.9rem; }
+        .event-description { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+        .event-badges { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .badge {
+            padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+        }
+        .badge-deadline { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-evidence { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .badge-urgent { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        
+        .confidence-bar {
+            height: 4px; background: var(--border); border-radius: 2px;
+            margin-top: 0.5rem; overflow: hidden;
+        }
+        .confidence-fill { height: 100%; background: var(--success); }
+        
+        /* Loading */
+        .loading { display: none; text-align: center; padding: 2rem; }
+        .loading.show { display: block; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Alert */
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .alert-info { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary); }
+        .alert-success { background: rgba(34, 197, 94, 0.2); border: 1px solid var(--success); }
+        .alert-warning { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); }
+        
+        /* Empty state */
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div id="semptify-nav"></div>
+    
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">⚡ Auto-Build Timeline</h1>
+            <p class="page-subtitle">Extract dates and events from your documents automatically</p>
+        </div>
+        
+        <!-- Input Section -->
+        <div class="section">
+            <h2 class="section-title">📄 Document Input</h2>
+            
+            <div class="input-tabs">
+                <div class="input-tab active" onclick="switchTab('paste')">📝 Paste Text</div>
+                <div class="input-tab" onclick="switchTab('upload')">📤 Upload File</div>
+                <div class="input-tab" onclick="switchTab('vault')">📁 From Vault</div>
+            </div>
+            
+            <!-- Paste Text Panel -->
+            <div class="input-panel active" id="panel-paste">
+                <textarea class="text-input" id="documentText" placeholder="Paste your document text here...
+
+Example content that works well:
+- Eviction notices with dates
+- Lease agreements
+- Court summons
+- Rent receipts
+- Repair requests
+- Any document with dates and events
+
+The system will automatically find:
+• Important dates
+• Deadlines
+• Event types (notice, payment, court, etc.)
+• Link to evidence"></textarea>
+            </div>
+            
+            <!-- Upload Panel -->
+            <div class="input-panel" id="panel-upload">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this.files)">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">TXT, PDF, DOC, DOCX (PDF requires OCR)</div>
+                </div>
+                <div id="uploadedFileName" style="margin-top: 1rem; display: none;"></div>
+            </div>
+            
+            <!-- Vault Panel -->
+            <div class="input-panel" id="panel-vault">
+                <div class="alert alert-info" style="margin-bottom: 1rem;">
+                    Select documents from your vault to extract timeline events
+                </div>
+                <div id="vaultDocuments" class="doc-selector">
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <p>Loading documents...</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline" onclick="loadVaultDocuments()" style="margin-top: 1rem;">
+                    🔄 Refresh Documents
+                </button>
+            </div>
+            
+            <!-- Options -->
+            <div class="options-row">
+                <div class="option-group">
+                    <label>Document Type:</label>
+                    <select id="documentType">
+                        <option value="">Auto-detect</option>
+                        <option value="eviction_notice">Eviction Notice</option>
+                        <option value="lease">Lease Agreement</option>
+                        <option value="court_summons">Court Summons</option>
+                        <option value="receipt">Receipt/Payment</option>
+                        <option value="repair_request">Repair Request</option>
+                        <option value="letter">Letter/Communication</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <label class="checkbox-group">
+                    <input type="checkbox" id="autoSave" checked>
+                    <span>Auto-save to timeline</span>
+                </label>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary btn-lg" onclick="extractTimeline()">
+                    ⚡ Extract Timeline Events
+                </button>
+                <button class="btn btn-outline" onclick="previewOnly()">
+                    👁️ Preview Only
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing document for dates and events...</p>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-container" id="results">
+            <div class="section">
+                <h2 class="section-title">📊 Extraction Results</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statEvents">0</div>
+                        <div class="stat-label">Events Found</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statDeadlines">0</div>
+                        <div class="stat-label">Deadlines</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statSaved">0</div>
+                        <div class="stat-label">Saved to Timeline</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statDateRange">-</div>
+                        <div class="stat-label">Date Range</div>
+                    </div>
+                </div>
+                
+                <div id="successMessage" class="alert alert-success" style="display: none;">
+                    ✅ Events have been saved to your timeline!
+                </div>
+                
+                <div id="warningsContainer" style="display: none;"></div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">📅 Extracted Timeline</h2>
+                <div class="timeline-preview" id="timelinePreview">
+                    <!-- Events will be rendered here -->
+                </div>
+                
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <a href="/static/timeline.html" class="btn btn-primary">📅 View Full Timeline</a>
+                    <button class="btn btn-outline" onclick="clearResults()">🔄 Extract Another</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="/static/js/shared-nav.js"></script>
+    <script>
+        let currentTab = 'paste';
+        let selectedDocumentId = null;
+        let extractedText = '';
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.input-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`.input-tab:nth-child(${tab === 'paste' ? 1 : tab === 'upload' ? 2 : 3})`).classList.add('active');
+            document.getElementById(`panel-${tab}`).classList.add('active');
+            
+            if (tab === 'vault') {
+                loadVaultDocuments();
+            }
+        }
+        
+        async function handleFileUpload(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            const fileName = document.getElementById('uploadedFileName');
+            fileName.style.display = 'block';
+            fileName.innerHTML = `<strong>Selected:</strong> ${file.name}`;
+            
+            // Read text files directly
+            if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                extractedText = await file.text();
+            } else {
+                // For PDF/DOC, we'd need server-side processing
+                fileName.innerHTML += '<br><span style="color: var(--warning);">⚠️ PDF/DOC files require server processing. Text will be extracted on submit.</span>';
+                extractedText = ''; // Will upload to server
+            }
+        }
+        
+        async function loadVaultDocuments() {
+            const container = document.getElementById('vaultDocuments');
+            container.innerHTML = '<div class="empty-state"><div class="spinner"></div><p>Loading...</p></div>';
+            
+            try {
+                const response = await fetch('/api/documents/', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><p>Please log in to access your vault</p></div>';
+                    return;
+                }
+                
+                const data = await response.json();
+                const docs = data.documents || data || [];
+                
+                if (docs.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><p>No documents in vault</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = docs.map(doc => `
+                    <div class="doc-item ${selectedDocumentId === doc.id ? 'selected' : ''}" 
+                         onclick="selectDocument('${doc.id}', '${doc.filename || doc.name}')">
+                        <div class="doc-name">📄 ${doc.filename || doc.name || 'Unnamed'}</div>
+                        <div class="doc-meta">${doc.document_type || 'Document'}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Error loading documents:', e);
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Error loading documents</p></div>';
+            }
+        }
+        
+        function selectDocument(id, name) {
+            selectedDocumentId = id;
+            document.querySelectorAll('.doc-item').forEach(item => {
+                item.classList.toggle('selected', item.onclick.toString().includes(id));
+            });
+        }
+        
+        function getInputText() {
+            if (currentTab === 'paste') {
+                return document.getElementById('documentText').value;
+            } else if (currentTab === 'upload') {
+                return extractedText;
+            }
+            return '';
+        }
+        
+        async function extractTimeline() {
+            const autoSave = document.getElementById('autoSave').checked;
+            await runExtraction(autoSave);
+        }
+        
+        async function previewOnly() {
+            await runExtraction(false);
+        }
+        
+        async function runExtraction(autoSave) {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+            
+            try {
+                let response;
+                
+                if (currentTab === 'vault' && selectedDocumentId) {
+                    // Extract from vault document
+                    response = await fetch(`/api/timeline/auto-build/from-document/${selectedDocumentId}?auto_save=${autoSave}`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                } else {
+                    // Extract from text
+                    const text = getInputText();
+                    if (!text.trim()) {
+                        alert('Please enter or upload document text');
+                        document.getElementById('loading').classList.remove('show');
+                        return;
+                    }
+                    
+                    const endpoint = autoSave ? '/api/timeline/auto-build' : '/api/timeline/auto-build/preview';
+                    response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            text: text,
+                            document_type: document.getElementById('documentType').value || null,
+                            auto_save: autoSave
+                        })
+                    });
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Extraction failed');
+                }
+                
+                const result = await response.json();
+                displayResults(result, autoSave);
+                
+            } catch (e) {
+                console.error('Extraction error:', e);
+                alert('Error: ' + e.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+        
+        function displayResults(result, wasSaved) {
+            // Update stats
+            document.getElementById('statEvents').textContent = result.total_events_found || result.events?.length || 0;
+            document.getElementById('statDeadlines').textContent = result.total_deadlines_found || 0;
+            document.getElementById('statSaved').textContent = result.events_saved || (wasSaved ? result.events?.length : 0) || 0;
+            
+            // Date range
+            if (result.earliest_date && result.latest_date) {
+                const earliest = new Date(result.earliest_date).toLocaleDateString();
+                const latest = new Date(result.latest_date).toLocaleDateString();
+                document.getElementById('statDateRange').textContent = earliest === latest ? earliest : `${earliest} - ${latest}`;
+            } else {
+                document.getElementById('statDateRange').textContent = '-';
+            }
+            
+            // Success message
+            const successMsg = document.getElementById('successMessage');
+            if (wasSaved && result.events_saved > 0) {
+                successMsg.style.display = 'block';
+            } else {
+                successMsg.style.display = 'none';
+            }
+            
+            // Warnings
+            const warningsContainer = document.getElementById('warningsContainer');
+            if (result.warnings && result.warnings.length > 0) {
+                warningsContainer.innerHTML = result.warnings.map(w => 
+                    `<div class="alert alert-warning">⚠️ ${w}</div>`
+                ).join('');
+                warningsContainer.style.display = 'block';
+            } else {
+                warningsContainer.style.display = 'none';
+            }
+            
+            // Render timeline
+            const preview = document.getElementById('timelinePreview');
+            const events = result.events || [];
+            
+            if (events.length === 0) {
+                preview.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <p>No events found in document</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Try a document with dates and events</p>
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = events.map(event => `
+                    <div class="timeline-event ${event.event_type} ${event.is_deadline ? 'deadline' : ''}">
+                        <div class="event-header">
+                            <div class="event-title">${event.title}</div>
+                            <div class="event-date">${event.event_date ? new Date(event.event_date).toLocaleDateString() : event.event_date_text}</div>
+                        </div>
+                        <div class="event-description">${event.description || ''}</div>
+                        <div class="event-badges">
+                            <span class="badge">${event.event_type}</span>
+                            ${event.is_deadline ? '<span class="badge badge-deadline">⏰ Deadline</span>' : ''}
+                            ${event.is_evidence ? '<span class="badge badge-evidence">📎 Evidence</span>' : ''}
+                            ${event.urgency === 'critical' || event.urgency === 'high' ? '<span class="badge badge-urgent">🔥 Urgent</span>' : ''}
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${(event.confidence || 0.5) * 100}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('results').classList.add('show');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function clearResults() {
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('documentText').value = '';
+            extractedText = '';
+            selectedDocumentId = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Drag and drop
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFileUpload(e.dataTransfer.files);
+        });
+    </script>
+    
+    <!-- Help System -->
+    <script src="/static/js/help-system.js"></script>
+    <script src="/static/js/semptify-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof SemptifyHelp !== 'undefined') {
+                SemptifyHelp.init('timeline_auto_build');
+            }
+        });
+    </script>
+</body>
+</html>

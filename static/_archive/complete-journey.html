@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Complete Legal Journey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/help-system.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .welcome-content {
+            max-width: 600px;
+        }
+
+        .welcome-logo {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray);
+            margin-bottom: 3rem;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            color: white;
+            padding: 1.25rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Onboarding Flow */
+        .onboarding-container {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .onboarding-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border-radius: 50%;
+            line-height: 60px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-desc {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .option-card.selected {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary);
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .option-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .checklist {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Main App Layout */
+        .main-app {
+            display: none;
+        }
+
+        .main-app.active {
+            display: block;
+        }
+
+        .top-nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-item {
+            color: var(--light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .journey-path {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .journey-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .journey-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .journey-card.completed::before {
+            content: '✓';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .journey-card.current {
+            border-color: var(--primary);
+            border-width: 2px;
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+        }
+
+        .card-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border-radius: 50%;
+            line-height: 50px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-action {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .card-action:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .card-action:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- STEP 1: WELCOME SCREEN -->
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-content">
+            <div class="welcome-logo">⚖️</div>
+            <h1 class="welcome-title">Welcome to Semptify</h1>
+            <p class="welcome-subtitle">Your complete legal defense platform. We'll guide you step-by-step through protecting your tenant rights.</p>
+            <button class="start-btn" onclick="startJourney()">
+                <i class="fas fa-rocket"></i> Let's Get Started
+            </button>
+        </div>
+    </div>
+
+    <!-- STEP 2-6: ONBOARDING FLOW -->
+    <div id="onboarding-container" class="onboarding-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
+        </div>
+
+        <!-- Step 1: Your Situation -->
+        <div class="step active" id="step-1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h2 class="step-title">Tell us about your situation</h2>
+                <p class="step-desc">This helps us personalize your experience</p>
+            </div>
+
+            <div class="option-grid">
+                <div class="option-card" onclick="selectOption(this, 'facing-eviction')">
+                    <div class="option-icon">🏠</div>
+                    <div class="option-title">Facing Eviction</div>
+                    <div class="option-desc">I received an eviction notice</div>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'bad-conditions')">
+                    <div class="option-icon">🔧</div>
+                    <div class="option-title">Bad Living Conditions</div>
+                    <div class="option-desc">My apartment has problems</div>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'security-deposit')">
+                    <div class="option-icon">💰</div>
+                    <div class="option-title">Security Deposit Issue</div>
+                    <div class="option-desc">Landlord won't return deposit</div>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'general-help')">
+                    <div class="option-icon">📚</div>
+                    <div class="option-title">General Help</div>
+                    <div class="option-desc">I need to know my rights</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" disabled>← Back</button>
+                <button class="btn btn-primary" id="step1-next" onclick="nextStep(2)" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Basic Information -->
+        <div class="step" id="step-2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2 class="step-title">Basic Information</h2>
+                <p class="step-desc">Help us understand your case better</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Where are you located?</label>
+                <input type="text" class="form-input" id="location" placeholder="City, State (e.g., Minneapolis, MN)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">When did this start?</label>
+                <input type="date" class="form-input" id="start-date">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Briefly describe what happened</label>
+                <textarea class="form-textarea" id="situation-desc" placeholder="Tell us your story..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevStep(1)">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep(3)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Document Collection Guidance -->
+        <div class="step" id="step-3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h2 class="step-title">Gather Your Documents</h2>
+                <p class="step-desc">Check off what you have (we'll help you get the rest)</p>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="doc-lease">
+                    <label for="doc-lease">
+                        <strong>Lease Agreement</strong><br>
+                        <small style="color: var(--gray)">Your rental contract</small>
+                    </label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="doc-notice">
+                    <label for="doc-notice">
+                        <strong>Eviction Notice / Letters from Landlord</strong><br>
+                        <small style="color: var(--gray)">Any official communications</small>
+                    </label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="doc-payments">
+                    <label for="doc-payments">
+                        <strong>Rent Payment Records</strong><br>
+                        <small style="color: var(--gray)">Receipts, bank statements, checks</small>
+                    </label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="doc-photos">
+                    <label for="doc-photos">
+                        <strong>Photos of Property Issues</strong><br>
+                        <small style="color: var(--gray)">Damage, repairs needed, etc.</small>
+                    </label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="doc-emails">
+                    <label for="doc-emails">
+                        <strong>Email/Text Communications</strong><br>
+                        <small style="color: var(--gray)">Messages with landlord or property manager</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevStep(2)">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep(4)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Timeline Setup -->
+        <div class="step" id="step-4">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <h2 class="step-title">Create Your Timeline</h2>
+                <p class="step-desc">Understanding the sequence of events is crucial</p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">📅 Why a timeline matters:</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        ✓ Shows pattern of landlord behavior
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        ✓ Proves you followed proper procedures
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        ✓ Establishes deadlines and response times
+                    </li>
+                    <li style="padding: 0.75rem 0;">
+                        ✓ Provides clear story for the court
+                    </li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevStep(3)">← Back</button>
+                <button class="btn btn-primary" onclick="nextStep(5)">I Understand →</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Ready to Build Your Case -->
+        <div class="step" id="step-5">
+            <div class="step-header">
+                <div class="step-number">5</div>
+                <h2 class="step-title">You're Ready!</h2>
+                <p class="step-desc">Let's build your defense step-by-step</p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.1)); border-radius: 20px; padding: 3rem; text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🎯</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Here's What Happens Next</h3>
+                <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                    <div style="padding: 1rem 0;">
+                        <strong>1. Upload your documents</strong> - We'll organize and analyze them
+                    </div>
+                    <div style="padding: 1rem 0;">
+                        <strong>2. Build your timeline</strong> - Create a chronological record
+                    </div>
+                    <div style="padding: 1rem 0;">
+                        <strong>3. Get AI insights</strong> - We'll analyze your case strength
+                    </div>
+                    <div style="padding: 1rem 0;">
+                        <strong>4. Prepare court documents</strong> - Auto-generate forms
+                    </div>
+                    <div style="padding: 1rem 0;">
+                        <strong>5. Track deadlines</strong> - Never miss a court date
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="prevStep(4)">← Back</button>
+                <button class="btn btn-primary" onclick="enterMainApp()" style="font-size: 1.1rem; padding: 1.25rem 2rem;">
+                    🚀 Let's Build My Case
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 7+: MAIN APPLICATION -->
+    <div id="main-app" class="main-app">
+        <nav class="top-nav">
+            <div class="logo">⚖️ Semptify</div>
+            <div class="nav-menu">
+                <a href="#journey" class="nav-item active">My Journey</a>
+                <a href="/documents" class="nav-item">Documents</a>
+                <a href="/static/timeline.html" class="nav-item">Timeline</a>
+                <a href="/static/calendar.html" class="nav-item">Deadlines</a>
+                <a href="/static/law_library.html" class="nav-item">Law Library</a>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Your Legal Defense Journey</h1>
+            <p style="color: var(--gray); font-size: 1.1rem; margin-bottom: 3rem;">
+                Follow these steps in order. Complete each one before moving to the next.
+            </p>
+
+            <div class="journey-path">
+                <!-- Step 1: Upload Documents -->
+                <div class="journey-card current">
+                    <div class="card-number">1</div>
+                    <h3 class="card-title">Upload Your Documents</h3>
+                    <p class="card-desc">
+                        Start by uploading your lease, notices, photos, and any communications. 
+                        We'll analyze and organize everything for you.
+                    </p>
+                    <button class="card-action" onclick="window.location.href='/documents'">
+                        <i class="fas fa-upload"></i> Start Uploading
+                    </button>
+                </div>
+
+                <!-- Step 2: Build Timeline -->
+                <div class="journey-card">
+                    <div class="card-number">2</div>
+                    <h3 class="card-title">Build Your Timeline</h3>
+                    <p class="card-desc">
+                        Document when things happened. This creates a clear story and proves your case.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Step 1 First
+                    </button>
+                </div>
+
+                <!-- Step 3: Research Your Rights -->
+                <div class="journey-card">
+                    <div class="card-number">3</div>
+                    <h3 class="card-title">Research Your Rights</h3>
+                    <p class="card-desc">
+                        Learn about Minnesota tenant laws and find relevant statutes for your situation.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-2
+                    </button>
+                </div>
+
+                <!-- Step 4: Get AI Analysis -->
+                <div class="journey-card">
+                    <div class="card-number">4</div>
+                    <h3 class="card-title">Get AI Case Analysis</h3>
+                    <p class="card-desc">
+                        Our AI will analyze your evidence, identify strengths, and suggest strategies.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-3
+                    </button>
+                </div>
+
+                <!-- Step 5: Prepare Court Documents -->
+                <div class="journey-card">
+                    <div class="card-number">5</div>
+                    <h3 class="card-title">Prepare Court Forms</h3>
+                    <p class="card-desc">
+                        Generate your Answer, Affidavit, and other court documents automatically.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-4
+                    </button>
+                </div>
+
+                <!-- Step 6: Set Court Deadlines -->
+                <div class="journey-card">
+                    <div class="card-number">6</div>
+                    <h3 class="card-title">Track Your Deadlines</h3>
+                    <p class="card-desc">
+                        Add court dates and filing deadlines. We'll remind you so you never miss one.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-5
+                    </button>
+                </div>
+
+                <!-- Step 7: Prepare for Hearing -->
+                <div class="journey-card">
+                    <div class="card-number">7</div>
+                    <h3 class="card-title">Prepare for Court</h3>
+                    <p class="card-desc">
+                        Learn courtroom etiquette, practice your testimony, and test your tech for Zoom court.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-6
+                    </button>
+                </div>
+
+                <!-- Step 8: File Your Documents -->
+                <div class="journey-card">
+                    <div class="card-number">8</div>
+                    <h3 class="card-title">File Your Documents</h3>
+                    <p class="card-desc">
+                        Submit your forms to the court. We'll guide you through e-filing or mailing.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-7
+                    </button>
+                </div>
+
+                <!-- Step 9: Final Review -->
+                <div class="journey-card">
+                    <div class="card-number">9</div>
+                    <h3 class="card-title">Final Case Review</h3>
+                    <p class="card-desc">
+                        Review everything one last time. Make sure you're fully prepared for your hearing.
+                    </p>
+                    <button class="card-action" disabled>
+                        <i class="fas fa-lock"></i> Complete Steps 1-8
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let userSituation = '';
+
+        function startJourney() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('onboarding-container').classList.add('active');
+        }
+
+        function selectOption(card, situation) {
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            userSituation = situation;
+            document.getElementById('step1-next').disabled = false;
+        }
+
+        function nextStep(step) {
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            
+            const progress = (currentStep / 5) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            
+            const progress = (currentStep / 5) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function enterMainApp() {
+            // Save user data
+            const userData = {
+                situation: userSituation,
+                location: document.getElementById('location').value,
+                startDate: document.getElementById('start-date').value,
+                description: document.getElementById('situation-desc').value,
+                documents: {
+                    lease: document.getElementById('doc-lease').checked,
+                    notice: document.getElementById('doc-notice').checked,
+                    payments: document.getElementById('doc-payments').checked,
+                    photos: document.getElementById('doc-photos').checked,
+                    emails: document.getElementById('doc-emails').checked
+                }
+            };
+            
+            localStorage.setItem('semptify_user_data', JSON.stringify(userData));
+            
+            // Show main app
+            document.getElementById('onboarding-container').classList.remove('active');
+            document.getElementById('main-app').classList.add('active');
+            
+            // Track journey progress
+            localStorage.setItem('semptify_journey_step', '1');
+        }
+    </script>
+    
+    <!-- Help System -->
+    <script src="/static/js/help-system.js"></script>
+    <script src="/static/js/semptify-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof SemptifyHelp !== 'undefined') {
+                SemptifyHelp.init('complete_journey');
+            }
+        });
+    </script>
+</body>
+</html>

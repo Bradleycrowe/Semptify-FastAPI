@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify - Document Intake</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/help-system.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --highlight-yellow: #fef08a;
+            --highlight-green: #bbf7d0;
+            --highlight-blue: #bfdbfe;
+            --highlight-pink: #fbcfe8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), #7c3aed);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+
+        .user-badge {
+            background: var(--bg-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .connect-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .connect-btn:hover { background: var(--primary-hover); }
+
+        .main-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .page-subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+        /* Quick Actions Bar */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .action-btn.timeline-btn {
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.timeline-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Upload zone */
+        .upload-zone {
+            background: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .upload-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .upload-desc { color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+        .upload-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upload-btn:hover { background: var(--primary-hover); }
+
+        .file-types {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .file-types span {
+            background: var(--bg-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin: 0 0.25rem;
+        }
+
+        /* Documents section */
+        .documents-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title { font-size: 1.125rem; font-weight: 600; }
+
+        .document-count {
+            background: var(--bg-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Category Filter */
+        .category-filter {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 12px;
+        }
+
+        .category-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+        }
+
+        .category-chip:hover, .category-chip.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-chip.cat-court { border-left: 3px solid #ef4444; }
+        .category-chip.cat-lease { border-left: 3px solid #10b981; }
+        .category-chip.cat-notice { border-left: 3px solid #f59e0b; }
+        .category-chip.cat-correspondence { border-left: 3px solid #3b82f6; }
+        .category-chip.cat-financial { border-left: 3px solid #8b5cf6; }
+        .category-chip.cat-other { border-left: 3px solid #6b7280; }
+
+        .documents-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .document-item:hover { background: #e2e8f0; }
+
+        .doc-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .doc-info { flex: 1; }
+        .doc-name { font-weight: 500; margin-bottom: 0.25rem; }
+        .doc-meta { font-size: 0.875rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+        .doc-type-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .doc-type-court_filing { background: #fee2e2; color: #dc2626; }
+        .doc-type-lease { background: #d1fae5; color: #059669; }
+        .doc-type-notice { background: #fef3c7; color: #d97706; }
+        .doc-type-correspondence { background: #dbeafe; color: #1d4ed8; }
+        .doc-type-financial { background: #ede9fe; color: #7c3aed; }
+        .doc-type-other { background: #f3f4f6; color: #4b5563; }
+
+        .doc-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-processing { background: #fef3c7; color: #d97706; }
+        .status-ready { background: #d1fae5; color: #059669; }
+        .status-error { background: #fee2e2; color: #dc2626; }
+
+        .view-hint {
+            opacity: 0;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            transition: opacity 0.2s;
+        }
+
+        .document-item:hover .view-hint { opacity: 1; }
+
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-secondary); }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        .upload-progress { margin-top: 1rem; display: none; }
+        .upload-progress.active { display: block; }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        #file-input { display: none; }
+
+        /* Toast notifications */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+
+        .toast {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { border-left: 4px solid var(--success-color); }
+        .toast.error { border-left: 4px solid var(--error-color); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Document Viewer Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .document-viewer {
+            background: var(--card-bg);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .viewer-title { font-size: 1.125rem; font-weight: 600; }
+        .viewer-actions { display: flex; gap: 0.5rem; }
+
+        .viewer-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .viewer-btn:hover { background: var(--bg-color); }
+        .viewer-btn.close-btn { background: var(--text-secondary); color: white; border: none; }
+
+        .category-dropdown {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .category-dropdown label { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .category-dropdown select {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: var(--card-bg);
+        }
+
+        .extract-events-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+
+        .extract-events-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Highlight toolbar */
+        .highlight-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-label { font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem; }
+
+        .highlight-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .highlight-btn:hover { transform: scale(1.1); }
+        .highlight-btn.active { border-color: var(--text-primary); box-shadow: 0 0 0 2px var(--primary-color); }
+
+        .highlight-btn.yellow { background: var(--highlight-yellow); }
+        .highlight-btn.green { background: var(--highlight-green); }
+        .highlight-btn.blue { background: var(--highlight-blue); }
+        .highlight-btn.pink { background: var(--highlight-pink); }
+
+        .highlight-btn.eraser {
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .footnote-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 1rem;
+        }
+
+        .footnote-btn:hover { background: var(--primary-color); color: white; }
+
+        /* Document content area */
+        .viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .viewer-content p { margin-bottom: 1rem; }
+
+        .viewer-content .highlight-yellow { background: var(--highlight-yellow); }
+        .viewer-content .highlight-green { background: var(--highlight-green); }
+        .viewer-content .highlight-blue { background: var(--highlight-blue); }
+        .viewer-content .highlight-pink { background: var(--highlight-pink); }
+
+        .footnote-marker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.65rem;
+            font-weight: 600;
+            vertical-align: super;
+            cursor: pointer;
+            margin-left: 2px;
+        }
+
+        .footnote-marker:hover { background: var(--primary-hover); }
+
+        /* Footnotes panel */
+        .footnotes-panel {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            background: var(--bg-color);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .footnotes-panel.active { display: block; }
+
+        .footnotes-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footnote-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .footnote-number {
+            background: var(--primary-color);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .footnote-text { flex: 1; }
+        .footnote-delete { color: var(--error-color); cursor: pointer; font-size: 1rem; }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .main-content { padding: 1rem; }
+            .upload-zone { padding: 2rem 1rem; }
+            .document-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+    <script src="/static/js/law-linker.js"></script>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+</head>
+<body>
+    <!-- Shared Navigation -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">📄</div>
+            <span>Semptify</span>
+        </div>
+        <div class="user-info">
+            <span class="user-badge" id="user-status">Not Connected</span>
+            <button class="connect-btn" id="connect-btn" onclick="showStorageOptions()">Connect Storage</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="page-title">Document Intake</h1>
+        <p class="page-subtitle">Upload legal documents for AI-powered analysis and processing</p>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/timeline" class="action-btn timeline-btn">
+                <span>📅</span> View Timeline
+            </a>
+            <a href="/law-library" class="action-btn" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; text-decoration: none;">
+                <span>📚</span> Law Library
+            </a>
+            <a href="/eviction-defense" class="action-btn" style="background: linear-gradient(135deg, #dc2626, #ef4444); color: white; border: none; text-decoration: none;">
+                <span>⚖️</span> Eviction Defense
+            </a>
+            <a href="/zoom-court" class="action-btn" style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; border: none; text-decoration: none;">
+                <span>💻</span> Zoom Court
+            </a>
+            <button class="action-btn" onclick="extractAllEvents()">
+                <span>🔍</span> Extract All Events
+            </button>
+            <button class="action-btn" onclick="exportDocuments()">
+                <span>📥</span> Export Documents
+            </button>
+            <a href="/static/letter_builder.html" class="action-btn" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; border: none; text-decoration: none;">
+                <span>✉️</span> Letter Builder
+            </a>
+        </div>
+
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📤</div>
+            <h2 class="upload-title">Drop documents here</h2>
+            <p class="upload-desc">or click to browse your files</p>
+            <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('file-input').click()">
+                Select Files
+            </button>
+            <p class="file-types">
+                Supported: <span>PDF</span> <span>DOCX</span> <span>DOC</span> <span>PNG</span> <span>JPG</span> <span>TXT</span>
+            </p>
+            <div class="upload-progress" id="upload-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text" id="progress-text">Uploading...</p>
+            </div>
+        </div>
+
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.txt">
+
+        <section class="documents-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Documents</h2>
+                <span class="document-count" id="doc-count">0 documents</span>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button class="category-chip active" onclick="filterByCategory('all', this)">All</button>
+                <button class="category-chip cat-court" onclick="filterByCategory('court_filing', this)">Court Filings</button>
+                <button class="category-chip cat-lease" onclick="filterByCategory('lease', this)">Leases</button>
+                <button class="category-chip cat-notice" onclick="filterByCategory('notice', this)">Notices</button>
+                <button class="category-chip cat-correspondence" onclick="filterByCategory('correspondence', this)">Correspondence</button>
+                <button class="category-chip cat-financial" onclick="filterByCategory('financial', this)">Financial</button>
+                <button class="category-chip cat-other" onclick="filterByCategory('other', this)">Other</button>
+            </div>
+
+            <div class="documents-list" id="documents-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <p>No documents yet. Upload your first document to get started.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Document Viewer Modal -->
+    <div class="modal-overlay" id="document-modal">
+        <div class="document-viewer">
+            <div class="viewer-header">
+                <div class="viewer-title" id="viewer-title">Document Name</div>
+                <div class="viewer-actions">
+                    <button class="viewer-btn" onclick="downloadDocument()">📥 Download</button>
+                    <button class="viewer-btn close-btn" onclick="closeViewer()">✕ Close</button>
+                </div>
+            </div>
+
+            <div class="category-dropdown">
+                <label>Document Type:</label>
+                <select id="doc-category-select" onchange="updateDocumentCategory()">
+                    <option value="other">Other</option>
+                    <option value="court_filing">Court Filing</option>
+                    <option value="lease">Lease Agreement</option>
+                    <option value="notice">Notice</option>
+                    <option value="correspondence">Correspondence</option>
+                    <option value="financial">Financial Document</option>
+                </select>
+                <button class="extract-events-btn" onclick="extractDocumentEvents()">
+                    📅 Extract Events to Timeline
+                </button>
+            </div>
+
+            <div class="highlight-toolbar">
+                <span class="toolbar-label">Highlight:</span>
+                <button class="highlight-btn yellow" onclick="setHighlightColor('yellow', this)" title="Yellow"></button>
+                <button class="highlight-btn green" onclick="setHighlightColor('green', this)" title="Green"></button>
+                <button class="highlight-btn blue" onclick="setHighlightColor('blue', this)" title="Blue"></button>
+                <button class="highlight-btn pink" onclick="setHighlightColor('pink', this)" title="Pink"></button>
+                <button class="highlight-btn eraser" onclick="setHighlightColor(null, this)" title="Remove Highlight">🧹</button>
+                
+                <button class="footnote-btn" onclick="addFootnote()">
+                    <span>📝</span> Add Note
+                </button>
+            </div>
+
+            <div class="viewer-content" id="viewer-content">
+                <p>Loading document content...</p>
+            </div>
+
+            <div class="footnotes-panel" id="footnotes-panel">
+                <div class="footnotes-title">📝 Notes & Annotations</div>
+                <div id="footnotes-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // State
+        let allDocuments = [];
+        let currentFilter = 'all';
+        let currentDocId = null;
+        let currentHighlight = null;
+        let footnotes = [];
+        let footnoteCounter = 0;
+
+        // Initialize
+        async function init() {
+            await checkSession();
+            loadDocuments();
+        }
+
+        async function checkSession() {
+            try {
+                const response = await fetch('/storage/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated) {
+                        document.getElementById('user-status').textContent = `Connected: ${data.provider || 'Storage'}`;
+                        document.getElementById('connect-btn').textContent = 'Manage Storage';
+                    }
+                }
+            } catch (err) {
+                console.log('No active session');
+            }
+        }
+
+        function showStorageOptions() {
+            window.location.href = '/vault';
+        }
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents/');
+                if (response.ok) {
+                    allDocuments = await response.json();
+                    renderDocuments(filterDocuments(allDocuments));
+                }
+            } catch (err) {
+                console.error('Failed to load documents:', err);
+            }
+        }
+
+        function filterDocuments(docs) {
+            if (currentFilter === 'all') return docs;
+            return docs.filter(doc => (doc.doc_type || 'other') === currentFilter);
+        }
+
+        function filterByCategory(category, btn) {
+            currentFilter = category;
+            document.querySelectorAll('.category-chip').forEach(chip => chip.classList.remove('active'));
+            btn.classList.add('active');
+            renderDocuments(filterDocuments(allDocuments));
+        }
+
+        function renderDocuments(docs) {
+            const list = document.getElementById('documents-list');
+            const count = document.getElementById('doc-count');
+
+            count.textContent = `${docs.length} document${docs.length !== 1 ? 's' : ''}`;
+
+            if (docs.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <p>${currentFilter === 'all' ? 'No documents yet. Upload your first document to get started.' : 'No documents in this category.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = docs.map(doc => `
+                <div class="document-item" onclick="openDocument('${doc.id}')">
+                    <div class="doc-icon">${getDocIcon(doc.filename)}</div>
+                    <div class="doc-info">
+                        <div class="doc-name">${doc.filename || doc.name}</div>
+                        <div class="doc-meta">
+                            ${formatFileSize(doc.size)} • ${formatDate(doc.uploaded_at || doc.created_at)}
+                            <span class="doc-type-badge doc-type-${doc.doc_type || 'other'}">${formatDocType(doc.doc_type)}</span>
+                        </div>
+                    </div>
+                    <div class="doc-status">
+                        <span class="status-badge ${getStatusClass(doc.status)}">${doc.status || 'ready'}</span>
+                        <span class="view-hint">Click to view →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatDocType(docType) {
+            const types = {
+                'court_filing': 'Court',
+                'lease': 'Lease',
+                'notice': 'Notice',
+                'correspondence': 'Letter',
+                'financial': 'Financial',
+                'other': 'Other'
+            };
+            return types[docType] || 'Other';
+        }
+
+        function getDocIcon(filename) {
+            const ext = (filename || '').split('.').pop().toLowerCase();
+            const icons = { 'pdf': '📕', 'docx': '📘', 'doc': '📘', 'txt': '📄', 'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️' };
+            return icons[ext] || '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let i = 0;
+            while (bytes >= 1024 && i < units.length - 1) { bytes /= 1024; i++; }
+            return `${bytes.toFixed(1)} ${units[i]}`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown date';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'Unknown date';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return 'Unknown date';
+            }
+        }
+
+        function getStatusClass(status) {
+            return { 'processing': 'status-processing', 'ready': 'status-ready', 'error': 'status-error' }[status] || 'status-ready';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Document Viewer
+        async function openDocument(docId) {
+            currentDocId = docId;
+            footnotes = [];
+            footnoteCounter = 0;
+            
+            const modal = document.getElementById('document-modal');
+            const content = document.getElementById('viewer-content');
+            const title = document.getElementById('viewer-title');
+            const categorySelect = document.getElementById('doc-category-select');
+            
+            modal.classList.add('active');
+            content.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Loading document...</p>';
+            
+            try {
+                const doc = allDocuments.find(d => d.id === docId);
+                if (doc) {
+                    title.textContent = doc.filename || doc.name;
+                    categorySelect.value = doc.doc_type || 'other';
+                }
+                
+                const response = await fetch(`/api/documents/${docId}/text`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderDocumentText(data.text || data.content || 'No text content available.');
+                } else {
+                    content.innerHTML = '<p style="color: var(--error-color);">Failed to load document content.</p>';
+                }
+            } catch (err) {
+                console.error('Error loading document:', err);
+                content.innerHTML = '<p style="color: var(--error-color);">Error loading document.</p>';
+            }
+            
+            updateFootnotesPanel();
+        }
+
+        function renderDocumentText(text) {
+            const content = document.getElementById('viewer-content');
+            const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+            
+            if (paragraphs.length === 0) {
+                content.innerHTML = '<p>No text content available.</p>';
+                return;
+            }
+            
+            content.innerHTML = paragraphs.map((p, i) => {
+                const formattedText = p.replace(/\n/g, '<br>');
+                return `<p data-para="${i}">${formattedText}</p>`;
+            }).join('');
+            
+            content.addEventListener('mouseup', handleTextSelection);
+        }
+
+        function closeViewer() {
+            document.getElementById('document-modal').classList.remove('active');
+            currentDocId = null;
+        }
+
+        function downloadDocument() {
+            if (!currentDocId) return;
+            window.open(`/api/documents/${currentDocId}/download`, '_blank');
+        }
+
+        // Highlighting
+        function setHighlightColor(color, btn) {
+            currentHighlight = color;
+            document.querySelectorAll('.highlight-btn').forEach(b => b.classList.remove('active'));
+            if (btn && color) btn.classList.add('active');
+        }
+
+        function handleTextSelection() {
+            if (!currentHighlight) return;
+            
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0 || selection.isCollapsed) return;
+            
+            const range = selection.getRangeAt(0);
+            const viewerContent = document.getElementById('viewer-content');
+            if (!viewerContent.contains(range.commonAncestorContainer)) return;
+            
+            const span = document.createElement('span');
+            span.className = `highlight-${currentHighlight}`;
+            
+            try {
+                range.surroundContents(span);
+            } catch (e) {
+                const fragment = range.extractContents();
+                span.appendChild(fragment);
+                range.insertNode(span);
+            }
+            
+            selection.removeAllRanges();
+            showToast('Text highlighted!', 'success');
+        }
+
+        // Footnotes
+        function addFootnote() {
+            const selection = window.getSelection();
+            if (selection.isCollapsed) {
+                showToast('Please select text to add a note', 'error');
+                return;
+            }
+            
+            const selectedText = selection.toString().trim();
+            if (!selectedText) {
+                showToast('Please select text to add a note', 'error');
+                return;
+            }
+            
+            const note = prompt('Enter your note for the selected text:');
+            if (!note) return;
+            
+            footnoteCounter++;
+            const footnoteId = footnoteCounter;
+            
+            const range = selection.getRangeAt(0);
+            const marker = document.createElement('span');
+            marker.className = 'footnote-marker';
+            marker.textContent = footnoteId;
+            marker.title = note;
+            marker.onclick = () => scrollToFootnote(footnoteId);
+            
+            range.collapse(false);
+            range.insertNode(marker);
+            
+            footnotes.push({
+                id: footnoteId,
+                text: selectedText.substring(0, 50) + (selectedText.length > 50 ? '...' : ''),
+                note: note
+            });
+            
+            selection.removeAllRanges();
+            updateFootnotesPanel();
+            showToast('Note added!', 'success');
+        }
+
+        function updateFootnotesPanel() {
+            const panel = document.getElementById('footnotes-panel');
+            const list = document.getElementById('footnotes-list');
+            
+            if (footnotes.length === 0) {
+                panel.classList.remove('active');
+                return;
+            }
+            
+            panel.classList.add('active');
+            list.innerHTML = footnotes.map(fn => `
+                <div class="footnote-item" id="footnote-${fn.id}">
+                    <div class="footnote-number">${fn.id}</div>
+                    <div class="footnote-text">
+                        <strong>"${fn.text}"</strong><br>
+                        ${fn.note}
+                    </div>
+                    <span class="footnote-delete" onclick="deleteFootnote(${fn.id})">✕</span>
+                </div>
+            `).join('');
+        }
+
+        function scrollToFootnote(id) {
+            const footnoteEl = document.getElementById(`footnote-${id}`);
+            if (footnoteEl) {
+                footnoteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                footnoteEl.style.background = '#fef3c7';
+                setTimeout(() => { footnoteEl.style.background = ''; }, 2000);
+            }
+        }
+
+        function deleteFootnote(id) {
+            footnotes = footnotes.filter(fn => fn.id !== id);
+            document.querySelectorAll('.footnote-marker').forEach(marker => {
+                if (marker.textContent == id) marker.remove();
+            });
+            updateFootnotesPanel();
+            showToast('Note removed', 'success');
+        }
+
+        // Category & Events
+        async function updateDocumentCategory() {
+            if (!currentDocId) return;
+            
+            const category = document.getElementById('doc-category-select').value;
+            
+            try {
+                const response = await fetch(`/api/documents/${currentDocId}/category`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ doc_type: category })
+                });
+                
+                if (response.ok) {
+                    const doc = allDocuments.find(d => d.id === currentDocId);
+                    if (doc) doc.doc_type = category;
+                    renderDocuments(filterDocuments(allDocuments));
+                    showToast('Document category updated!', 'success');
+                }
+            } catch (err) {
+                showToast('Failed to update category', 'error');
+            }
+        }
+
+        async function extractDocumentEvents() {
+            if (!currentDocId) return;
+            
+            showToast('Extracting events from document...', 'success');
+            
+            try {
+                const response = await fetch(`/api/documents/${currentDocId}/auto-timeline`, { method: 'POST' });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`Added ${data.events_created} events to timeline!`, 'success');
+                } else {
+                    showToast('Failed to extract events', 'error');
+                }
+            } catch (err) {
+                showToast('Error extracting events', 'error');
+            }
+        }
+
+        async function extractAllEvents() {
+            showToast('Extracting events from all documents...', 'success');
+            
+            try {
+                const response = await fetch('/api/documents/auto-timeline-all', { method: 'POST' });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`Added ${data.total_events_created} events from ${data.documents_processed} documents!`, 'success');
+                } else {
+                    showToast('Failed to extract events', 'error');
+                }
+            } catch (err) {
+                showToast('Error extracting events', 'error');
+            }
+        }
+
+        function exportDocuments() {
+            // Show export options modal
+            const format = prompt('Export format:\n\n1. ZIP (includes all files + metadata)\n2. JSON (metadata only)\n3. CSV (spreadsheet format)\n\nEnter: zip, json, or csv', 'zip');
+            
+            if (!format) return;
+            
+            const validFormats = ['zip', 'json', 'csv'];
+            const selectedFormat = format.toLowerCase().trim();
+            
+            if (!validFormats.includes(selectedFormat)) {
+                showToast('Invalid format. Use: zip, json, or csv', 'error');
+                return;
+            }
+            
+            showToast(`Preparing ${selectedFormat.toUpperCase()} export...`, 'success');
+            
+            // Trigger download
+            const url = `/api/documents/export/download?format=${selectedFormat}`;
+            
+            // Create hidden link and click it
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // File Upload
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('dragover'); });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                showToast(`Dropped ${e.dataTransfer.files.length} file(s), starting upload...`, 'success');
+            }
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                showToast(`Selected ${e.target.files.length} file(s), starting upload...`, 'success');
+            }
+            handleFiles(e.target.files);
+        });
+
+        async function handleFiles(files) {
+            if (files.length === 0) return;
+
+            const progressEl = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+
+            progressEl.classList.add('active');
+            progressFill.style.width = '0%';
+            progressText.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}...`;
+
+            let uploaded = 0;
+            for (const file of files) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch('/api/documents/upload', { method: 'POST', body: formData });
+
+                    if (response.ok) {
+                        uploaded++;
+                        progressFill.style.width = `${(uploaded / files.length) * 100}%`;
+                        progressText.textContent = `Uploaded ${uploaded}/${files.length}...`;
+                    } else {
+                        const errorText = await response.text();
+                        showToast(`Failed to upload ${file.name}: ${errorText}`, 'error');
+                    }
+                } catch (err) {
+                    showToast(`Error uploading ${file.name}: ${err.message}`, 'error');
+                }
+            }
+
+            setTimeout(() => {
+                progressEl.classList.remove('active');
+                if (uploaded > 0) {
+                    showToast(`Successfully uploaded ${uploaded} file${uploaded > 1 ? 's' : ''}`, 'success');
+                    loadDocuments();
+                }
+            }, 500);
+        }
+
+        // Modal handling
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeViewer(); });
+        document.getElementById('document-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'document-modal') closeViewer();
+        });
+
+        // Init
+        init();
+    </script>
+
+    <!-- Site-Wide Help System -->
+    <script src="/static/js/help-system.js"></script>
+    <script src="/static/js/help-content.js"></script>
+    <script>SemptifyHelp.init('documents');</script>
+    <script>
+        // Initialize law linker for automatic statute linking
+        if (typeof LawLinker !== 'undefined') {
+            window.lawLinker = new LawLinker();
+        }
+    </script>
+</body>
+</html>
