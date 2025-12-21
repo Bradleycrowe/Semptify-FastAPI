@@ -17,7 +17,7 @@ const SemptifyNav = {
             id: 'home',
             title: '🏠 Home',
             items: [
-                { icon: '🏠', label: 'Dashboard', href: '/static/home.html' },
+                { icon: '🏠', label: 'Dashboard', href: '/' },
                 { icon: '📊', label: 'My Case', href: '/static/cases.html' },
                 { icon: '🆘', label: 'Crisis Assessment', href: '/static/crisis_intake.html' },
             ]
