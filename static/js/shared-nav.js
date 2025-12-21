@@ -9,8 +9,8 @@
 
 const SemptifyNav = {
     // =========================================================================
-    // SIMPLIFIED 7-SECTION NAVIGATION
-    // Logical workflow: Home → Intake → Timeline → Defense → Court → Tools → Vault
+    // SIMPLIFIED 5-SECTION NAVIGATION (v2.0)
+    // Streamlined workflow: Home → Documents → Timeline → Legal → Settings
     // =========================================================================
     sections: [
         {
@@ -18,68 +18,40 @@ const SemptifyNav = {
             title: '🏠 Home',
             items: [
                 { icon: '🏠', label: 'Dashboard', href: '/' },
-                { icon: '📊', label: 'My Case', href: '/static/cases.html' },
-                { icon: '🆘', label: 'Crisis Assessment', href: '/static/crisis_intake.html' },
+                { icon: '🆘', label: 'Crisis Help', href: '/static/crisis_intake.html' },
             ]
         },
         {
-            id: 'intake',
-            title: '📥 Step 1: Intake',
+            id: 'documents',
+            title: '📄 Documents',
             items: [
-                { icon: '📋', label: 'Upload Documents', href: '/static/document_intake.html' },
-                { icon: '🔍', label: 'AI Recognition', href: '/static/recognition.html' },
+                { icon: '📤', label: 'Upload', href: '/static/document_intake.html' },
                 { icon: '💼', label: 'Briefcase', href: '/static/briefcase.html' },
-            ]
-        },
-        {
-            id: 'timeline',
-            title: '📅 Step 2: Timeline',
-            items: [
-                { icon: '⚡', label: 'Auto-Build', href: '/static/timeline_auto_build.html' },
-                { icon: '📅', label: 'View Timeline', href: '/static/timeline.html', badge: 'timelineCount' },
-                { icon: '📆', label: 'Calendar', href: '/static/calendar.html' },
-            ]
-        },
-        {
-            id: 'defense',
-            title: '⚖️ Step 3: Defense',
-            items: [
-                { icon: '📖', label: 'Law Library', href: '/static/law_library.html' },
-                { icon: '📝', label: 'File Answer', href: '/static/eviction_answer.html' },
-                { icon: '⚔️', label: 'Counterclaim', href: '/static/counterclaim.html' },
-                { icon: '📋', label: 'File Motion', href: '/static/motions.html' },
-            ]
-        },
-        {
-            id: 'court',
-            title: '🏛️ Step 4: Court',
-            items: [
-                { icon: '📦', label: 'Court Packet', href: '/static/court_packet.html' },
-                { icon: '🎯', label: 'Hearing Prep', href: '/static/hearing_prep.html' },
-                { icon: '💻', label: 'Zoom Court', href: '/static/zoom_court.html' },
-            ]
-        },
-        {
-            id: 'tools',
-            title: '🔧 Tools',
-            items: [
-                { icon: '✉️', label: 'Letters', href: '/static/letter_builder.html' },
-                { icon: '📝', label: 'Complaints', href: '/static/complaints.html' },
-                { icon: '📇', label: 'Contacts', href: '/static/contacts.html' },
-                { icon: '📬', label: 'Correspondence', href: '/static/correspondence.html' },
-                { icon: '🔎', label: 'Fraud Analysis', href: '/static/fraud.html' },
-            ]
-        },
-        {
-            id: 'vault',
-            title: '📁 Vault',
-            items: [
-                { icon: '🔐', label: 'Document Vault', href: '/static/vault.html' },
+                { icon: '🔐', label: 'Vault', href: '/static/vault.html' },
                 { icon: '📑', label: 'PDF Tools', href: '/static/pdf_tools.html' },
             ]
         },
         {
-            id: 'system',
+            id: 'timeline',
+            title: '📅 Timeline',
+            items: [
+                { icon: '📅', label: 'My Timeline', href: '/static/timeline.html', badge: 'timelineCount' },
+                { icon: '📆', label: 'Calendar', href: '/static/calendar.html' },
+            ]
+        },
+        {
+            id: 'legal',
+            title: '⚖️ Legal',
+            items: [
+                { icon: '📖', label: 'Law Library', href: '/static/law_library.html' },
+                { icon: '📝', label: 'File Answer', href: '/static/eviction_answer.html' },
+                { icon: '📋', label: 'Motions', href: '/static/motions.html' },
+                { icon: '📦', label: 'Court Packet', href: '/static/court_packet.html' },
+                { icon: '✉️', label: 'Letters', href: '/static/letter_builder.html' },
+            ]
+        },
+        {
+            id: 'settings',
             title: '⚙️ Settings',
             collapsed: true,
             items: [
