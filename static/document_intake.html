@@ -1630,6 +1630,14 @@
                                     <div class="tooltip-when">Click to run deep analysis with confidence scoring and relationship mapping.</div>
                                 </div>
                             </div>
+                            <div class="has-help" style="display: inline-block;">
+                                <button class="tab" data-tab="annotations">📝 Annotations</button>
+                                <div class="help-tooltip tooltip-bottom">
+                                    <div class="tooltip-title">📝 Annotations Tab</div>
+                                    Add highlights, notes, footnotes, and tracked edits to your document. All annotations are stored as overlays - the original document is never modified.
+                                    <div class="tooltip-when">Click to annotate and add notes to your document without altering the original.</div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Overview Tab -->
@@ -1704,6 +1712,16 @@
                                     <button class="btn btn-primary" onclick="runRecognitionAnalysis()" id="runRecognitionBtn" disabled>
                                         🧠 Run Recognition Analysis
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Annotations Tab (Overlay System) -->
+                        <div class="tab-content" id="tab-annotations">
+                            <div id="annotationsContent">
+                                <div class="empty-state">
+                                    <div class="icon">📝</div>
+                                    <p>Select a document to view or add annotations</p>
                                 </div>
                             </div>
                         </div>
@@ -2841,6 +2859,7 @@
             showRegistry(doc);
             showCustody(doc);
             showRecognition(doc);
+            showAnnotations(doc);
         }
         
         function showOverview(doc) {
@@ -3906,6 +3925,399 @@
                 }));
             }
             window.location.href = '/static/recognition.html';
+        }
+
+        // =====================================================================
+        // Annotations/Overlay System
+        // =====================================================================
+        let currentOverlay = null;
+        
+        async function showAnnotations(doc) {
+            const container = document.getElementById('annotationsContent');
+            
+            if (!doc.savedToVault && !doc.documentId) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <p>Save document to vault first to enable annotations</p>
+                        <p style="font-size: 12px; color: var(--gray-500); margin-top: 8px;">
+                            Annotations are stored as overlays - your original document is never modified.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const docId = doc.documentId || doc.storagePath?.split('/').pop()?.split('.')[0] || doc.id;
+            
+            container.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading annotations...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentOverlay = data.overlay;
+                    doc.overlay = currentOverlay;
+                    renderAnnotationsUI(container, doc, currentOverlay);
+                } else {
+                    // No overlay yet, show empty UI
+                    currentOverlay = { highlights: [], notes: [], footnotes: [], edits: [], processing: [] };
+                    doc.overlay = currentOverlay;
+                    renderAnnotationsUI(container, doc, currentOverlay);
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <div class="icon">❌</div>
+                        <p>Failed to load annotations: ${error.message}</p>
+                        <button class="btn btn-primary" onclick="showAnnotations(documents.find(d => d.id === '${doc.id}'))">
+                            🔄 Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderAnnotationsUI(container, doc, overlay) {
+            const docId = doc.documentId || doc.storagePath?.split('/').pop()?.split('.')[0] || doc.id;
+            
+            container.innerHTML = `
+                <div class="annotation-toolbar" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <button class="btn btn-outline" onclick="addNewNote('${docId}')" title="Add Note">
+                        📝 Add Note
+                    </button>
+                    <button class="btn btn-outline" onclick="addNewHighlight('${docId}')" title="Add Highlight">
+                        ✨ Highlight
+                    </button>
+                    <button class="btn btn-outline" onclick="addNewFootnote('${docId}')" title="Add Footnote">
+                        📎 Footnote
+                    </button>
+                    <button class="btn btn-outline" onclick="showEditSuggestion('${docId}')" title="Suggest Edit">
+                        ✏️ Suggest Edit
+                    </button>
+                </div>
+                
+                <div class="annotation-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div class="stat-card" style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #92400e;">${overlay.highlights?.length || 0}</div>
+                        <div style="font-size: 12px; color: #92400e;">Highlights</div>
+                    </div>
+                    <div class="stat-card" style="background: #dbeafe; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #1e40af;">${overlay.notes?.length || 0}</div>
+                        <div style="font-size: 12px; color: #1e40af;">Notes</div>
+                    </div>
+                    <div class="stat-card" style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #065f46;">${overlay.footnotes?.length || 0}</div>
+                        <div style="font-size: 12px; color: #065f46;">Footnotes</div>
+                    </div>
+                    <div class="stat-card" style="background: #fce7f3; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #9d174d;">${overlay.edits?.length || 0}</div>
+                        <div style="font-size: 12px; color: #9d174d;">Edits</div>
+                    </div>
+                </div>
+                
+                <!-- Notes Section -->
+                <div class="result-card">
+                    <h4>📝 Notes (${overlay.notes?.length || 0})</h4>
+                    <div class="annotations-list" style="max-height: 200px; overflow-y: auto;">
+                        ${overlay.notes?.length ? overlay.notes.map(note => `
+                            <div class="annotation-item" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--gray-200);">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <span class="note-type-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 11px; background: ${note.note_type === 'legal' ? '#fee2e2' : note.note_type === 'ai' ? '#dbeafe' : '#f3f4f6'}; color: ${note.note_type === 'legal' ? '#991b1b' : note.note_type === 'ai' ? '#1e40af' : '#374151'};">
+                                            ${note.note_type.toUpperCase()}
+                                        </span>
+                                        <span class="priority-badge" style="margin-left: 8px; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: ${note.priority === 'critical' ? '#fee2e2' : note.priority === 'high' ? '#fef3c7' : '#f3f4f6'};">
+                                            ${note.priority}
+                                        </span>
+                                        ${note.resolved ? '<span style="margin-left: 8px; color: #10b981;">✓ Resolved</span>' : ''}
+                                    </div>
+                                    <button onclick="deleteAnnotation('${docId}', 'notes', '${note.id}')" style="background: none; border: none; cursor: pointer; color: var(--gray-400);" title="Delete">🗑️</button>
+                                </div>
+                                <p style="margin-top: 8px; color: var(--gray-700);">${note.content}</p>
+                                ${note.tags?.length ? `<div style="margin-top: 8px;">${note.tags.map(t => `<span style="margin-right: 4px; padding: 2px 6px; background: var(--gray-100); border-radius: 4px; font-size: 11px;">#${t}</span>`).join('')}</div>` : ''}
+                                <div style="margin-top: 8px; font-size: 11px; color: var(--gray-400);">Added: ${new Date(note.created_at).toLocaleString()}</div>
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No notes yet. Click "Add Note" to create one.</p>'}
+                    </div>
+                </div>
+                
+                <!-- Highlights Section -->
+                <div class="result-card">
+                    <h4>✨ Highlights (${overlay.highlights?.length || 0})</h4>
+                    <div class="annotations-list" style="max-height: 200px; overflow-y: auto;">
+                        ${overlay.highlights?.length ? overlay.highlights.map(hl => `
+                            <div class="annotation-item" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${getHighlightColor(hl.color)};">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <span style="color: var(--gray-600); font-style: italic;">"${hl.range?.text || 'Text selection'}"</span>
+                                    <button onclick="deleteAnnotation('${docId}', 'highlights', '${hl.id}')" style="background: none; border: none; cursor: pointer; color: var(--gray-400);" title="Delete">🗑️</button>
+                                </div>
+                                ${hl.note ? `<p style="margin-top: 8px; color: var(--gray-700);">${hl.note}</p>` : ''}
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No highlights yet.</p>'}
+                    </div>
+                </div>
+                
+                <!-- Footnotes Section -->
+                <div class="result-card">
+                    <h4>📎 Footnotes (${overlay.footnotes?.length || 0})</h4>
+                    <div class="annotations-list" style="max-height: 200px; overflow-y: auto;">
+                        ${overlay.footnotes?.length ? overlay.footnotes.map(fn => `
+                            <div class="annotation-item" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--gray-200);">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; font-size: 12px; font-weight: 600;">${fn.number}</span>
+                                        <span style="margin-left: 8px; color: var(--gray-600); font-style: italic;">"${fn.range?.text || 'Reference'}"</span>
+                                    </div>
+                                    <button onclick="deleteAnnotation('${docId}', 'footnotes', '${fn.id}')" style="background: none; border: none; cursor: pointer; color: var(--gray-400);" title="Delete">🗑️</button>
+                                </div>
+                                <p style="margin-top: 8px; color: var(--gray-700);">${fn.content}</p>
+                                ${fn.citation ? `<p style="margin-top: 4px; font-size: 12px; color: var(--gray-500);"><strong>Citation:</strong> ${fn.citation}</p>` : ''}
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No footnotes yet.</p>'}
+                    </div>
+                </div>
+                
+                <!-- Edits Section -->
+                <div class="result-card">
+                    <h4>✏️ Suggested Edits (${overlay.edits?.length || 0})</h4>
+                    <div class="annotations-list" style="max-height: 200px; overflow-y: auto;">
+                        ${overlay.edits?.length ? overlay.edits.map(edit => `
+                            <div class="annotation-item" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid ${edit.status === 'accepted' ? '#10b981' : edit.status === 'rejected' ? '#ef4444' : '#f59e0b'};">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <span class="edit-status-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 11px; background: ${edit.status === 'accepted' ? '#d1fae5' : edit.status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color: ${edit.status === 'accepted' ? '#065f46' : edit.status === 'rejected' ? '#991b1b' : '#92400e'};">
+                                        ${edit.status.toUpperCase()}
+                                    </span>
+                                    <div>
+                                        ${edit.status === 'pending' ? `
+                                            <button onclick="updateEditStatus('${docId}', '${edit.id}', 'accepted')" style="background: #10b981; border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">✓ Accept</button>
+                                            <button onclick="updateEditStatus('${docId}', '${edit.id}', 'rejected')" style="background: #ef4444; border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">✕ Reject</button>
+                                        ` : ''}
+                                        <button onclick="deleteAnnotation('${docId}', 'edits', '${edit.id}')" style="background: none; border: none; cursor: pointer; color: var(--gray-400); margin-left: 8px;" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <div style="background: #fee2e2; padding: 8px; border-radius: 4px; margin-bottom: 4px;">
+                                        <span style="color: #991b1b; text-decoration: line-through;">${edit.original_text}</span>
+                                    </div>
+                                    <div style="background: #d1fae5; padding: 8px; border-radius: 4px;">
+                                        <span style="color: #065f46;">${edit.new_text}</span>
+                                    </div>
+                                </div>
+                                ${edit.reason ? `<p style="margin-top: 8px; font-size: 12px; color: var(--gray-500);"><strong>Reason:</strong> ${edit.reason}</p>` : ''}
+                            </div>
+                        `).join('') : '<p style="color: var(--gray-500); padding: 12px;">No suggested edits yet.</p>'}
+                    </div>
+                </div>
+                
+                <!-- Processing Results Section -->
+                ${overlay.processing?.length ? `
+                <div class="result-card">
+                    <h4>🧠 AI Processing History (${overlay.processing.length})</h4>
+                    <div class="annotations-list" style="max-height: 150px; overflow-y: auto;">
+                        ${overlay.processing.map(p => `
+                            <div class="annotation-item" style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--gray-200);">
+                                <div style="font-weight: 600; color: var(--gray-700);">${p.module_name}</div>
+                                <div style="font-size: 12px; color: var(--gray-500);">
+                                    ${new Date(p.processed_at).toLocaleString()}
+                                    ${p.confidence ? ` • ${(p.confidence * 100).toFixed(1)}% confidence` : ''}
+                                    ${p.processing_time_ms ? ` • ${p.processing_time_ms}ms` : ''}
+                                </div>
+                                ${p.suggestions?.length ? `<div style="margin-top: 8px;"><strong>Suggestions:</strong> ${p.suggestions.slice(0, 3).join(', ')}${p.suggestions.length > 3 ? '...' : ''}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        function getHighlightColor(color) {
+            const colors = {
+                yellow: '#fef08a',
+                green: '#bbf7d0',
+                blue: '#bfdbfe',
+                pink: '#fbcfe8',
+                red: '#fecaca'
+            };
+            return colors[color] || colors.yellow;
+        }
+        
+        async function addNewNote(docId) {
+            const content = prompt('Enter your note:');
+            if (!content) return;
+            
+            const noteType = prompt('Note type (user/legal/ai):', 'user') || 'user';
+            const priority = prompt('Priority (low/normal/high/critical):', 'normal') || 'normal';
+            const tagsInput = prompt('Tags (comma-separated):', '');
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ content, note_type: noteType, priority, tags })
+                });
+                
+                if (response.ok) {
+                    showToast('Note added successfully', 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to add note');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function addNewHighlight(docId) {
+            const text = prompt('Text to highlight:');
+            if (!text) return;
+            
+            const colors = ['yellow', 'green', 'blue', 'pink', 'red'];
+            const color = prompt('Color (yellow/green/blue/pink/red):', 'yellow') || 'yellow';
+            const note = prompt('Add a note to this highlight (optional):');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/highlights`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        range: { start_offset: 0, end_offset: text.length, text },
+                        color: colors.includes(color) ? color : 'yellow',
+                        note
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Highlight added successfully', 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to add highlight');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function addNewFootnote(docId) {
+            const text = prompt('Text to reference:');
+            if (!text) return;
+            
+            const content = prompt('Footnote content:');
+            if (!content) return;
+            
+            const citation = prompt('Legal citation (optional):');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/footnotes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        range: { start_offset: 0, end_offset: text.length, text },
+                        content,
+                        citation: citation || null
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Footnote added successfully', 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to add footnote');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function showEditSuggestion(docId) {
+            const original = prompt('Original text to change:');
+            if (!original) return;
+            
+            const newText = prompt('Suggested replacement:');
+            if (!newText) return;
+            
+            const reason = prompt('Reason for this edit (optional):');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/edits`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        range: { start_offset: 0, end_offset: original.length, text: original },
+                        original_text: original,
+                        new_text: newText,
+                        edit_type: 'replace',
+                        reason: reason || null
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Edit suggestion added', 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to add edit suggestion');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function updateEditStatus(docId, editId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/edits/${editId}?status=${status}`, {
+                    method: 'PATCH',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    showToast(`Edit ${status}`, 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to update edit');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function deleteAnnotation(docId, type, itemId) {
+            if (!confirm(`Delete this ${type.slice(0, -1)}?`)) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/overlays/${docId}/${type}/${itemId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    showToast('Deleted successfully', 'success');
+                    const doc = documents.find(d => d.id === selectedDocId);
+                    if (doc) showAnnotations(doc);
+                } else {
+                    throw new Error('Failed to delete');
+                }
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+            }
         }
 
         // =====================================================================
