@@ -3,29 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semptify - Redirecting...</title>
-    <!-- Unified Entry Point: Redirect to Dashboard -->
-    <script>
-        // Redirect all traffic to the unified dashboard entry point
-        window.location.replace('/');
-    </script>
-    <meta http-equiv="refresh" content="0;url=/">
+    <title>Semptify - The Tenant's Journal</title>
     <style>
-        body { 
-            font-family: system-ui, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #1e3a5f;
-            color: white;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    </style>
-</head>
-<body>
-    <p>Redirecting to Semptify Dashboard... <a href="/" style="color: #3b82f6;">Click here</a> if not redirected.</p>
-</body>
-</html>
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #3b82f6;
+            --warm: #f59e0b;
+            --text: #1e293b;
+            --text-light: #475569;
+            --bg: #fdfcfa;
+            --paper: #ffffff;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .header .tagline {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.75;
+            margin-top: 0.5rem;
+        }
+
+        /* Article Container */
+        .article {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--paper);
+        }
+
+        /* Section styling */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 400;
+            border-bottom: 2px solid #e2e8f0;
             padding-bottom: 0.5rem;
         }
 
@@ -512,11 +563,8 @@
 
         <!-- CTA -->
         <div class="cta">
-            <a href="/static/storage_setup.html" class="cta-button">Start Your Tenant Journal</a>
+            <a href="/dashboard" class="cta-button">Start Your Tenant Journal</a>
             <p>Free to use. Your documents stay in your control.</p>
-            <p style="margin-top: 0.5rem; font-size: 0.85rem;">
-                <a href="/static/home.html" style="color: var(--accent);">Already have an account? Go to Dashboard →</a>
-            </p>
         </div>
 
     </article>
@@ -528,15 +576,5 @@
         </p>
     </footer>
 
-    <!-- Help System -->
-    <script src="/static/js/help-system.js"></script>
-    <script src="/static/js/semptify-auth.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof SemptifyHelp !== 'undefined') {
-                SemptifyHelp.init('welcome');
-            }
-        });
-    </script>
 </body>
 </html>

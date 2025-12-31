@@ -3,29 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semptify - Redirecting...</title>
-    <!-- Unified Entry Point: Redirect to Dashboard -->
-    <script>
-        // Redirect all traffic to the unified dashboard entry point
-        window.location.replace('/');
-    </script>
-    <meta http-equiv="refresh" content="0;url=/">
+    <title>Semptify - The Tenant's Journal</title>
     <style>
-        body { 
-            font-family: system-ui, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #1e3a5f;
-            color: white;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    </style>
-</head>
-<body>
-    <p>Redirecting to Semptify Dashboard... <a href="/" style="color: #3b82f6;">Click here</a> if not redirected.</p>
-</body>
-</html>
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a87;
+            --accent: #3b82f6;
+            --warm: #f59e0b;
+            --text: #1e293b;
+            --text-light: #475569;
+            --bg: #fdfcfa;
+            --paper: #ffffff;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 17px;
         }
 
         /* Header */
