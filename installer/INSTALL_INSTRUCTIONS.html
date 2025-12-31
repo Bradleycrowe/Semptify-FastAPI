@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semptify 5.0 - Installation Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 .icon {
+            font-size: 1.5rem;
+        }
+        
+        .quick-start {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid var(--success);
+        }
+        
+        .quick-start h2 {
+            color: var(--success);
+        }
+        
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .step:last-child {
+            border-bottom: none;
+        }
+        
+        .step-number {
+            counter-increment: step;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .step-number::before {
+            content: counter(step);
+        }
+        
+        .step-content h3 {
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+        
+        .step-content p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        code {
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+        }
+        
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .file-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .req-item {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .req-item .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .req-item .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        
+        .success-box {
+            background: #dcfce7;
+            border-left: 4px solid var(--success);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg);
+            font-weight: 600;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .credentials-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid var(--warning);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+        
+        .credentials-box h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .cred-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #d97706;
+        }
+        
+        .cred-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cred-label {
+            font-weight: 500;
+        }
+        
+        .cred-value {
+            font-family: 'Consolas', monospace;
+            background: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .toc {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+        }
+        
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .step {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SEMPTIFY</h1>
+            <p>Tenant Rights Protection Platform</p>
+            <div class="version-badge">Version 5.0 - Windows Edition</div>
+        </header>
+
+        <!-- Quick Start -->
+        <div class="card quick-start">
+            <h2><span class="icon">&#9889;</span> Quick Install (2 Minutes)</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Run the Installer</h3>
+                        <p>Right-click <code>Install-Semptify.bat</code> and select <strong>"Run as administrator"</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Wait for Installation</h3>
+                        <p>The installer will automatically set up Python, PostgreSQL, and all dependencies</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Launch Semptify</h3>
+                        <p>Double-click the <strong>Semptify</strong> shortcut on your desktop, then open <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="card">
+            <h2><span class="icon">&#128196;</span> Contents</h2>
+            <div class="toc">
+                <ul>
+                    <li><a href="#requirements">System Requirements</a></li>
+                    <li><a href="#included">What's Included</a></li>
+                    <li><a href="#auto-install">Automatic Installation</a></li>
+                    <li><a href="#manual-install">Manual Installation</a></li>
+                    <li><a href="#postgresql">PostgreSQL Setup</a></li>
+                    <li><a href="#credentials">Database Credentials</a></li>
+                    <li><a href="#starting">Starting Semptify</a></li>
+                    <li><a href="#service">Windows Service (Auto-Start)</a></li>
+                    <li><a href="#troubleshooting">Troubleshooting</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- System Requirements -->
+        <div class="card" id="requirements">
+            <h2><span class="icon">&#128187;</span> System Requirements</h2>
+            <div class="requirements-grid">
+                <div class="req-item">
+                    <div class="value">Windows 10+</div>
+                    <div class="label">Operating System</div>
+                </div>
+                <div class="req-item">
+                    <div class="value">4 GB</div>
+                    <div class="label">Minimum RAM</div>
+                </div>
+                <div class="req-item">
+                    <div class="value">2 GB</div>
+                    <div class="label">Disk Space</div>
+                </div>
+                <div class="req-item">
+                    <div class="value">Python 3.11+</div>
+                    <div class="label">Runtime (Included)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What's Included -->
+        <div class="card" id="included">
+            <h2><span class="icon">&#128230;</span> What's Included</h2>
+            <table>
+                <tr>
+                    <th>File/Folder</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Install-Semptify.bat</code></td>
+                    <td>One-click installer (run as admin)</td>
+                </tr>
+                <tr>
+                    <td><code>install_semptify.ps1</code></td>
+                    <td>PowerShell installer with options</td>
+                </tr>
+                <tr>
+                    <td><code>postgresql/</code></td>
+                    <td>PostgreSQL 16 installer (offline)</td>
+                </tr>
+                <tr>
+                    <td><code>python/</code></td>
+                    <td>Python 3.12 installer (offline)</td>
+                </tr>
+                <tr>
+                    <td><code>START.ps1</code></td>
+                    <td>Launch Semptify server</td>
+                </tr>
+                <tr>
+                    <td><code>app/</code></td>
+                    <td>Semptify application code</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Automatic Installation -->
+        <div class="card" id="auto-install">
+            <h2><span class="icon">&#9881;</span> Automatic Installation</h2>
+            <p>The easiest way to install Semptify:</p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Locate the Installer</h3>
+                        <p>Find <code>Install-Semptify.bat</code> in the extracted folder</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Run as Administrator</h3>
+                        <p>Right-click the file and select <strong>"Run as administrator"</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Follow the Prompts</h3>
+                        <p>The installer will:</p>
+                        <ul>
+                            <li>Install Python 3.12 (if not present)</li>
+                            <li>Install PostgreSQL 16 (if not present)</li>
+                            <li>Create virtual environment</li>
+                            <li>Install all dependencies</li>
+                            <li>Configure the database</li>
+                            <li>Create desktop shortcut</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>Advanced Options:</strong> Run PowerShell as administrator and use:
+                <pre><code>.\install_semptify.ps1 -InstallService    # Auto-start on boot
+.\install_semptify.ps1 -InstallPath "D:\Semptify"   # Custom location</code></pre>
+            </div>
+        </div>
+
+        <!-- PostgreSQL Setup -->
+        <div class="card" id="postgresql">
+            <h2><span class="icon">&#128451;</span> PostgreSQL Database Setup</h2>
+            
+            <h3 style="margin-top: 15px;">Option A: Use Included Installer (Offline)</h3>
+            <p>Run the PostgreSQL installer from the <code>postgresql/</code> folder:</p>
+            <pre><code>postgresql\postgresql-16-windows-x64.exe</code></pre>
+            <p>During installation:</p>
+            <ul>
+                <li>Set password to: <code>Semptify2024!</code></li>
+                <li>Keep default port: <code>5432</code></li>
+                <li>Select your locale</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">Option B: Auto-Install via Script</h3>
+            <p>The <code>install_semptify.ps1</code> script can download and install PostgreSQL automatically if you have internet access.</p>
+
+            <h3 style="margin-top: 20px;">Create the Database</h3>
+            <p>After PostgreSQL is installed, open Command Prompt and run:</p>
+            <pre><code>cd "C:\Program Files\PostgreSQL\16\bin"
+psql -U postgres -c "CREATE DATABASE semptify;"</code></pre>
+        </div>
+
+        <!-- Database Credentials -->
+        <div class="credentials-box" id="credentials">
+            <h3>&#128272; Database Credentials</h3>
+            <div class="cred-item">
+                <span class="cred-label">Host:</span>
+                <span class="cred-value">localhost</span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Port:</span>
+                <span class="cred-value">5432</span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Database:</span>
+                <span class="cred-value">semptify</span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Username:</span>
+                <span class="cred-value">postgres</span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Password:</span>
+                <span class="cred-value">Semptify2024!</span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Connection String:</span>
+                <span class="cred-value" style="font-size: 0.8rem;">postgresql+asyncpg://postgres:Semptify2024!@localhost:5432/semptify</span>
+            </div>
+        </div>
+
+        <!-- Starting Semptify -->
+        <div class="card" id="starting">
+            <h2><span class="icon">&#9654;</span> Starting Semptify</h2>
+            
+            <h3>Option 1: Desktop Shortcut</h3>
+            <p>Double-click the <strong>Semptify</strong> shortcut on your desktop</p>
+            
+            <h3 style="margin-top: 15px;">Option 2: START Script</h3>
+            <p>Double-click <code>START.ps1</code> or run:</p>
+            <pre><code>cd C:\Semptify\Semptify-FastAPI
+.\START.ps1</code></pre>
+
+            <h3 style="margin-top: 15px;">Option 3: Manual Command</h3>
+            <pre><code>cd C:\Semptify\Semptify-FastAPI
+.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000</code></pre>
+
+            <div class="success-box">
+                <strong>Access Points:</strong><br>
+                &#127760; Web Interface: <a href="http://localhost:8000" target="_blank">http://localhost:8000</a><br>
+                &#128214; API Documentation: <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a>
+            </div>
+        </div>
+
+        <!-- Windows Service -->
+        <div class="card" id="service">
+            <h2><span class="icon">&#128736;</span> Windows Service (Auto-Start)</h2>
+            <p>To have Semptify start automatically when Windows boots:</p>
+            
+            <pre><code># Install as service (requires NSSM)
+.\install_semptify.ps1 -InstallService
+
+# Or manually with NSSM:
+nssm install Semptify "C:\Semptify\Semptify-FastAPI\.venv\Scripts\python.exe"
+nssm set Semptify AppParameters "-m uvicorn app.main:app --host 0.0.0.0 --port 8000"
+nssm set Semptify AppDirectory "C:\Semptify\Semptify-FastAPI"
+nssm start Semptify</code></pre>
+
+            <p style="margin-top: 15px;">Service commands:</p>
+            <pre><code>Start-Service Semptify    # Start the service
+Stop-Service Semptify     # Stop the service
+Restart-Service Semptify  # Restart the service</code></pre>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="card" id="troubleshooting">
+            <h2><span class="icon">&#128295;</span> Troubleshooting</h2>
+            
+            <h3>"Python not found"</h3>
+            <p>Install Python from the included <code>python/</code> folder, or download from <a href="https://python.org" target="_blank">python.org</a></p>
+            <pre><code>python\python-3.12.0-amd64.exe</code></pre>
+            
+            <h3 style="margin-top: 15px;">"PostgreSQL connection failed"</h3>
+            <p>Check if PostgreSQL service is running:</p>
+            <pre><code>Get-Service postgresql*
+Start-Service postgresql-x64-16</code></pre>
+
+            <h3 style="margin-top: 15px;">"Port 8000 already in use"</h3>
+            <p>Find and stop the process using port 8000:</p>
+            <pre><code>netstat -ano | findstr :8000
+taskkill /PID [process_id] /F</code></pre>
+            <p>Or use a different port:</p>
+            <pre><code>.venv\Scripts\python.exe -m uvicorn app.main:app --port 8080</code></pre>
+
+            <h3 style="margin-top: 15px;">"Cannot connect to database"</h3>
+            <p>Verify the database exists:</p>
+            <pre><code>cd "C:\Program Files\PostgreSQL\16\bin"
+psql -U postgres -l</code></pre>
+            <p>Create it if missing:</p>
+            <pre><code>psql -U postgres -c "CREATE DATABASE semptify;"</code></pre>
+
+            <h3 style="margin-top: 15px;">Reset Database Password</h3>
+            <pre><code>cd "C:\Program Files\PostgreSQL\16\bin"
+psql -U postgres -c "ALTER USER postgres PASSWORD 'Semptify2024!';"</code></pre>
+        </div>
+
+        <!-- Manual Installation -->
+        <div class="card" id="manual-install">
+            <h2><span class="icon">&#128736;</span> Manual Installation Steps</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Install Python 3.12</h3>
+                        <p>Run <code>python\python-3.12.0-amd64.exe</code><br>
+                        &#9745; Check "Add Python to PATH"</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Install PostgreSQL 16</h3>
+                        <p>Run <code>postgresql\postgresql-16-windows-x64.exe</code><br>
+                        Set password: <code>Semptify2024!</code></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Create Virtual Environment</h3>
+                        <pre><code>cd C:\Semptify\Semptify-FastAPI
+python -m venv .venv
+.venv\Scripts\activate</code></pre>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Install Dependencies</h3>
+                        <pre><code>pip install -r requirements.txt</code></pre>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Configure Environment</h3>
+                        <p>Copy <code>.env.example</code> to <code>.env</code> and update settings</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Create Database</h3>
+                        <pre><code>cd "C:\Program Files\PostgreSQL\16\bin"
+psql -U postgres -c "CREATE DATABASE semptify;"</code></pre>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Initialize Tables</h3>
+                        <pre><code>cd C:\Semptify\Semptify-FastAPI
+.venv\Scripts\python.exe scripts\init_postgres.py</code></pre>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Start Semptify</h3>
+                        <pre><code>.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Semptify 5.0</strong> - Empowering Tenants, Protecting Rights</p>
+            <p>For support, visit <a href="https://github.com/Bradleycrowe/Semptify5.0">GitHub Repository</a></p>
+        </footer>
+    </div>
+</body>
+</html>

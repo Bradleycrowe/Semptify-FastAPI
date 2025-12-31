@@ -130,33 +130,46 @@ foreach ($path in $pythonPaths) {
 if (-not $pythonCmd -and -not $SkipPython) {
     Write-Step "Installing Python 3.12"
     
-    try {
-        winget install Python.Python.3.12 --accept-package-agreements --accept-source-agreements
-        
-        # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-        
-        # Find python again
-        foreach ($path in $pythonPaths) {
-            try {
-                $version = & $path --version 2>$null
-                if ($version -match "Python 3") {
-                    $pythonCmd = $path
-                    break
-                }
-            } catch {}
+    # Check for offline installer first
+    $offlinePython = Join-Path $ScriptDir "python\python-3.12.0-amd64.exe"
+    if (-not (Test-Path $offlinePython)) {
+        $offlinePython = Join-Path $ScriptDir "..\python\python-3.12.0-amd64.exe"
+    }
+    
+    if (Test-Path $offlinePython) {
+        Write-Info "Using offline Python installer"
+        Start-Process -FilePath $offlinePython -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0" -Wait
+    } else {
+        # Try winget
+        try {
+            winget install Python.Python.3.12 --accept-package-agreements --accept-source-agreements
+        } catch {
+            Write-Error "Failed to install Python: $_"
+            Write-Info "Please install Python 3.11+ manually from https://python.org"
+            Write-Info "Or place python-3.12.0-amd64.exe in the python/ folder"
+            exit 1
         }
-        
-        if ($pythonCmd) {
-            Write-Success "Python installed successfully"
-        } else {
-            Write-Error "Python installation may require system restart"
-            Write-Info "After restart, run this installer again with -SkipPython"
-        }
-    } catch {
-        Write-Error "Failed to install Python: $_"
-        Write-Info "Please install Python 3.11+ manually from https://python.org"
-        exit 1
+    }
+    
+    # Refresh PATH
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    
+    # Find python again
+    foreach ($path in $pythonPaths) {
+        try {
+            $version = & $path --version 2>$null
+            if ($version -match "Python 3") {
+                $pythonCmd = $path
+                break
+            }
+        } catch {}
+    }
+    
+    if ($pythonCmd) {
+        Write-Success "Python installed successfully"
+    } else {
+        Write-Error "Python installation may require system restart"
+        Write-Info "After restart, run this installer again with -SkipPython"
     }
 }
 
@@ -184,21 +197,51 @@ if ($UsePostgreSQL) {
     } else {
         Write-Step "Installing PostgreSQL 16"
         
-        try {
-            winget install PostgreSQL.PostgreSQL.16 --accept-package-agreements --accept-source-agreements
+        # Check for offline installer first
+        $offlinePostgres = Join-Path $ScriptDir "postgresql\postgresql-16-windows-x64.exe"
+        if (-not (Test-Path $offlinePostgres)) {
+            $offlinePostgres = Join-Path $ScriptDir "..\postgresql\postgresql-16-windows-x64.exe"
+        }
+        
+        if (Test-Path $offlinePostgres) {
+            Write-Info "Using offline PostgreSQL installer"
+            Write-Info "IMPORTANT: Set password to: $PostgresPassword"
+            
+            # Run PostgreSQL installer with unattended options
+            $pgArgs = @(
+                "--mode", "unattended",
+                "--unattendedmodeui", "minimal",
+                "--superpassword", $PostgresPassword,
+                "--serverport", "5432",
+                "--servicename", "postgresql-x64-16"
+            )
+            
+            Start-Process -FilePath $offlinePostgres -ArgumentList $pgArgs -Wait
             
             Start-Sleep -Seconds 5
-            
             $pgService = Get-Service postgresql* -ErrorAction SilentlyContinue
             if ($pgService) {
-                Write-Success "PostgreSQL installed successfully"
-            } else {
-                Write-Info "PostgreSQL installed - may require restart to start service"
+                Write-Success "PostgreSQL installed successfully from offline installer"
             }
-        } catch {
-            Write-Error "Failed to install PostgreSQL: $_"
-            Write-Info "Falling back to SQLite database"
-            $UsePostgreSQL = $false
+        } else {
+            # Try winget
+            try {
+                winget install PostgreSQL.PostgreSQL.16 --accept-package-agreements --accept-source-agreements
+                
+                Start-Sleep -Seconds 5
+                
+                $pgService = Get-Service postgresql* -ErrorAction SilentlyContinue
+                if ($pgService) {
+                    Write-Success "PostgreSQL installed successfully"
+                } else {
+                    Write-Info "PostgreSQL installed - may require restart to start service"
+                }
+            } catch {
+                Write-Error "Failed to install PostgreSQL: $_"
+                Write-Info "Falling back to SQLite database"
+                Write-Info "Or place postgresql-16-windows-x64.exe in the postgresql/ folder"
+                $UsePostgreSQL = $false
+            }
         }
     }
 }

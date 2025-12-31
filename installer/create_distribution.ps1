@@ -125,7 +125,8 @@ $installerFiles = @(
     "Install-Semptify.bat",
     "install_semptify.ps1",
     "WINDOWS_INSTALL_GUIDE.md",
-    "DISTRIBUTION_README.md"
+    "DISTRIBUTION_README.md",
+    "INSTALL_INSTRUCTIONS.html"
 )
 
 foreach ($file in $installerFiles) {
@@ -134,6 +135,25 @@ foreach ($file in $installerFiles) {
         Copy-Item $srcPath $packageDir -Force
         Write-Host "    [OK] $file" -ForegroundColor Green
     }
+}
+
+# Copy offline dependencies if they exist
+$depsPath = Join-Path $ProjectRoot "installer\dependencies"
+if (Test-Path $depsPath) {
+    Write-Host "    Copying offline installers..." -ForegroundColor Gray
+    Copy-Item $depsPath $packageDir -Recurse -Force
+    # Move subfolders to root level for easier access
+    $postgresDir = Join-Path $packageDir "dependencies\postgresql"
+    $pythonDir = Join-Path $packageDir "dependencies\python"
+    if (Test-Path $postgresDir) {
+        Move-Item $postgresDir $packageDir -Force
+        Write-Host "    [OK] postgresql/ (offline installer)" -ForegroundColor Green
+    }
+    if (Test-Path $pythonDir) {
+        Move-Item $pythonDir $packageDir -Force
+        Write-Host "    [OK] python/ (offline installer)" -ForegroundColor Green
+    }
+    Remove-Item (Join-Path $packageDir "dependencies") -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 # Rename DISTRIBUTION_README.md to README-INSTALL.md in root
