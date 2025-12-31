@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crawler Control Panel - Semptify</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .logo { 
+            font-size: 1.5rem; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo-icon { font-size: 1.8rem; }
+        .nav-links { display: flex; gap: 1rem; }
+        .nav-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 1600px; margin: 0 auto; padding: 2rem; }
+        .page-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .page-subtitle { color: #93c5fd; margin-bottom: 2rem; }
+        
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Panel Styles */
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #e0f2fe;
+        }
+        .panel-title-icon { font-size: 1.2rem; }
+        
+        /* Sidebar - Crawler Types */
+        .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .crawler-type-card {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .crawler-type-card:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(59,130,246,0.3);
+        }
+        .crawler-type-card.active {
+            background: rgba(59,130,246,0.2);
+            border-color: #3b82f6;
+        }
+        .crawler-type-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .crawler-type-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .crawler-type-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            background: rgba(59,130,246,0.3);
+            color: #93c5fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        /* Main Content Area */
+        .main-content { display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        /* URL Input Section */
+        .url-section { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .url-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .url-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 1rem;
+        }
+        .url-input::placeholder { color: #64748b; }
+        .url-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .url-list {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .url-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .url-item:last-child { border-bottom: none; }
+        .url-text {
+            font-size: 0.9rem;
+            color: #93c5fd;
+            word-break: break-all;
+            flex: 1;
+            margin-right: 1rem;
+        }
+        .url-remove {
+            background: rgba(239,68,68,0.2);
+            color: #fca5a5;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .url-remove:hover { background: rgba(239,68,68,0.4); }
+        
+        /* Preset URLs */
+        .preset-urls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .preset-url {
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #93c5fd;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-url:hover {
+            background: rgba(59,130,246,0.3);
+            border-color: #3b82f6;
+        }
+        
+        /* Parameters Section */
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .param-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .param-hint {
+            color: #64748b;
+            font-size: 0.75rem;
+            cursor: help;
+        }
+        .param-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .param-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .param-input[type="number"] { width: 100%; }
+        
+        .param-select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .param-select option { background: #1e293b; color: white; }
+        
+        .param-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .param-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+        
+        /* Information Sought Section */
+        .info-sought-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+        .info-tag {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .info-tag:hover {
+            background: rgba(255,255,255,0.12);
+        }
+        .info-tag.selected {
+            background: rgba(34,197,94,0.2);
+            border-color: #22c55e;
+        }
+        .info-tag-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: #22c55e;
+        }
+        .info-tag-label { font-size: 0.9rem; }
+        
+        /* Custom Keywords */
+        .keywords-input {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .keywords-input::placeholder { color: #64748b; }
+        
+        /* Buttons */
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn:disabled { background: #475569; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .btn-success { background: #22c55e; }
+        .btn-success:hover { background: #16a34a; }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.9rem; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        /* Results/Output Section */
+        .output-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            min-height: 300px;
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .output-title { font-weight: 600; }
+        .output-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #64748b;
+        }
+        .status-dot.running { background: #fbbf24; animation: pulse 1s infinite; }
+        .status-dot.success { background: #22c55e; }
+        .status-dot.error { background: #ef4444; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .output-body {
+            padding: 1rem 1.25rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .output-line { margin-bottom: 0.25rem; }
+        .output-line.info { color: #93c5fd; }
+        .output-line.success { color: #86efac; }
+        .output-line.warning { color: #fde047; }
+        .output-line.error { color: #fca5a5; }
+        .output-line.data { color: #e0f2fe; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin: 1rem 1.25rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #22c55e);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Results Cards */
+        .results-grid {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+        }
+        .result-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+        .result-card:hover { background: rgba(255,255,255,0.12); }
+        .result-card-title {
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 0.5rem;
+        }
+        .result-card-title a { color: inherit; text-decoration: none; }
+        .result-card-title a:hover { text-decoration: underline; }
+        .result-card-content {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .result-card-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .result-tag {
+            background: rgba(59,130,246,0.2);
+            color: #93c5fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        /* Saved Configs */
+        .saved-configs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .config-chip {
+            background: rgba(139,92,246,0.2);
+            border: 1px solid rgba(139,92,246,0.3);
+            color: #c4b5fd;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .config-chip:hover { background: rgba(139,92,246,0.3); }
+        .config-chip-delete {
+            margin-left: 0.25rem;
+            opacity: 0.7;
+        }
+        .config-chip-delete:hover { opacity: 1; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🕷️</span>
+            Crawler Control Panel
+        </div>
+        <nav class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/static/crawler.html">🔍 Search</a>
+            <a href="/docs">📚 API Docs</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Web Crawler Configuration</h1>
+        <p class="page-subtitle">Configure crawlers, set parameters, add custom URLs, and specify what information to extract</p>
+        
+        <div class="main-grid">
+            <!-- Sidebar - Crawler Types -->
+            <aside class="sidebar">
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">🔧</span>
+                        Crawler Type
+                    </div>
+                    
+                    <div class="crawler-type-card active" data-crawler="api" onclick="selectCrawler('api')">
+                        <div class="crawler-type-name">📡 API Crawler</div>
+                        <div class="crawler-type-desc">Crawl public APIs and aggregate data from multiple sources</div>
+                        <span class="crawler-type-badge">Real-time</span>
+                    </div>
+                    
+                    <div class="crawler-type-card" data-crawler="eviction" onclick="selectCrawler('eviction')">
+                        <div class="crawler-type-name">⚖️ Eviction Crawler</div>
+                        <div class="crawler-type-desc">Batch crawl eviction records and legal resources</div>
+                        <span class="crawler-type-badge">Batch</span>
+                    </div>
+                    
+                    <div class="crawler-type-card" data-crawler="app" onclick="selectCrawler('app')">
+                        <div class="crawler-type-name">🔍 App Auditor</div>
+                        <div class="crawler-type-desc">Crawl and audit internal application pages</div>
+                        <span class="crawler-type-badge">Internal</span>
+                    </div>
+                    
+                    <div class="crawler-type-card" data-crawler="custom" onclick="selectCrawler('custom')">
+                        <div class="crawler-type-name">⚙️ Custom Crawler</div>
+                        <div class="crawler-type-desc">Define custom crawl targets with full parameter control</div>
+                        <span class="crawler-type-badge">Advanced</span>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">💾</span>
+                        Saved Configurations
+                    </div>
+                    <div class="saved-configs" id="savedConfigs">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn btn-secondary btn-sm" style="margin-top:1rem; width:100%" onclick="saveConfig()">
+                        💾 Save Current Config
+                    </button>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">📊</span>
+                        Quick Stats
+                    </div>
+                    <div style="font-size:0.9rem; color:#94a3b8">
+                        <p>URLs in queue: <span id="statUrls" style="color:#93c5fd">0</span></p>
+                        <p>Info types selected: <span id="statInfo" style="color:#93c5fd">0</span></p>
+                        <p>Last crawl: <span id="statLast" style="color:#93c5fd">Never</span></p>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- URLs Section -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">🌐</span>
+                        Target URLs
+                    </div>
+                    
+                    <div class="url-section">
+                        <div class="url-input-wrapper">
+                            <input type="url" class="url-input" id="urlInput" 
+                                   placeholder="Enter URL to crawl (e.g., https://example.com/data)" 
+                                   onkeypress="if(event.key==='Enter') addUrl()">
+                            <button class="btn" onclick="addUrl()">+ Add</button>
+                        </div>
+                        
+                        <div class="url-list" id="urlList">
+                            <div style="padding:1rem; text-align:center; color:#64748b; font-size:0.9rem">
+                                No URLs added yet. Add URLs above or use presets below.
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:0.5rem">Quick Add Presets:</p>
+                            <div class="preset-urls" id="presetUrls">
+                                <!-- Populated based on crawler type -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Parameters Section -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">⚙️</span>
+                        Crawler Parameters
+                    </div>
+                    
+                    <div class="params-grid">
+                        <div class="param-group">
+                            <label class="param-label">
+                                Rate Limit (req/sec)
+                                <span class="param-hint tooltip" data-tip="Max requests per second">ℹ️</span>
+                            </label>
+                            <input type="number" class="param-input" id="paramRateLimit" value="1" min="0.1" max="10" step="0.1">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">
+                                Timeout (seconds)
+                                <span class="param-hint tooltip" data-tip="Request timeout">ℹ️</span>
+                            </label>
+                            <input type="number" class="param-input" id="paramTimeout" value="30" min="5" max="120">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">
+                                Max Pages
+                                <span class="param-hint tooltip" data-tip="Maximum pages to crawl">ℹ️</span>
+                            </label>
+                            <input type="number" class="param-input" id="paramMaxPages" value="50" min="1" max="1000">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">
+                                Crawl Depth
+                                <span class="param-hint tooltip" data-tip="How deep to follow links">ℹ️</span>
+                            </label>
+                            <input type="number" class="param-input" id="paramDepth" value="2" min="1" max="10">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">User Agent</label>
+                            <select class="param-select" id="paramUserAgent">
+                                <option value="semptify">Semptify Crawler/1.0</option>
+                                <option value="googlebot">Googlebot</option>
+                                <option value="chrome">Chrome Browser</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">Output Format</label>
+                            <select class="param-select" id="paramFormat">
+                                <option value="json">JSON</option>
+                                <option value="csv">CSV</option>
+                                <option value="markdown">Markdown</option>
+                            </select>
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label param-checkbox-group">
+                                <input type="checkbox" class="param-checkbox" id="paramRespectRobots" checked>
+                                Respect robots.txt
+                            </label>
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label param-checkbox-group">
+                                <input type="checkbox" class="param-checkbox" id="paramFollowLinks">
+                                Follow external links
+                            </label>
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label param-checkbox-group">
+                                <input type="checkbox" class="param-checkbox" id="paramSaveCache" checked>
+                                Cache results
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Information Sought Section -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <span class="panel-title-icon">🎯</span>
+                        Information Sought
+                    </div>
+                    <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:1rem">Select what data to extract from crawled pages:</p>
+                    
+                    <div class="info-sought-grid" id="infoSoughtGrid">
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="statutes" checked>
+                            <span class="info-tag-label">📜 Statutes & Laws</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="case_citations">
+                            <span class="info-tag-label">⚖️ Case Citations</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="contact_info">
+                            <span class="info-tag-label">📞 Contact Info</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="addresses">
+                            <span class="info-tag-label">📍 Addresses</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="dates">
+                            <span class="info-tag-label">📅 Dates & Deadlines</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="legal_forms">
+                            <span class="info-tag-label">📄 Legal Forms</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="definitions">
+                            <span class="info-tag-label">📖 Definitions</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="procedures">
+                            <span class="info-tag-label">📋 Procedures</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="fees_costs">
+                            <span class="info-tag-label">💰 Fees & Costs</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="tenant_rights">
+                            <span class="info-tag-label">🏠 Tenant Rights</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="landlord_info">
+                            <span class="info-tag-label">🏢 Landlord Info</span>
+                        </label>
+                        <label class="info-tag" onclick="toggleInfoTag(this)">
+                            <input type="checkbox" class="info-tag-checkbox" value="court_info">
+                            <span class="info-tag-label">🏛️ Court Info</span>
+                        </label>
+                    </div>
+                    
+                    <input type="text" class="keywords-input" id="customKeywords" 
+                           placeholder="Add custom keywords to search for (comma-separated): e.g., eviction notice, security deposit, lease termination">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="startCrawlBtn" onclick="startCrawl()">
+                        🚀 Start Crawl
+                    </button>
+                    <button class="btn btn-secondary" onclick="previewConfig()">
+                        👁️ Preview Config
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportConfig()">
+                        📤 Export Config
+                    </button>
+                    <button class="btn btn-danger" onclick="resetForm()">
+                        🔄 Reset
+                    </button>
+                </div>
+                
+                <!-- Output Section -->
+                <div class="output-section">
+                    <div class="output-header">
+                        <span class="output-title">📊 Crawl Output</span>
+                        <div class="output-status">
+                            <span class="status-dot" id="statusDot"></span>
+                            <span id="statusText">Ready</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar" id="progressBar" style="display:none">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="output-body" id="outputBody">
+                        <div style="text-align:center; padding:3rem; color:#64748b">
+                            <p style="font-size:2rem; margin-bottom:1rem">🕷️</p>
+                            <p>Configure your crawl settings and click "Start Crawl" to begin.</p>
+                            <p style="font-size:0.85rem; margin-top:0.5rem">Results will appear here in real-time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        let currentCrawler = 'api';
+        let urls = [];
+        let savedConfigs = JSON.parse(localStorage.getItem('semptify_crawler_configs') || '[]');
+        let crawlRunning = false;
+        
+        // Preset URLs for each crawler type
+        const presets = {
+            api: [
+                { label: 'MN Statutes', url: 'https://www.revisor.mn.gov/statutes' },
+                { label: 'MN Courts', url: 'https://www.mncourts.gov' },
+                { label: 'Legal Aid MN', url: 'https://www.lawhelpmn.org' },
+                { label: 'HUD Gov', url: 'https://www.hud.gov' },
+            ],
+            eviction: [
+                { label: 'MN Tenant Rights', url: 'https://www.ag.state.mn.us/consumer/handbooks/lt/default.asp' },
+                { label: 'Chapter 504B', url: 'https://www.revisor.mn.gov/statutes/cite/504B' },
+                { label: 'Eviction Forms', url: 'https://www.mncourts.gov/GetForms.aspx?c=10' },
+            ],
+            app: [
+                { label: 'Dashboard', url: '/dashboard' },
+                { label: 'Cases', url: '/cases' },
+                { label: 'Documents', url: '/documents' },
+                { label: 'All Pages', url: '/' },
+            ],
+            custom: [
+                { label: 'Google', url: 'https://www.google.com' },
+                { label: 'Wikipedia', url: 'https://en.wikipedia.org' },
+            ]
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPresets();
+            renderSavedConfigs();
+            updateStats();
+        });
+        
+        // Crawler Selection
+        function selectCrawler(type) {
+            currentCrawler = type;
+            document.querySelectorAll('.crawler-type-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.crawler === type);
+            });
+            renderPresets();
+            
+            // Adjust defaults per crawler type
+            if (type === 'eviction') {
+                document.getElementById('paramMaxPages').value = 100;
+                document.getElementById('paramDepth').value = 3;
+            } else if (type === 'app') {
+                document.getElementById('paramMaxPages').value = 200;
+                document.getElementById('paramRateLimit').value = 5;
+            }
+        }
+        
+        // Render preset URLs
+        function renderPresets() {
+            const container = document.getElementById('presetUrls');
+            const crawlerPresets = presets[currentCrawler] || [];
+            container.innerHTML = crawlerPresets.map(p => 
+                `<button class="preset-url" onclick="addPresetUrl('${p.url}')">${p.label}</button>`
+            ).join('');
+        }
+        
+        // URL Management
+        function addUrl() {
+            const input = document.getElementById('urlInput');
+            const url = input.value.trim();
+            if (url && !urls.includes(url)) {
+                urls.push(url);
+                renderUrls();
+                input.value = '';
+                updateStats();
+            }
+        }
+        
+        function addPresetUrl(url) {
+            if (!urls.includes(url)) {
+                urls.push(url);
+                renderUrls();
+                updateStats();
+            }
+        }
+        
+        function removeUrl(index) {
+            urls.splice(index, 1);
+            renderUrls();
+            updateStats();
+        }
+        
+        function renderUrls() {
+            const container = document.getElementById('urlList');
+            if (urls.length === 0) {
+                container.innerHTML = `
+                    <div style="padding:1rem; text-align:center; color:#64748b; font-size:0.9rem">
+                        No URLs added yet. Add URLs above or use presets below.
+                    </div>
+                `;
+            } else {
+                container.innerHTML = urls.map((url, i) => `
+                    <div class="url-item">
+                        <span class="url-text">${escapeHtml(url)}</span>
+                        <button class="url-remove" onclick="removeUrl(${i})">×</button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Info Tags
+        function toggleInfoTag(el) {
+            el.classList.toggle('selected', el.querySelector('input').checked);
+            updateStats();
+        }
+        
+        // Stats
+        function updateStats() {
+            document.getElementById('statUrls').textContent = urls.length;
+            const checkedInfo = document.querySelectorAll('.info-tag-checkbox:checked').length;
+            document.getElementById('statInfo').textContent = checkedInfo;
+        }
+        
+        // Config Management
+        function getConfig() {
+            const infoTypes = Array.from(document.querySelectorAll('.info-tag-checkbox:checked'))
+                                   .map(cb => cb.value);
+            const keywords = document.getElementById('customKeywords').value
+                                    .split(',').map(k => k.trim()).filter(k => k);
+            
+            return {
+                crawler_type: currentCrawler,
+                urls: urls,
+                parameters: {
+                    rate_limit: parseFloat(document.getElementById('paramRateLimit').value),
+                    timeout: parseInt(document.getElementById('paramTimeout').value),
+                    max_pages: parseInt(document.getElementById('paramMaxPages').value),
+                    depth: parseInt(document.getElementById('paramDepth').value),
+                    user_agent: document.getElementById('paramUserAgent').value,
+                    output_format: document.getElementById('paramFormat').value,
+                    respect_robots: document.getElementById('paramRespectRobots').checked,
+                    follow_external: document.getElementById('paramFollowLinks').checked,
+                    cache_results: document.getElementById('paramSaveCache').checked,
+                },
+                information_sought: infoTypes,
+                custom_keywords: keywords,
+            };
+        }
+        
+        function saveConfig() {
+            const name = prompt('Enter a name for this configuration:');
+            if (name) {
+                const config = { name, ...getConfig(), saved_at: new Date().toISOString() };
+                savedConfigs.push(config);
+                localStorage.setItem('semptify_crawler_configs', JSON.stringify(savedConfigs));
+                renderSavedConfigs();
+            }
+        }
+        
+        function loadConfig(index) {
+            const config = savedConfigs[index];
+            if (!config) return;
+            
+            // Load crawler type
+            selectCrawler(config.crawler_type);
+            
+            // Load URLs
+            urls = [...(config.urls || [])];
+            renderUrls();
+            
+            // Load parameters
+            if (config.parameters) {
+                document.getElementById('paramRateLimit').value = config.parameters.rate_limit || 1;
+                document.getElementById('paramTimeout').value = config.parameters.timeout || 30;
+                document.getElementById('paramMaxPages').value = config.parameters.max_pages || 50;
+                document.getElementById('paramDepth').value = config.parameters.depth || 2;
+                document.getElementById('paramUserAgent').value = config.parameters.user_agent || 'semptify';
+                document.getElementById('paramFormat').value = config.parameters.output_format || 'json';
+                document.getElementById('paramRespectRobots').checked = config.parameters.respect_robots !== false;
+                document.getElementById('paramFollowLinks').checked = config.parameters.follow_external || false;
+                document.getElementById('paramSaveCache').checked = config.parameters.cache_results !== false;
+            }
+            
+            // Load info sought
+            document.querySelectorAll('.info-tag-checkbox').forEach(cb => {
+                cb.checked = (config.information_sought || []).includes(cb.value);
+                cb.closest('.info-tag').classList.toggle('selected', cb.checked);
+            });
+            
+            // Load keywords
+            document.getElementById('customKeywords').value = (config.custom_keywords || []).join(', ');
+            
+            updateStats();
+        }
+        
+        function deleteConfig(index) {
+            if (confirm('Delete this configuration?')) {
+                savedConfigs.splice(index, 1);
+                localStorage.setItem('semptify_crawler_configs', JSON.stringify(savedConfigs));
+                renderSavedConfigs();
+            }
+        }
+        
+        function renderSavedConfigs() {
+            const container = document.getElementById('savedConfigs');
+            if (savedConfigs.length === 0) {
+                container.innerHTML = '<p style="color:#64748b; font-size:0.85rem">No saved configurations</p>';
+            } else {
+                container.innerHTML = savedConfigs.map((c, i) => `
+                    <div class="config-chip" onclick="loadConfig(${i})">
+                        ${escapeHtml(c.name)}
+                        <span class="config-chip-delete" onclick="event.stopPropagation(); deleteConfig(${i})">×</span>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function previewConfig() {
+            const config = getConfig();
+            const output = document.getElementById('outputBody');
+            output.innerHTML = `<pre style="color:#e0f2fe">${JSON.stringify(config, null, 2)}</pre>`;
+        }
+        
+        function exportConfig() {
+            const config = getConfig();
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `crawler_config_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function resetForm() {
+            urls = [];
+            renderUrls();
+            selectCrawler('api');
+            document.getElementById('paramRateLimit').value = 1;
+            document.getElementById('paramTimeout').value = 30;
+            document.getElementById('paramMaxPages').value = 50;
+            document.getElementById('paramDepth').value = 2;
+            document.getElementById('paramUserAgent').value = 'semptify';
+            document.getElementById('paramFormat').value = 'json';
+            document.getElementById('paramRespectRobots').checked = true;
+            document.getElementById('paramFollowLinks').checked = false;
+            document.getElementById('paramSaveCache').checked = true;
+            document.querySelectorAll('.info-tag-checkbox').forEach(cb => {
+                cb.checked = cb.value === 'statutes';
+                cb.closest('.info-tag').classList.toggle('selected', cb.checked);
+            });
+            document.getElementById('customKeywords').value = '';
+            document.getElementById('outputBody').innerHTML = `
+                <div style="text-align:center; padding:3rem; color:#64748b">
+                    <p style="font-size:2rem; margin-bottom:1rem">🕷️</p>
+                    <p>Configure your crawl settings and click "Start Crawl" to begin.</p>
+                </div>
+            `;
+            updateStats();
+        }
+        
+        // Crawl Execution
+        async function startCrawl() {
+            if (urls.length === 0) {
+                alert('Please add at least one URL to crawl');
+                return;
+            }
+            
+            const config = getConfig();
+            const output = document.getElementById('outputBody');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const btn = document.getElementById('startCrawlBtn');
+            
+            // Set running state
+            crawlRunning = true;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Crawling...';
+            statusDot.className = 'status-dot running';
+            statusText.textContent = 'Running';
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            
+            output.innerHTML = '';
+            
+            addOutputLine('info', `🚀 Starting ${config.crawler_type} crawl...`);
+            addOutputLine('info', `📋 Configuration: ${config.urls.length} URLs, ${config.information_sought.length} info types`);
+            addOutputLine('info', `⚙️ Rate limit: ${config.parameters.rate_limit} req/s, Max pages: ${config.parameters.max_pages}`);
+            addOutputLine('', '─'.repeat(60));
+            
+            try {
+                // Determine endpoint based on crawler type
+                let endpoint = '/api/crawler/crawl';
+                if (config.crawler_type === 'eviction') {
+                    endpoint = '/api/crawler/eviction/batch';
+                } else if (config.crawler_type === 'app') {
+                    endpoint = '/api/crawler/audit';
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Crawl failed');
+                }
+                
+                const data = await response.json();
+                
+                // Show results
+                addOutputLine('success', '✅ Crawl completed successfully!');
+                addOutputLine('', '─'.repeat(60));
+                
+                if (data.results && data.results.length > 0) {
+                    addOutputLine('info', `📊 Found ${data.results.length} results:`);
+                    data.results.forEach((r, i) => {
+                        addOutputLine('data', `\n[${i+1}] ${r.title || r.url}`);
+                        if (r.snippet) addOutputLine('', `    ${r.snippet.substring(0, 200)}...`);
+                        if (r.extracted_data) {
+                            Object.entries(r.extracted_data).forEach(([k, v]) => {
+                                addOutputLine('', `    • ${k}: ${JSON.stringify(v)}`);
+                            });
+                        }
+                    });
+                } else {
+                    addOutputLine('warning', '⚠️ No results found matching your criteria.');
+                }
+                
+                progressFill.style.width = '100%';
+                statusDot.className = 'status-dot success';
+                statusText.textContent = 'Completed';
+                document.getElementById('statLast').textContent = new Date().toLocaleTimeString();
+                
+            } catch (err) {
+                addOutputLine('error', `❌ Error: ${err.message}`);
+                statusDot.className = 'status-dot error';
+                statusText.textContent = 'Failed';
+                
+                // Simulate some results for demo
+                addOutputLine('', '');
+                addOutputLine('info', '📝 Demo mode - showing sample output:');
+                simulateCrawl(config);
+            } finally {
+                crawlRunning = false;
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Start Crawl';
+            }
+        }
+        
+        // Simulate crawl for demo
+        function simulateCrawl(config) {
+            const progressFill = document.getElementById('progressFill');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = `${progress}%`;
+                
+                if (progress <= 30) {
+                    addOutputLine('info', `🔍 Crawling: ${config.urls[0] || 'target URL'}...`);
+                } else if (progress <= 60) {
+                    addOutputLine('success', `✓ Found: Minnesota Statute 504B.001`);
+                    addOutputLine('data', `  Title: Definitions - Residential Tenant`);
+                } else if (progress <= 90) {
+                    addOutputLine('success', `✓ Found: Eviction notice requirements`);
+                    addOutputLine('data', `  Deadline: 14 days notice required`);
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    addOutputLine('', '─'.repeat(60));
+                    addOutputLine('success', '✅ Demo crawl completed');
+                    addOutputLine('info', `📊 Results: 2 items extracted`);
+                    document.getElementById('statusDot').className = 'status-dot success';
+                    document.getElementById('statusText').textContent = 'Completed (Demo)';
+                }
+            }, 500);
+        }
+        
+        function addOutputLine(type, text) {
+            const output = document.getElementById('outputBody');
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // Utility
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
