@@ -255,7 +255,8 @@ class IntakeDocument:
     uploaded_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     processed_at: Optional[datetime] = None
     
-    # Storage
+    # Storage - documents are in vault
+    vault_id: Optional[str] = None  # Reference to document in vault
     storage_path: Optional[str] = None
     storage_provider: Optional[str] = None
 
@@ -276,6 +277,7 @@ class IntakeDocument:
             "matched_laws": self.matched_laws,
             "uploaded_at": self.uploaded_at.isoformat(),
             "processed_at": self.processed_at.isoformat() if self.processed_at else None,
+            "vault_id": self.vault_id,
             "storage_path": self.storage_path,
             "storage_provider": self.storage_provider,
         }
@@ -932,15 +934,19 @@ class DocumentIntakeEngine:
         file_content: bytes,
         filename: str,
         mime_type: str,
+        vault_id: Optional[str] = None,
     ) -> IntakeDocument:
         """
         Intake a new document.
+        
+        Documents should already be in the vault - this creates a processing record.
         
         Args:
             user_id: The user uploading the document
             file_content: Raw file bytes
             filename: Original filename
             mime_type: MIME type of the file
+            vault_id: Reference to document in vault (if already stored there)
         
         Returns:
             IntakeDocument with status RECEIVED
@@ -966,9 +972,11 @@ class DocumentIntakeEngine:
             status=IntakeStatus.RECEIVED,
             status_message="Document received, awaiting processing",
             progress_percent=10,
+            vault_id=vault_id,  # Link to vault
         )
         
-        # Store raw file
+        # Store raw file locally for processing (even if in vault)
+        # This is a working copy - vault is the source of truth
         user_dir = self.storage_dir / user_id
         user_dir.mkdir(exist_ok=True)
         file_path = user_dir / f"{doc_id}_{filename}"
@@ -979,6 +987,7 @@ class DocumentIntakeEngine:
         self._save_documents()
         
         return doc
+
 
     async def process_document(self, doc_id: str) -> IntakeDocument:
         """

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e40af">
+    <title>Semptify - Document Vault</title>
+    <link rel="stylesheet" href="/static/css/shared-nav.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            margin-left: 60px; /* Space for collapsed nav */
+        }
+        
+        body.nav-pinned {
+            margin-left: 260px;
+        }
+        
+        @media (max-width: 768px) {
+            body, body.nav-pinned {
+                margin-left: 0;
+            }
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 20px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        /* Toolbar */
+        .toolbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .toolbar-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        
+        .view-btn {
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .view-btn:hover:not(.active) {
+            background: var(--border);
+        }
+        
+        /* Sort Dropdown */
+        .sort-dropdown {
+            position: relative;
+        }
+        
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .sort-btn:hover {
+            background: var(--border);
+        }
+        
+        .sort-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            min-width: 200px;
+            display: none;
+            z-index: 100;
+        }
+        
+        .sort-menu.open {
+            display: block;
+        }
+        
+        .sort-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sort-option:hover {
+            background: var(--bg);
+        }
+        
+        .sort-option.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sort-option.active::after {
+            content: '✓';
+        }
+        
+        /* Filter Buttons */
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        
+        .filter-pill {
+            padding: 6px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .filter-pill:hover, .filter-pill.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Search */
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            gap: 8px;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        /* Upload Button */
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+        
+        /* Main Content */
+        .main {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Folder View */
+        .folder-section {
+            margin-bottom: 32px;
+        }
+        
+        .folder-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        
+        .folder-icon {
+            font-size: 24px;
+        }
+        
+        .folder-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .folder-count {
+            background: var(--bg);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .folder-toggle {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        /* Grid View */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .doc-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .doc-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        .doc-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .doc-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .doc-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .doc-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        
+        /* List View */
+        .documents-list {
+            display: none;
+        }
+        
+        .documents-list.active {
+            display: block;
+        }
+        
+        .documents-grid.hidden {
+            display: none;
+        }
+        
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .list-item:hover {
+            border-color: var(--primary);
+            background: #f8faff;
+        }
+        
+        .list-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+        
+        .list-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .list-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .list-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .list-date {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        .list-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .action-btn:hover {
+            background: var(--border);
+        }
+        
+        .action-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        
+        /* Upload Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--card);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 18px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .upload-zone-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-top: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Quick Access Bar */
+        .quick-access {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .quick-access-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .quick-access-items {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+        }
+        
+        .quick-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            cursor: pointer;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+        
+        .quick-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quick-item-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .quick-item-label {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>🔐 Document Vault</h1>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span>📄</span>
+                    <span class="stat-value" id="totalDocs">0</span>
+                    <span>Documents</span>
+                </div>
+                <div class="stat-item">
+                    <span>📁</span>
+                    <span class="stat-value" id="totalFolders">5</span>
+                    <span>Folders</span>
+                </div>
+                <div class="stat-item">
+                    <span>💾</span>
+                    <span class="stat-value" id="totalSize">0 KB</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" title="Grid View">📊</button>
+                <button class="view-btn" data-view="list" title="List View">📋</button>
+                <button class="view-btn" data-view="folder" title="Folder View">📁</button>
+            </div>
+            
+            <div class="sort-dropdown">
+                <button class="sort-btn" onclick="toggleSortMenu()">
+                    <span>⬇️</span>
+                    <span id="sortLabel">Date (Newest)</span>
+                    <span>▼</span>
+                </button>
+                <div class="sort-menu" id="sortMenu">
+                    <div class="sort-option active" data-sort="date-desc">Date (Newest First)</div>
+                    <div class="sort-option" data-sort="date-asc">Date (Oldest First)</div>
+                    <div class="sort-option" data-sort="name-asc">Name (A-Z)</div>
+                    <div class="sort-option" data-sort="name-desc">Name (Z-A)</div>
+                    <div class="sort-option" data-sort="size-desc">Size (Largest)</div>
+                    <div class="sort-option" data-sort="size-asc">Size (Smallest)</div>
+                    <div class="sort-option" data-sort="type">Type</div>
+                </div>
+            </div>
+            
+            <div class="filter-pills">
+                <div class="filter-pill active" data-filter="all">All</div>
+                <div class="filter-pill" data-filter="lease">📄 Lease</div>
+                <div class="filter-pill" data-filter="notice">⚠️ Notice</div>
+                <div class="filter-pill" data-filter="photo">📸 Photos</div>
+                <div class="filter-pill" data-filter="court">⚖️ Court</div>
+                <div class="filter-pill" data-filter="receipt">🧾 Receipt</div>
+                <div class="filter-pill" data-filter="letter">✉️ Letter</div>
+            </div>
+        </div>
+        
+        <div class="toolbar-right">
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" id="searchInput" placeholder="Search documents...">
+            </div>
+            <button class="upload-btn" onclick="openUploadModal()">
+                <span>⬆️</span>
+                Upload Document
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Quick Access -->
+        <div class="quick-access">
+            <div class="quick-access-title">📌 QUICK ACCESS</div>
+            <div class="quick-access-items">
+                <div class="quick-item" onclick="filterByType('recent')">
+                    <span class="quick-item-icon">🕐</span>
+                    <span class="quick-item-label">Recent</span>
+                </div>
+                <div class="quick-item" onclick="filterByType('starred')">
+                    <span class="quick-item-icon">⭐</span>
+                    <span class="quick-item-label">Starred</span>
+                </div>
+                <div class="quick-item" onclick="filterByType('court')">
+                    <span class="quick-item-icon">⚖️</span>
+                    <span class="quick-item-label">Court Docs</span>
+                </div>
+                <div class="quick-item" onclick="filterByType('lease')">
+                    <span class="quick-item-icon">📄</span>
+                    <span class="quick-item-label">Lease</span>
+                </div>
+                <div class="quick-item" onclick="filterByType('evidence')">
+                    <span class="quick-item-icon">📸</span>
+                    <span class="quick-item-label">Evidence</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Loading your vault...</p>
+        </div>
+        
+        <!-- Documents Container -->
+        <div id="documentsContainer" style="display: none;">
+            <!-- Folder View -->
+            <div id="folderView" style="display: none;">
+                <!-- Court Documents -->
+                <div class="folder-section" data-folder="court">
+                    <div class="folder-header" onclick="toggleFolder('court')">
+                        <span class="folder-icon">⚖️</span>
+                        <span class="folder-title">Court Documents</span>
+                        <span class="folder-count" id="court-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="court-docs"></div>
+                </div>
+                
+                <!-- Lease & Rental -->
+                <div class="folder-section" data-folder="lease">
+                    <div class="folder-header" onclick="toggleFolder('lease')">
+                        <span class="folder-icon">📄</span>
+                        <span class="folder-title">Lease & Rental Agreements</span>
+                        <span class="folder-count" id="lease-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="lease-docs"></div>
+                </div>
+                
+                <!-- Notices -->
+                <div class="folder-section" data-folder="notice">
+                    <div class="folder-header" onclick="toggleFolder('notice')">
+                        <span class="folder-icon">⚠️</span>
+                        <span class="folder-title">Notices & Letters</span>
+                        <span class="folder-count" id="notice-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="notice-docs"></div>
+                </div>
+                
+                <!-- Evidence -->
+                <div class="folder-section" data-folder="evidence">
+                    <div class="folder-header" onclick="toggleFolder('evidence')">
+                        <span class="folder-icon">📸</span>
+                        <span class="folder-title">Photos & Evidence</span>
+                        <span class="folder-count" id="evidence-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="evidence-docs"></div>
+                </div>
+                
+                <!-- Financial -->
+                <div class="folder-section" data-folder="financial">
+                    <div class="folder-header" onclick="toggleFolder('financial')">
+                        <span class="folder-icon">💰</span>
+                        <span class="folder-title">Financial Documents</span>
+                        <span class="folder-count" id="financial-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="financial-docs"></div>
+                </div>
+                
+                <!-- Other -->
+                <div class="folder-section" data-folder="other">
+                    <div class="folder-header" onclick="toggleFolder('other')">
+                        <span class="folder-icon">📁</span>
+                        <span class="folder-title">Other Documents</span>
+                        <span class="folder-count" id="other-count">0</span>
+                        <span class="folder-toggle">▼</span>
+                    </div>
+                    <div class="documents-grid folder-content" id="other-docs"></div>
+                </div>
+            </div>
+            
+            <!-- Grid View -->
+            <div class="documents-grid" id="gridView"></div>
+            
+            <!-- List View -->
+            <div class="documents-list" id="listView"></div>
+            
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">📁</div>
+                <div class="empty-title">Your vault is empty</div>
+                <p>Upload documents to get started. All your important case files will be stored securely here.</p>
+                <button class="upload-btn" style="margin-top: 20px;" onclick="openUploadModal()">
+                    ⬆️ Upload Your First Document
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📤 Upload Document to Vault</h2>
+                <button class="modal-close" onclick="closeUploadModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-zone-icon">📄</div>
+                    <p><strong>Click to select file</strong> or drag and drop</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+                        PDF, Images, Word Documents (Max 50MB)
+                    </p>
+                </div>
+                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt">
+                
+                <div id="selectedFile" style="display: none; margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 8px;">
+                    <strong>Selected:</strong> <span id="selectedFileName"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Document Type</label>
+                    <select id="docType">
+                        <option value="">Select type...</option>
+                        <option value="lease">📄 Lease / Rental Agreement</option>
+                        <option value="notice">⚠️ Notice (Eviction, Violation, etc.)</option>
+                        <option value="court">⚖️ Court Document</option>
+                        <option value="photo">📸 Photo / Evidence</option>
+                        <option value="receipt">🧾 Receipt / Payment Record</option>
+                        <option value="letter">✉️ Letter / Correspondence</option>
+                        <option value="other">📁 Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <input type="text" id="docDescription" placeholder="Brief description of the document">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
+                <button class="btn btn-primary" id="uploadBtn" onclick="uploadDocument()">Upload to Vault</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Shared Navigation -->
+    <div id="semptify-nav"></div>
+    <script src="/static/js/shared-nav.js"></script>
+    
+    <script>
+        // State
+        let documents = [];
+        let currentView = 'grid';
+        let currentSort = 'date-desc';
+        let currentFilter = 'all';
+        let selectedFile = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDocuments();
+            setupEventListeners();
+        });
+        
+        // Load documents from vault API
+        async function loadDocuments() {
+            try {
+                // Get user ID from localStorage or use default
+                const userId = localStorage.getItem('semptify_user_id') || 'default';
+                
+                // Try to fetch from vault API
+                const response = await fetch('/api/vault/all', {
+                    headers: {
+                        'X-User-ID': userId
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    documents = data.documents || [];
+                } else {
+                    // Fallback: try briefcase API
+                    const briefcaseResponse = await fetch('/api/briefcase/');
+                    if (briefcaseResponse.ok) {
+                        const briefcaseData = await briefcaseResponse.json();
+                        documents = briefcaseData.documents || [];
+                    } else {
+                        documents = [];
+                    }
+                }
+                
+                updateStats();
+                renderDocuments();
+                
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                documents = [];
+                renderDocuments();
+            }
+            
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('documentsContainer').style.display = 'block';
+        }
+        
+        // Update stats
+        function updateStats() {
+            document.getElementById('totalDocs').textContent = documents.length;
+            
+            let totalSize = 0;
+            documents.forEach(doc => {
+                totalSize += doc.file_size || 0;
+            });
+            
+            if (totalSize > 1024 * 1024) {
+                document.getElementById('totalSize').textContent = (totalSize / 1024 / 1024).toFixed(1) + ' MB';
+            } else if (totalSize > 1024) {
+                document.getElementById('totalSize').textContent = (totalSize / 1024).toFixed(1) + ' KB';
+            } else {
+                document.getElementById('totalSize').textContent = totalSize + ' B';
+            }
+        }
+        
+        // Render documents based on current view
+        function renderDocuments() {
+            // Filter documents
+            let filtered = documents;
+            if (currentFilter !== 'all') {
+                filtered = documents.filter(doc => 
+                    doc.document_type === currentFilter || 
+                    (doc.type && doc.type.includes(currentFilter))
+                );
+            }
+            
+            // Sort documents
+            filtered = sortDocuments(filtered, currentSort);
+            
+            // Show empty state if no documents
+            if (documents.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('gridView').style.display = 'none';
+                document.getElementById('listView').style.display = 'none';
+                document.getElementById('folderView').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('emptyState').style.display = 'none';
+            
+            // Render based on view
+            if (currentView === 'folder') {
+                renderFolderView(filtered);
+            } else if (currentView === 'list') {
+                renderListView(filtered);
+            } else {
+                renderGridView(filtered);
+            }
+        }
+        
+        // Sort documents
+        function sortDocuments(docs, sortBy) {
+            const sorted = [...docs];
+            switch(sortBy) {
+                case 'date-desc':
+                    sorted.sort((a, b) => new Date(b.uploaded_at || b.created_at) - new Date(a.uploaded_at || a.created_at));
+                    break;
+                case 'date-asc':
+                    sorted.sort((a, b) => new Date(a.uploaded_at || a.created_at) - new Date(b.uploaded_at || b.created_at));
+                    break;
+                case 'name-asc':
+                    sorted.sort((a, b) => (a.filename || a.name || '').localeCompare(b.filename || b.name || ''));
+                    break;
+                case 'name-desc':
+                    sorted.sort((a, b) => (b.filename || b.name || '').localeCompare(a.filename || a.name || ''));
+                    break;
+                case 'size-desc':
+                    sorted.sort((a, b) => (b.file_size || 0) - (a.file_size || 0));
+                    break;
+                case 'size-asc':
+                    sorted.sort((a, b) => (a.file_size || 0) - (b.file_size || 0));
+                    break;
+                case 'type':
+                    sorted.sort((a, b) => (a.document_type || a.type || '').localeCompare(b.document_type || b.type || ''));
+                    break;
+            }
+            return sorted;
+        }
+        
+        // Grid View
+        function renderGridView(docs) {
+            document.getElementById('gridView').style.display = 'grid';
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('folderView').style.display = 'none';
+            
+            const container = document.getElementById('gridView');
+            container.innerHTML = docs.map(doc => `
+                <div class="doc-card" onclick="openDocument('${doc.vault_id || doc.id}')">
+                    <div class="doc-icon">${getDocIcon(doc.mime_type || doc.type)}</div>
+                    <div class="doc-name">${doc.filename || doc.name}</div>
+                    <div class="doc-meta">${formatFileSize(doc.file_size)}</div>
+                    <div class="doc-type-badge">${doc.document_type || doc.type || 'Document'}</div>
+                </div>
+            `).join('');
+        }
+        
+        // List View
+        function renderListView(docs) {
+            document.getElementById('gridView').style.display = 'none';
+            document.getElementById('listView').style.display = 'block';
+            document.getElementById('folderView').style.display = 'none';
+            
+            const container = document.getElementById('listView');
+            container.innerHTML = docs.map(doc => `
+                <div class="list-item" onclick="openDocument('${doc.vault_id || doc.id}')">
+                    <div class="list-icon">${getDocIcon(doc.mime_type || doc.type)}</div>
+                    <div class="list-info">
+                        <div class="list-name">${doc.filename || doc.name}</div>
+                        <div class="list-meta">${doc.document_type || doc.type || 'Document'} • ${formatFileSize(doc.file_size)}</div>
+                    </div>
+                    <div class="list-date">${formatDate(doc.uploaded_at || doc.created_at)}</div>
+                    <div class="list-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); downloadDocument('${doc.vault_id || doc.id}')">⬇️</button>
+                        <button class="action-btn primary" onclick="event.stopPropagation(); openDocument('${doc.vault_id || doc.id}')">View</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Folder View
+        function renderFolderView(docs) {
+            document.getElementById('gridView').style.display = 'none';
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('folderView').style.display = 'block';
+            
+            // Categorize documents
+            const folders = {
+                court: [],
+                lease: [],
+                notice: [],
+                evidence: [],
+                financial: [],
+                other: []
+            };
+            
+            docs.forEach(doc => {
+                const type = (doc.document_type || doc.type || '').toLowerCase();
+                if (type.includes('court') || type.includes('summons') || type.includes('motion')) {
+                    folders.court.push(doc);
+                } else if (type.includes('lease') || type.includes('rental')) {
+                    folders.lease.push(doc);
+                } else if (type.includes('notice') || type.includes('letter') || type.includes('eviction')) {
+                    folders.notice.push(doc);
+                } else if (type.includes('photo') || type.includes('evidence') || type.includes('image')) {
+                    folders.evidence.push(doc);
+                } else if (type.includes('receipt') || type.includes('payment') || type.includes('financial')) {
+                    folders.financial.push(doc);
+                } else {
+                    folders.other.push(doc);
+                }
+            });
+            
+            // Render each folder
+            Object.keys(folders).forEach(folder => {
+                const count = folders[folder].length;
+                document.getElementById(`${folder}-count`).textContent = count;
+                
+                const container = document.getElementById(`${folder}-docs`);
+                container.innerHTML = folders[folder].map(doc => `
+                    <div class="doc-card" onclick="openDocument('${doc.vault_id || doc.id}')">
+                        <div class="doc-icon">${getDocIcon(doc.mime_type || doc.type)}</div>
+                        <div class="doc-name">${doc.filename || doc.name}</div>
+                        <div class="doc-meta">${formatFileSize(doc.file_size)}</div>
+                    </div>
+                `).join('') || '<p style="color: var(--text-muted); padding: 20px;">No documents in this folder</p>';
+            });
+        }
+        
+        // Toggle folder
+        function toggleFolder(folderId) {
+            const section = document.querySelector(`[data-folder="${folderId}"]`);
+            const content = section.querySelector('.folder-content');
+            const toggle = section.querySelector('.folder-toggle');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'grid';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+        
+        // Helper functions
+        function getDocIcon(type) {
+            if (!type) return '📄';
+            type = type.toLowerCase();
+            if (type.includes('pdf')) return '📕';
+            if (type.includes('image') || type.includes('jpg') || type.includes('png')) return '🖼️';
+            if (type.includes('word') || type.includes('doc')) return '📘';
+            if (type.includes('excel') || type.includes('sheet')) return '📗';
+            if (type.includes('court')) return '⚖️';
+            if (type.includes('lease')) return '📜';
+            if (type.includes('notice')) return '⚠️';
+            if (type.includes('photo')) return '📸';
+            return '📄';
+        }
+        
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            if (bytes > 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+            if (bytes > 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return bytes + ' B';
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        
+        // Event listeners
+        function setupEventListeners() {
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.dataset.view;
+                    renderDocuments();
+                });
+            });
+            
+            // Sort options
+            document.querySelectorAll('.sort-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    document.querySelectorAll('.sort-option').forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                    currentSort = opt.dataset.sort;
+                    document.getElementById('sortLabel').textContent = opt.textContent;
+                    document.getElementById('sortMenu').classList.remove('open');
+                    renderDocuments();
+                });
+            });
+            
+            // Filter pills
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    currentFilter = pill.dataset.filter;
+                    renderDocuments();
+                });
+            });
+            
+            // Search
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filtered = documents.filter(doc => 
+                    (doc.filename || doc.name || '').toLowerCase().includes(query) ||
+                    (doc.document_type || doc.type || '').toLowerCase().includes(query)
+                );
+                if (currentView === 'folder') {
+                    renderFolderView(filtered);
+                } else if (currentView === 'list') {
+                    renderListView(filtered);
+                } else {
+                    renderGridView(filtered);
+                }
+            });
+            
+            // File input
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    selectedFile = e.target.files[0];
+                    document.getElementById('selectedFileName').textContent = selectedFile.name;
+                    document.getElementById('selectedFile').style.display = 'block';
+                }
+            });
+            
+            // Drag and drop
+            const uploadZone = document.getElementById('uploadZone');
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    selectedFile = e.dataTransfer.files[0];
+                    document.getElementById('selectedFileName').textContent = selectedFile.name;
+                    document.getElementById('selectedFile').style.display = 'block';
+                }
+            });
+            
+            // Close sort menu on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.sort-dropdown')) {
+                    document.getElementById('sortMenu').classList.remove('open');
+                }
+            });
+        }
+        
+        // Sort menu toggle
+        function toggleSortMenu() {
+            document.getElementById('sortMenu').classList.toggle('open');
+        }
+        
+        // Filter by type
+        function filterByType(type) {
+            if (type === 'recent') {
+                currentFilter = 'all';
+                currentSort = 'date-desc';
+            } else if (type === 'starred') {
+                // TODO: Implement starred filter
+                currentFilter = 'all';
+            } else if (type === 'evidence') {
+                currentFilter = 'photo';
+            } else {
+                currentFilter = type;
+            }
+            
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            const pill = document.querySelector(`.filter-pill[data-filter="${currentFilter}"]`);
+            if (pill) pill.classList.add('active');
+            
+            renderDocuments();
+        }
+        
+        // Modal functions
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('open');
+        }
+        
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('open');
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selectedFile').style.display = 'none';
+            document.getElementById('docType').value = '';
+            document.getElementById('docDescription').value = '';
+        }
+        
+        // Upload document
+        async function uploadDocument() {
+            if (!selectedFile) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            const btn = document.getElementById('uploadBtn');
+            btn.textContent = 'Uploading...';
+            btn.disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('document_type', document.getElementById('docType').value);
+                formData.append('description', document.getElementById('docDescription').value);
+                formData.append('storage_provider', 'local');
+                
+                // Try vault upload first
+                let response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    // Fallback to briefcase
+                    response = await fetch('/api/briefcase/document', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+                
+                if (response.ok) {
+                    closeUploadModal();
+                    loadDocuments(); // Refresh list
+                    alert('✅ Document uploaded successfully to vault!');
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('❌ Upload failed. Please try again.');
+            } finally {
+                btn.textContent = 'Upload to Vault';
+                btn.disabled = false;
+            }
+        }
+        
+        // Open document
+        function openDocument(docId) {
+            // Try to view the document
+            window.location.href = `/api/vault/document/${docId}/content`;
+        }
+        
+        // Download document
+        function downloadDocument(docId) {
+            window.location.href = `/api/vault/document/${docId}/content`;
+        }
+    </script>
+</body>
+</html>

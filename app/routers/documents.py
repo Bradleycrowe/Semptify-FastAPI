@@ -3,12 +3,14 @@ Semptify 5.0 - Documents API Router
 Fresh API for document management, processing, and law cross-referencing.
 
 Enhanced with world-class document intelligence endpoints.
+
+ALL UPLOADS GO TO VAULT FIRST - modules access from vault.
 """
 
 from typing import Optional
 import logging
 
-from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Depends, Request
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Depends, Request, Form
 from pydantic import BaseModel
 
 from app.core.config import get_settings, Settings
@@ -21,6 +23,13 @@ from app.services.document_pipeline import (
     DocumentType
 )
 from app.services.law_engine import get_law_engine
+
+# Import vault upload service - ALL uploads go through here first
+try:
+    from app.services.vault_upload_service import get_vault_service, VaultDocument
+    HAS_VAULT_SERVICE = True
+except ImportError:
+    HAS_VAULT_SERVICE = False
 
 # Import document registry for unified registration
 try:
@@ -232,14 +241,19 @@ async def upload_document(
     request: Request,
     file: UploadFile = File(...),
     case_number: Optional[str] = Query(None, description="Associate with case number"),
+    document_type: Optional[str] = Form(None, description="Document type (lease, notice, etc.)"),
+    access_token: Optional[str] = Form(None, description="Storage provider access token"),
+    storage_provider: str = Form("local", description="Storage provider (google_drive, dropbox, onedrive, local)"),
     user: StorageUser = Depends(require_user),
 ):
     """
     🚀 UNIFIED DOCUMENT UPLOAD - Complete Processing in One Action
     
+    ALL DOCUMENTS GO TO USER'S VAULT FIRST, then modules access from vault.
+    
     This endpoint performs the ENTIRE document lifecycle in a single request:
     
-    1. ✅ UPLOAD & STORE - Secure file storage with hash verification
+    1. ✅ VAULT UPLOAD - Document stored in user's vault (cloud/local)
     2. ✅ REGISTER - Unique Semptify ID (SEM-YYYY-NNNNNN-XXXX), tamper-proof hashing
     3. ✅ EXTRACT - OCR, text extraction, key data parsing
     4. ✅ CLASSIFY - Document type detection (lease, notice, court filing, etc.)
@@ -248,7 +262,7 @@ async def upload_document(
     7. ✅ VERIFY - Duplicate detection, forgery analysis, integrity check
     8. ✅ ENRICH - Action items, timeline events, urgency assessment
     
-    Returns complete processing results including registry ID, classification,
+    Returns complete processing results including vault ID, classification,
     extracted data counts, legal references, and intelligence insights.
     """
     from datetime import datetime, timezone
@@ -266,9 +280,32 @@ async def upload_document(
     # Get client IP for audit trail
     client_ip = request.client.host if request.client else None
     
+    # =========================================================================
+    # STEP 0: UPLOAD TO VAULT FIRST (All documents go to user's vault)
+    # =========================================================================
+    vault_id = None
+    vault_doc = None
+    if HAS_VAULT_SERVICE:
+        try:
+            vault_service = get_vault_service()
+            vault_doc = await vault_service.upload(
+                user_id=user_id,
+                filename=file.filename,
+                content=content,
+                mime_type=mime_type,
+                document_type=document_type,
+                source_module="documents",
+                access_token=access_token,
+                storage_provider=storage_provider,
+            )
+            vault_id = vault_doc.vault_id
+            logger.info(f"📁 Document stored in vault: {vault_id}")
+        except Exception as e:
+            logger.warning(f"Vault upload failed, continuing with legacy flow: {e}")
+    
     # Initialize response data
     registry_id = None
-    content_hash = None
+    content_hash = vault_doc.sha256_hash if vault_doc else None
     is_duplicate = False
     integrity_verified = False
     forgery_score = 0.0

@@ -1,7 +1,10 @@
 """
 Briefcase Router - Document & Folder Organization System
 A digital briefcase for organizing legal documents, evidence, and case files
+
+ALL UPLOADS GO TO VAULT FIRST - briefcase references documents from vault.
 """
+import logging
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from typing import List, Optional, Dict, Any
@@ -16,6 +19,15 @@ import hashlib
 import base64
 import zipfile
 import uuid
+
+logger = logging.getLogger(__name__)
+
+# Import vault upload service - ALL uploads go through here first
+try:
+    from app.services.vault_upload_service import get_vault_service
+    HAS_VAULT_SERVICE = True
+except ImportError:
+    HAS_VAULT_SERVICE = False
 
 router = APIRouter(prefix="/api/briefcase", tags=["Briefcase"])
 
@@ -259,29 +271,61 @@ async def upload_document(
     file: UploadFile = File(...),
     folder_id: str = Form(default="root"),
     tags: str = Form(default=""),
-    notes: str = Form(default="")
+    notes: str = Form(default=""),
+    user_id: str = Form(default="default"),
+    access_token: Optional[str] = Form(None, description="Storage provider access token"),
+    storage_provider: str = Form("local", description="Storage provider"),
 ):
-    """Upload a document to the briefcase"""
+    """
+    Upload a document to the briefcase.
+    
+    ALL DOCUMENTS GO TO VAULT FIRST, then referenced from briefcase.
+    """
     if folder_id not in briefcase_data["folders"]:
         raise HTTPException(status_code=404, detail="Folder not found")
     
     content = await file.read()
     
-    # Generate document ID and hash
-    doc_id = f"doc_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(content) & 0xFFFFFF:06x}"
-    file_hash = hashlib.sha256(content).hexdigest()[:16]
+    # Parse tags
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()]
     
     # Determine file type
     filename = file.filename or "unknown"
     ext = os.path.splitext(filename)[1].lower()
     file_type = get_file_type(ext)
     
-    # Parse tags
-    tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+    # STEP 1: Upload to vault first
+    vault_id = None
+    vault_path = None
+    if HAS_VAULT_SERVICE:
+        try:
+            vault_service = get_vault_service()
+            vault_doc = await vault_service.upload(
+                user_id=user_id,
+                filename=filename,
+                content=content,
+                mime_type=file.content_type or "application/octet-stream",
+                document_type=file_type,
+                tags=tag_list,
+                source_module="briefcase",
+                access_token=access_token,
+                storage_provider=storage_provider,
+            )
+            vault_id = vault_doc.vault_id
+            vault_path = vault_doc.storage_path
+            logger.info(f"📁 Document stored in vault: {vault_id}")
+        except Exception as e:
+            logger.warning(f"Vault upload failed: {e}")
     
-    # Store document
+    # Generate document ID and hash
+    doc_id = vault_id or f"doc_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(content) & 0xFFFFFF:06x}"
+    file_hash = hashlib.sha256(content).hexdigest()[:16]
+    
+    # Store document reference in briefcase (not content - that's in vault)
     document = {
         "id": doc_id,
+        "vault_id": vault_id,
+        "vault_path": vault_path,
         "name": filename,
         "folder_id": folder_id,
         "size": len(content),
@@ -294,7 +338,9 @@ async def upload_document(
         "starred": False,
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
-        "content": base64.b64encode(content).decode('utf-8')
+        # Only store content locally if vault failed
+        "content": base64.b64encode(content).decode('utf-8') if not vault_id else None,
+        "in_vault": bool(vault_id),
     }
     
     briefcase_data["documents"][doc_id] = document
@@ -302,7 +348,7 @@ async def upload_document(
     # Return without content
     doc_response = {k: v for k, v in document.items() if k != "content"}
     
-    return {"success": True, "document": doc_response}
+    return {"success": True, "document": doc_response, "vault_id": vault_id}
 
 
 def get_file_type(ext: str) -> str:
@@ -335,13 +381,38 @@ async def get_document(doc_id: str):
 
 
 @router.get("/document/{doc_id}/download")
-async def download_document(doc_id: str):
-    """Download a document"""
+async def download_document(
+    doc_id: str,
+    access_token: Optional[str] = None,
+):
+    """
+    Download a document.
+    
+    If document is in vault, retrieves from vault storage.
+    """
     if doc_id not in briefcase_data["documents"]:
         raise HTTPException(status_code=404, detail="Document not found")
     
     doc = briefcase_data["documents"][doc_id]
-    content = base64.b64decode(doc["content"])
+    
+    # Try to get from vault first
+    content = None
+    if doc.get("in_vault") and doc.get("vault_id") and HAS_VAULT_SERVICE:
+        try:
+            vault_service = get_vault_service()
+            content = await vault_service.get_document_content(
+                vault_id=doc["vault_id"],
+                access_token=access_token,
+            )
+        except Exception as e:
+            logger.warning(f"Vault download failed: {e}")
+    
+    # Fall back to local content
+    if content is None and doc.get("content"):
+        content = base64.b64decode(doc["content"])
+    
+    if content is None:
+        raise HTTPException(status_code=404, detail="Document content not available")
     
     return StreamingResponse(
         io.BytesIO(content),

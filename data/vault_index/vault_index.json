@@ -1,0 +1,24 @@
+{
+  "documents": {
+    "4e36ed86-fd9a-4299-a5d9-5b1f12b3cbb7": {
+      "vault_id": "4e36ed86-fd9a-4299-a5d9-5b1f12b3cbb7",
+      "user_id": "test_user_123",
+      "filename": "test_document.txt",
+      "safe_filename": "4e36ed86-fd9a-4299-a5d9-5b1f12b3cbb7.txt",
+      "sha256_hash": "c4cf24cc38f36ad7c221195f7d214a537933eaadf0fceeb1923b49c703298ac3",
+      "file_size": 55,
+      "mime_type": "text/plain",
+      "document_type": "test",
+      "description": null,
+      "tags": [],
+      "storage_path": "data\\vault_storage\\test_user_123\\4e36ed86-fd9a-4299-a5d9-5b1f12b3cbb7.txt",
+      "storage_provider": "local",
+      "certificate_id": "cert_20251231_163840_4e36ed86",
+      "uploaded_at": "2025-12-31T16:38:40.066614+00:00",
+      "processed": false,
+      "extracted_data": null,
+      "source_module": "test"
+    }
+  },
+  "updated_at": "2025-12-31T16:38:40.068081+00:00"
+}

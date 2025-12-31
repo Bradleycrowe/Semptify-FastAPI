@@ -74,7 +74,8 @@ const SemptifyNav = {
             title: '📁 Vault',
             items: [
                 { icon: '🔐', label: 'Document Vault', href: '/static/vault.html' },
-                { icon: '📑', label: 'PDF Tools', href: '/static/pdf_tools.html' },
+                { icon: '�', label: 'Calendar View', href: '/static/document_calendar.html' },
+                { icon: '�📑', label: 'PDF Tools', href: '/static/pdf_tools.html' },
             ]
         },
         {
@@ -241,6 +242,12 @@ const SemptifyNav = {
                     </a>
                     <button class="sidebar-close" onclick="SemptifyNav.closeMobile()">✕</button>
                 </div>
+                
+                <!-- Quick Access Vault Button - Always Visible -->
+                <a href="/static/vault.html" class="vault-quick-access" title="Open Document Vault">
+                    <span class="vault-icon">🔐</span>
+                    <span class="vault-label">VAULT</span>
+                </a>
                 
                 <div class="sidebar-content">
                     ${sectionsHtml}

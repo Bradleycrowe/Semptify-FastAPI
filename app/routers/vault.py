@@ -3,8 +3,9 @@ Document Vault Router (Cloud Storage Version)
 Secure document upload to user's cloud storage with certification.
 
 Semptify 5.0 Architecture:
+- ALL DOCUMENTS GO TO VAULT FIRST
 - Documents stored in USER's cloud storage (Google Drive, Dropbox, OneDrive)
-- NOT stored locally on server
+- Modules access documents FROM the vault
 - User must be authenticated via storage OAuth
 - Certificates stored alongside documents in .semptify/vault/
 """
@@ -12,16 +13,25 @@ Semptify 5.0 Architecture:
 import hashlib
 import json
 import uuid
+import logging
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status, Query
 from pydantic import BaseModel, Field
 
 from app.core.config import Settings, get_settings
 from app.core.security import require_user, rate_limit_dependency, StorageUser
 from app.services.storage import get_provider, StorageFile
 
+# Import vault upload service - central document storage
+try:
+    from app.services.vault_upload_service import get_vault_service, VaultDocument
+    HAS_VAULT_SERVICE = True
+except ImportError:
+    HAS_VAULT_SERVICE = False
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -579,3 +589,149 @@ async def delete_document(
                     return
 
     raise HTTPException(status_code=404, detail="Document not found")
+
+
+# =============================================================================
+# Vault Service Endpoints - For modules to access documents
+# =============================================================================
+
+class VaultDocumentSummary(BaseModel):
+    """Summary of a vault document."""
+    vault_id: str
+    filename: str
+    document_type: Optional[str] = None
+    file_size: int
+    mime_type: str
+    uploaded_at: str
+    processed: bool = False
+    source_module: str = "direct"
+    in_vault: bool = True
+
+
+class VaultListResponse(BaseModel):
+    """List of vault documents."""
+    documents: List[VaultDocumentSummary]
+    total: int
+
+
+@router.get("/all", response_model=VaultListResponse)
+async def list_all_vault_documents(
+    document_type: Optional[str] = Query(None, description="Filter by document type"),
+    user: StorageUser = Depends(require_user),
+):
+    """
+    List ALL documents in user's vault.
+    
+    This endpoint is for modules to discover available documents.
+    Documents can be accessed by their vault_id.
+    """
+    if not HAS_VAULT_SERVICE:
+        return VaultListResponse(documents=[], total=0)
+    
+    vault_service = get_vault_service()
+    docs = vault_service.get_user_documents(user.user_id, document_type)
+    
+    summaries = [
+        VaultDocumentSummary(
+            vault_id=doc.vault_id,
+            filename=doc.filename,
+            document_type=doc.document_type,
+            file_size=doc.file_size,
+            mime_type=doc.mime_type,
+            uploaded_at=doc.uploaded_at,
+            processed=doc.processed,
+            source_module=doc.source_module,
+            in_vault=True,
+        )
+        for doc in docs
+    ]
+    
+    return VaultListResponse(documents=summaries, total=len(summaries))
+
+
+@router.get("/document/{vault_id}")
+async def get_vault_document_metadata(
+    vault_id: str,
+    user: StorageUser = Depends(require_user),
+):
+    """
+    Get metadata for a vault document by vault_id.
+    
+    Modules use this to get document details before processing.
+    """
+    if not HAS_VAULT_SERVICE:
+        raise HTTPException(status_code=404, detail="Vault service not available")
+    
+    vault_service = get_vault_service()
+    doc = vault_service.get_document(vault_id)
+    
+    if not doc or doc.user_id != user.user_id:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    return doc.to_dict()
+
+
+@router.get("/document/{vault_id}/content")
+async def get_vault_document_content(
+    vault_id: str,
+    access_token: Optional[str] = Query(None, description="Storage provider access token"),
+    user: StorageUser = Depends(require_user),
+):
+    """
+    Get document content from vault.
+    
+    Modules call this to read document bytes for processing.
+    Returns raw file content.
+    """
+    if not HAS_VAULT_SERVICE:
+        raise HTTPException(status_code=404, detail="Vault service not available")
+    
+    vault_service = get_vault_service()
+    doc = vault_service.get_document(vault_id)
+    
+    if not doc or doc.user_id != user.user_id:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    content = await vault_service.get_document_content(vault_id, access_token)
+    
+    if not content:
+        raise HTTPException(status_code=404, detail="Document content not available")
+    
+    from fastapi.responses import Response
+    return Response(
+        content=content,
+        media_type=doc.mime_type,
+        headers={
+            "Content-Disposition": f"attachment; filename={doc.filename}",
+            "X-Vault-ID": vault_id,
+        }
+    )
+
+
+@router.post("/document/{vault_id}/mark-processed")
+async def mark_vault_document_processed(
+    vault_id: str,
+    extracted_data: Optional[dict] = None,
+    document_type: Optional[str] = None,
+    user: StorageUser = Depends(require_user),
+):
+    """
+    Mark a vault document as processed by a module.
+    
+    Modules call this after processing to update vault metadata.
+    """
+    if not HAS_VAULT_SERVICE:
+        raise HTTPException(status_code=404, detail="Vault service not available")
+    
+    vault_service = get_vault_service()
+    doc = vault_service.get_document(vault_id)
+    
+    if not doc or doc.user_id != user.user_id:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    vault_service.mark_processed(vault_id, extracted_data)
+    
+    if document_type:
+        vault_service.update_document_type(vault_id, document_type)
+    
+    return {"success": True, "vault_id": vault_id, "processed": True}

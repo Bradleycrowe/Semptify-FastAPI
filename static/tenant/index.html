@@ -37,6 +37,22 @@
             color: var(--text);
             min-height: 100vh;
             padding-bottom: 80px; /* Space for bottom nav */
+            margin-left: 60px; /* Space for collapsed nav */
+        }
+        
+        /* Adjust for pinned nav */
+        body.nav-pinned {
+            margin-left: 260px;
+        }
+        
+        /* Mobile - no nav margin */
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0;
+            }
+            body.nav-pinned {
+                margin-left: 0;
+            }
         }
         
         /* Top Header */

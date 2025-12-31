@@ -481,30 +481,338 @@
     "integrity_status": "verified",
     "is_duplicate": false,
     "original_document_id": null,
-    "duplicate_ids": [],
-    "duplicate_count": 0,
+    "duplicate_ids": [
+      "SEM-2025-000001-BDF6"
+    ],
+    "duplicate_count": 1,
     "forgery_alerts": [],
     "forgery_score": 0.0,
     "requires_review": false,
     "registered_at": "2025-12-31T03:17:53.660307+00:00",
     "last_verified_at": null,
     "last_accessed_at": null,
+    "custody_chain": [],
+    "versions": [],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000001-BDF6": {
+    "document_id": "SEM-2025-000001-BDF6",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "maintenance.pdf",
+    "file_size": 382572,
+    "mime_type": "application/pdf",
+    "content_hash": "8b3e8a9e23b5b4d941ff05237c3095ac0e526a8be2f33c4764697617d28575c0",
+    "metadata_hash": "98acc56a9ac1a3394fa0d40ffd58b87f511ac05ebf8c616c0624d7e1f535d541",
+    "combined_hash": "866954e17b2ebddbab8a7446805c70d3fe766a1bd663c8677c602854de356f73",
+    "status": "copy",
+    "integrity_status": "verified",
+    "is_duplicate": true,
+    "original_document_id": "SEM-2025-000001-1292",
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:34:02.090613+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
     "custody_chain": [
       {
-        "timestamp": "2025-12-31T03:17:53.660316+00:00",
+        "timestamp": "2025-12-31T05:34:02.090627+00:00",
         "action": "received",
         "actor": "OUERbGoRAh",
         "details": "Document registered: maintenance.pdf",
         "ip_address": "127.0.0.1",
         "device_info": null,
-        "integrity_hash": "99402a08050bb4c10315fcd94fbb28e2cc9438a3aef3597772fc8b222ae58ee9"
+        "integrity_hash": "866954e17b2ebddbab8a7446805c70d3fe766a1bd663c8677c602854de356f73"
       }
     ],
     "versions": [
       {
         "version": 1,
-        "timestamp": "2025-12-31T03:17:53.660336+00:00",
+        "timestamp": "2025-12-31T05:34:02.090729+00:00",
         "content_hash": "8b3e8a9e23b5b4d941ff05237c3095ac0e526a8be2f33c4764697617d28575c0",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000002-FC81": {
+    "document_id": "SEM-2025-000002-FC81",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "notice of the lease violation .jpg",
+    "file_size": 7032403,
+    "mime_type": "image/jpeg",
+    "content_hash": "d8e38068ca4c317f9f1efba2a7cb65128781a4b24c8972bef1a0acf5675b9d88",
+    "metadata_hash": "46919dc9bada29e9f82b2bec46560252e95012cd9b9b07199574b96e1938e296",
+    "combined_hash": "465d4b175bacb2067c1655193cfa3f2f58136cb93746b20046b613da3d4897c7",
+    "status": "original",
+    "integrity_status": "verified",
+    "is_duplicate": false,
+    "original_document_id": null,
+    "duplicate_ids": [
+      "SEM-2025-000005-BC1E"
+    ],
+    "duplicate_count": 1,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:34:53.042240+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:34:53.042253+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: notice of the lease violation .jpg",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "465d4b175bacb2067c1655193cfa3f2f58136cb93746b20046b613da3d4897c7"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:34:53.042279+00:00",
+        "content_hash": "d8e38068ca4c317f9f1efba2a7cb65128781a4b24c8972bef1a0acf5675b9d88",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000003-E41A": {
+    "document_id": "SEM-2025-000003-E41A",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "Notice to vacate.jpg",
+    "file_size": 6586777,
+    "mime_type": "image/jpeg",
+    "content_hash": "4bdbfe82e68a3a88ef1a8d4e06832aff18a046f3a7d6c3e30b9801f9654a974b",
+    "metadata_hash": "f7a0459e067c0c09e3aacfbfa1ed3171b4c0d682db61035840e5aaca07878de9",
+    "combined_hash": "e0f504e4d23930d386595b9240788a42886d4971f325ef1e85bf68d0fd00cd7b",
+    "status": "original",
+    "integrity_status": "verified",
+    "is_duplicate": false,
+    "original_document_id": null,
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:35:42.365998+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:35:42.366014+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: Notice to vacate.jpg",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "e0f504e4d23930d386595b9240788a42886d4971f325ef1e85bf68d0fd00cd7b"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:35:42.366032+00:00",
+        "content_hash": "4bdbfe82e68a3a88ef1a8d4e06832aff18a046f3a7d6c3e30b9801f9654a974b",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000004-3256": {
+    "document_id": "SEM-2025-000004-3256",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "Tenant Report Formfiled .pdf",
+    "file_size": 283291,
+    "mime_type": "application/pdf",
+    "content_hash": "982679bfee35e7972669a469f8748f9bcb39a7ffc1531d3cc62a302aa6142e3b",
+    "metadata_hash": "f5135ee0faa1a23a7842052007f6ad668eeeb39081fd15a4c92c06ce25fab439",
+    "combined_hash": "5c0b31b0060f1775d4484fb8c1b2ad00dd8126fae5f15d4125cc23df79f8877f",
+    "status": "original",
+    "integrity_status": "verified",
+    "is_duplicate": false,
+    "original_document_id": null,
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:35:59.843644+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:35:59.843666+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: Tenant Report Formfiled .pdf",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "5c0b31b0060f1775d4484fb8c1b2ad00dd8126fae5f15d4125cc23df79f8877f"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:35:59.843692+00:00",
+        "content_hash": "982679bfee35e7972669a469f8748f9bcb39a7ffc1531d3cc62a302aa6142e3b",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000005-BC1E": {
+    "document_id": "SEM-2025-000005-BC1E",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "notice of the lease violation .jpg",
+    "file_size": 7032403,
+    "mime_type": "image/jpeg",
+    "content_hash": "d8e38068ca4c317f9f1efba2a7cb65128781a4b24c8972bef1a0acf5675b9d88",
+    "metadata_hash": "97d5dd0d5608f7808f39b2995e93da765bc2ec7f48ac85cb926aafd67d2ac779",
+    "combined_hash": "09992a5765a03358c453ae03f45f0547d43c5479f9f23c899e0ffb6d083bf9f0",
+    "status": "copy",
+    "integrity_status": "verified",
+    "is_duplicate": true,
+    "original_document_id": "SEM-2025-000002-FC81",
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:36:51.763840+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:36:51.763851+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: notice of the lease violation .jpg",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "09992a5765a03358c453ae03f45f0547d43c5479f9f23c899e0ffb6d083bf9f0"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:36:51.763865+00:00",
+        "content_hash": "d8e38068ca4c317f9f1efba2a7cb65128781a4b24c8972bef1a0acf5675b9d88",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000006-44CC": {
+    "document_id": "SEM-2025-000006-44CC",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx.pdf",
+    "file_size": 1011462,
+    "mime_type": "application/pdf",
+    "content_hash": "79da15f9f8f5abb1f315a9887ec5a4feb1c40c5fa1446527ab08fef2fb317541",
+    "metadata_hash": "a11d47138b38410c61beb7c8d98e49c22d3f24142a773f2a9e3d9cf785dcd38f",
+    "combined_hash": "3091468cf59e22c84871287d632b6a58a451936a4a070a4789b09096972af699",
+    "status": "original",
+    "integrity_status": "verified",
+    "is_duplicate": false,
+    "original_document_id": null,
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:37:15.092476+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:37:15.092486+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx.pdf",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "3091468cf59e22c84871287d632b6a58a451936a4a070a4789b09096972af699"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:37:15.092497+00:00",
+        "content_hash": "79da15f9f8f5abb1f315a9887ec5a4feb1c40c5fa1446527ab08fef2fb317541",
+        "changes": "Initial registration",
+        "changed_by": "OUERbGoRAh"
+      }
+    ],
+    "current_version": 1,
+    "storage_path": null,
+    "intake_document_id": null
+  },
+  "SEM-2025-000007-CB00": {
+    "document_id": "SEM-2025-000007-CB00",
+    "user_id": "OUERbGoRAh",
+    "case_number": null,
+    "original_filename": "Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+    "file_size": 1523102,
+    "mime_type": "application/pdf",
+    "content_hash": "bd1ba2af5b941cedba2a04a4af137f193a96ee3e94ec613d6f2c4df4beb0b1c3",
+    "metadata_hash": "fcdaaaabfde47f326a165510522d489c781f77a5e75d340d937ab98329f717e0",
+    "combined_hash": "97643b620ee0b9e71491cb38f0582f20d2f6e24e756110cfb1b6eac20094457f",
+    "status": "original",
+    "integrity_status": "verified",
+    "is_duplicate": false,
+    "original_document_id": null,
+    "duplicate_ids": [],
+    "duplicate_count": 0,
+    "forgery_alerts": [],
+    "forgery_score": 0.0,
+    "requires_review": false,
+    "registered_at": "2025-12-31T05:38:53.601061+00:00",
+    "last_verified_at": null,
+    "last_accessed_at": null,
+    "custody_chain": [
+      {
+        "timestamp": "2025-12-31T05:38:53.601086+00:00",
+        "action": "received",
+        "actor": "OUERbGoRAh",
+        "details": "Document registered: Formal Cease and Desist Demand \u2013 Harassment and Retaliation at Lexington Flats e mailx_ocred.pdf",
+        "ip_address": "127.0.0.1",
+        "device_info": null,
+        "integrity_hash": "97643b620ee0b9e71491cb38f0582f20d2f6e24e756110cfb1b6eac20094457f"
+      }
+    ],
+    "versions": [
+      {
+        "version": 1,
+        "timestamp": "2025-12-31T05:38:53.601113+00:00",
+        "content_hash": "bd1ba2af5b941cedba2a04a4af137f193a96ee3e94ec613d6f2c4df4beb0b1c3",
         "changes": "Initial registration",
         "changed_by": "OUERbGoRAh"
       }

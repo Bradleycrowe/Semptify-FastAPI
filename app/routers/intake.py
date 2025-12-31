@@ -8,8 +8,11 @@ Provides endpoints for:
 - Issue detection results
 - Batch processing
 - Vault-based processing (documents from cloud storage)
+
+ALL UPLOADS GO TO VAULT FIRST - modules access from vault.
 """
 
+import logging
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -26,6 +29,15 @@ from app.services.document_intake import (
     LanguageCode,
 )
 from app.core.event_bus import event_bus, EventType as BusEventType
+
+logger = logging.getLogger(__name__)
+
+# Import vault upload service - ALL uploads go through here first
+try:
+    from app.services.vault_upload_service import get_vault_service
+    HAS_VAULT_SERVICE = True
+except ImportError:
+    HAS_VAULT_SERVICE = False
 
 # Import flow orchestrator for complete pipeline
 try:
@@ -149,19 +161,21 @@ class BatchUploadResponse(BaseModel):
 async def upload_document(
     file: UploadFile = File(...),
     user_id: str = Form(..., description="User ID for the document owner"),
+    access_token: Optional[str] = Form(None, description="Storage provider access token"),
+    storage_provider: str = Form("local", description="Storage provider"),
 ):
     """
     Upload a document for intake processing.
     
+    ALL DOCUMENTS GO TO VAULT FIRST, then processed from vault.
+    
     The document will be:
-    1. Received and validated
+    1. Stored in user's vault (cloud or local)
     2. Hashed for integrity
     3. Queued for processing
     
     Use the returned ID to check processing status.
     """
-    engine = get_intake_engine()
-    
     # Read file content
     content = await file.read()
     
@@ -171,19 +185,40 @@ async def upload_document(
     if len(content) > 25 * 1024 * 1024:  # 25MB limit
         raise HTTPException(status_code=400, detail="File too large (max 25MB)")
     
-    # Intake the document
+    # STEP 1: Upload to vault first
+    vault_id = None
+    if HAS_VAULT_SERVICE:
+        try:
+            vault_service = get_vault_service()
+            vault_doc = await vault_service.upload(
+                user_id=user_id,
+                filename=file.filename or "unknown",
+                content=content,
+                mime_type=file.content_type or "application/octet-stream",
+                source_module="intake",
+                access_token=access_token,
+                storage_provider=storage_provider,
+            )
+            vault_id = vault_doc.vault_id
+            logger.info(f"📁 Document stored in vault: {vault_id}")
+        except Exception as e:
+            logger.warning(f"Vault upload failed: {e}")
+    
+    # STEP 2: Intake the document for processing
+    engine = get_intake_engine()
     doc = await engine.intake_document(
         user_id=user_id,
         file_content=content,
         filename=file.filename or "unknown",
         mime_type=file.content_type or "application/octet-stream",
+        vault_id=vault_id,  # Pass vault reference
     )
     
     return UploadResponse(
         id=doc.id,
         filename=doc.filename,
         status=doc.status.value,
-        message="Document received. Use /process/{id} to begin processing.",
+        message=f"Document stored in vault ({vault_id or 'local'}). Use /process/{doc.id} to begin processing.",
     )
 
 
@@ -194,6 +229,7 @@ class AutoProcessResponse(BaseModel):
     status: str
     doc_type: str
     message: str
+    vault_id: Optional[str] = None
     extracted_data: dict = {}
     timeline_events: int = 0
     issues_found: int = 0
@@ -203,12 +239,16 @@ class AutoProcessResponse(BaseModel):
 async def upload_and_process(
     file: UploadFile = File(...),
     user_id: str = Depends(get_user_id),
+    access_token: Optional[str] = Form(None, description="Storage provider access token"),
+    storage_provider: str = Form("local", description="Storage provider"),
 ):
     """
     Upload and automatically process a document (complete pipeline).
     
+    ALL DOCUMENTS GO TO VAULT FIRST, then processed from vault.
+    
     This is the recommended endpoint for the full document flow:
-    1. Upload & validate
+    1. Store in user's vault (cloud or local)
     2. OCR/text extraction (auto-detects if image/scan)
     3. Document type classification (summons, lease, notice, etc.)
     4. Data extraction (dates, amounts, parties)
@@ -219,9 +259,6 @@ async def upload_and_process(
     
     Returns complete processing result in one call.
     """
-    import logging
-    logger = logging.getLogger(__name__)
-    
     engine = get_intake_engine()
     
     # Read file content
@@ -233,12 +270,32 @@ async def upload_and_process(
     if len(content) > 25 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large (max 25MB)")
     
+    # STEP 0: Upload to vault first
+    vault_id = None
+    if HAS_VAULT_SERVICE:
+        try:
+            vault_service = get_vault_service()
+            vault_doc = await vault_service.upload(
+                user_id=user_id,
+                filename=file.filename or "unknown",
+                content=content,
+                mime_type=file.content_type or "application/octet-stream",
+                source_module="intake_auto",
+                access_token=access_token,
+                storage_provider=storage_provider,
+            )
+            vault_id = vault_doc.vault_id
+            logger.info(f"📁 Document stored in vault: {vault_id}")
+        except Exception as e:
+            logger.warning(f"Vault upload failed: {e}")
+    
     # Step 1: Intake the document
     doc = await engine.intake_document(
         user_id=user_id,
         file_content=content,
         filename=file.filename or "unknown",
         mime_type=file.content_type or "application/octet-stream",
+        vault_id=vault_id,
     )
     
     # Step 2: Process (extract text, classify, analyze)
@@ -252,6 +309,7 @@ async def upload_and_process(
             status="error",
             doc_type="unknown",
             message=f"Processing failed: {str(e)}",
+            vault_id=vault_id,
         )
     
     # Step 3: Run full flow orchestration
@@ -266,11 +324,28 @@ async def upload_and_process(
         except Exception as flow_err:
             logger.warning(f"Flow orchestration partial: {flow_err}")
     
+    # Update vault with extracted data
+    if HAS_VAULT_SERVICE and vault_id and doc.extraction:
+        try:
+            vault_service = get_vault_service()
+            vault_service.mark_processed(
+                vault_id=vault_id,
+                extracted_data={
+                    "doc_type": doc.doc_type.value if doc.doc_type else None,
+                    "summary": doc.extraction.summary if doc.extraction else None,
+                }
+            )
+            if doc.doc_type:
+                vault_service.update_document_type(vault_id, doc.doc_type.value)
+        except Exception as e:
+            logger.warning(f"Vault update failed: {e}")
+    
     # Publish completion event
     await event_bus.publish(
         BusEventType.DOCUMENT_PROCESSED,
         {
             "doc_id": doc.id,
+            "vault_id": vault_id,
             "user_id": user_id,
             "doc_type": doc.doc_type.value if doc.doc_type else "unknown",
             "filename": doc.filename,
@@ -293,7 +368,8 @@ async def upload_and_process(
         filename=doc.filename,
         status=doc.status.value if doc.status else "complete",
         doc_type=doc.doc_type.value if doc.doc_type else "unknown",
-        message="Document processed successfully",
+        message="Document stored in vault and processed successfully",
+        vault_id=vault_id,
         extracted_data=extracted_data,
         timeline_events=flow_result.get("stages", {}).get("events", {}).get("count", 0),
         issues_found=len(doc.extraction.issues) if doc.extraction and doc.extraction.issues else 0,
